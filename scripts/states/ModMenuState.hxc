@@ -212,11 +212,6 @@ class ModMenuState extends ScriptedMusicBeatState {
     colorShaderMini.hue -= 1;
 		if (controls.BACK)
     {
-      var colorBg:FlxSprite = new FlxSprite(0, 0);
-      colorBg.makeGraphic(FlxG.width, FlxG.height, 0xff050005);
-      colorBg.cameras = [foregroundCamera];
-      add(colorBg);
-
       var targetState:NextState = ScriptedMusicBeatState.init('ModLoadingState');
       FlxG.switchState(targetState);
       FlxTransitionableState.skipNextTransIn = true;
