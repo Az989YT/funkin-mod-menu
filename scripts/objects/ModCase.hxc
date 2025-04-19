@@ -1,0 +1,147 @@
+import funkin.modding.PolymodHandler;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.addons.effects.FlxSkewedSprite;
+import flixel.graphics.FlxGraphic;
+import flixel.math.FlxPoint;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+
+import haxe.Unserializer;
+
+import openfl.display.BitmapData;
+
+import polymod.Polymod;
+
+class ModCase extends ScriptedFlxSpriteGroup {
+
+  var caseSprite:FlxSprite;
+  var grpOffset:ScriptedFlxSpriteGroup;
+
+  var metadata:ModMetadata;
+  var enabled:Bool = true;
+  var isNew:Bool = true;
+
+  var fileSystem:Dynamic;
+
+	public function new(xPos:Float = 0, yPos:Float = 0, ?args:Array = [])
+  {
+		super("ModCase", xPos, yPos);
+    this.setPosition(xPos, yPos);
+    enabled = args[0];
+    metadata = args[1];
+    isNew = args[2];
+    //trace(args);
+
+    // FileSystem workaround! (found from https://github.com/Burgerballs/ModBootstrap/, thank you SO much vro)
+    fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
+
+		var colorBg:FlxSkewedSprite = new FlxSkewedSprite(633, 5);
+    colorBg.makeGraphic(107, 107, 0xffFFDFD3);
+    colorBg.skew.set(22,0);
+    add(colorBg);
+
+    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(633,5).loadGraphic(Paths.image("modmenu/no_icon"));
+    if (metadata != null) {
+      var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
+      //trace(iconPath);
+      if (fileSystem.exists(iconPath)) {
+        var modIconBitmap:BitmapData = BitmapData.fromFile(iconPath);
+        modIcon.loadGraphic(FlxGraphic.fromBitmapData(modIconBitmap, false, iconPath));
+      }
+    }
+    modIcon.setGraphicSize(107, 107);
+    modIcon.updateHitbox();
+    modIcon.skew.set(22,0);
+    add(modIcon);
+
+    caseSprite = new FlxSprite(0, 0);
+    caseSprite.frames = Paths.getSparrowAtlas("modmenu/modcase");
+    caseSprite.animation.addByPrefix("enabled", "enabled", 24, false);
+    caseSprite.animation.addByPrefix("loopEnabled", "loopEnabled", 24, true);
+    caseSprite.animation.addByPrefix("disabled", "disabled", 24, false);
+    caseSprite.animation.addByPrefix("loopDisabled", "loopDisabled", 24, true);
+    if (enabled) { caseSprite.animation.play("loopEnabled"); }
+    else { caseSprite.animation.play("loopDisabled"); }
+    add(caseSprite);
+
+    var modTitle:FlxText = new FlxText(115 , 61, 590, "Mod Name", 32);
+    if (metadata != null) modTitle.text = metadata.title;
+    modTitle.font = "Pixel Arial 11";
+    modTitle.borderColor = 0xff5F91C1;
+    modTitle.borderSize = 5;
+    modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modTitle.bold = true;
+    if (modTitle.text.length > 16) modTitle.text = modTitle.text.substring(0, 16) + "...";
+    add(modTitle);
+
+    var modAuthors:FlxText = new FlxText(110 , 9, 590, "Authors", 32);
+    if (metadata != null) {
+      modAuthors.text = "";
+      if(metadata.contributors != null) {
+        for (contributor in 0...metadata.contributors.length) {
+          if (contributor == metadata.contributors.length-1) { modAuthors.text += metadata.contributors[contributor].name; }
+          else { modAuthors.text += metadata.contributors[contributor].name + ", "; }
+        }
+      } else {
+        modAuthors.text = metadata._author;
+      }
+    }
+    modAuthors.font = "5by7";
+    modAuthors.borderColor = 0xff3D7DFF;
+    modAuthors.borderSize = 2;
+    modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modAuthors.blend = 0;
+    //modAuthors.bold = true;
+    if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
+    add(modAuthors);
+
+    if(isNew) {
+      newNotifSprite = new FlxSprite(caseSprite.width - 176, -20);
+      newNotifSprite.frames = Paths.getSparrowAtlas("freeplay/freeplayCapsule/new");
+      newNotifSprite.animation.addByPrefix("idle", "NEW notif", 24, true);
+      newNotifSprite.animation.play("idle");
+      add(newNotifSprite);
+    }
+
+    grpOffset = new ScriptedFlxSpriteGroup(0, 0);
+    grpOffset.add(colorBg);
+    grpOffset.add(modIcon);
+    grpOffset.add(modTitle);
+    grpOffset.add(modAuthors);
+    if(isNew) grpOffset.add(newNotifSprite);
+	}
+
+  override function update(elapsed:Float):Void
+  {
+    super.update(elapsed);
+    if (caseSprite.animation.finished) {
+      if(enabled) {
+        caseSprite.animation.play("loopEnabled");
+      } else {
+        caseSprite.animation.play("loopDisabled");
+      }
+      grpOffset.y = 0;
+    }
+
+  }
+
+  public function toggleCaseSpriteAnimation() {
+    var soundToPlay = '';
+    if(enabled) {
+      caseSprite.animation.play("enabled");
+      soundToPlay = 'fav';
+      grpOffset.y = 3;
+    } else {
+      caseSprite.animation.play("disabled");
+      soundToPlay = 'unfav';
+      grpOffset.y = 2;
+    }
+    FlxG.sound.play(Paths.sound(soundToPlay));
+  }
+}

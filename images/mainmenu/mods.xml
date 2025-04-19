@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Created with Funkin Packer v0.1.3 https://neeeoo.github.io/funkin-packer/
+-->
+<TextureAtlas imagePath="mods.png" width="695" height="637">
+	<SubTexture name="mods idle0000" x="569" y="320" width="124" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods idle0001" x="569" y="320" width="124" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods idle0002" x="569" y="320" width="124" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods idle0003" x="441" y="205" width="125" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods idle0004" x="441" y="205" width="125" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods idle0005" x="441" y="205" width="125" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods idle0006" x="569" y="1" width="125" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods idle0007" x="569" y="1" width="125" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods idle0008" x="569" y="1" width="125" height="316" rotated="true" frameX="-0" frameY="-0" frameWidth="316" frameHeight="125"/>
+	<SubTexture name="mods selected0000" x="1" y="408" width="432" height="200" frameX="-3" frameY="-2" frameWidth="438" frameHeight="202"/>
+	<SubTexture name="mods selected0001" x="1" y="205" width="437" height="200" frameX="-1" frameY="-1" frameWidth="438" frameHeight="202"/>
+	<SubTexture name="mods selected0002" x="1" y="1" width="438" height="201" frameX="-0" frameY="-0" frameWidth="438" frameHeight="202"/>
+</TextureAtlas>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="modCase.png">
+	<!-- Created using the Spritesheet and XML generator -->
+	<!-- https://uncertainprod.github.io/FNF-Spritesheet-XML-generator-Web -->
+	<SubTexture name="loopDisabled0000" x="0" y="248" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0001" x="0" y="248" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0002" x="0" y="248" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0003" x="0" y="248" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0004" x="0" y="248" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0005" x="0" y="0" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0006" x="0" y="0" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0007" x="0" y="0" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0008" x="0" y="0" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopDisabled0009" x="0" y="0" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="enabled0000" x="812" y="122" width="812" height="122" frameX="2" frameY="0" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="enabled0001" x="812" y="0" width="812" height="122" frameX="2" frameY="0" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0000" x="0" y="372" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0001" x="0" y="372" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0002" x="0" y="372" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0003" x="0" y="372" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0004" x="0" y="372" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0005" x="0" y="124" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0006" x="0" y="124" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0007" x="0" y="124" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0008" x="0" y="124" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="loopEnabled0009" x="0" y="124" width="812" height="124" frameX="2" frameY="2" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="disabled0000" x="0" y="619" width="812" height="123" frameX="2" frameY="1" frameWidth="810" frameHeight="120"/>
+	<SubTexture name="disabled0001" x="0" y="496" width="812" height="123" frameX="2" frameY="1" frameWidth="810" frameHeight="120"/>
+</TextureAtlas>

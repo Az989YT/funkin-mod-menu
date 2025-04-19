@@ -1,0 +1,162 @@
+import funkin.data.DataParse;
+import funkin.graphics.FunkinSprite;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.modding.PolymodHandler;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+import funkin.util.assets.DataAssets;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.addons.effects.FlxSkewedSprite;
+import flixel.graphics.FlxGraphic;
+import flixel.math.FlxPoint;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+
+import haxe.Unserializer;
+
+import hxjsonast.Parser;
+import hxjsonast.Tools;
+
+import openfl.display.BitmapData;
+
+import polymod.Polymod;
+
+import StringTools;
+
+class ModMenuPortrait extends ScriptedFlxSpriteGroup {
+
+  var characterSprite:FunkinSprite;
+  var colorShader:AdjustColorShader;
+  var poofSprite:FlxSprite;
+  var allowedToPlayAnimation:Bool = true;
+  var switchingPortrait:Bool = false;
+  var trueRandom:Bool = true;
+
+  var portraits = [
+    "daddy-dearest",
+    "otis",
+  ];
+  var portraitData = [
+
+  ];
+  var curPortrait = 0;
+
+  var fileSystem:Dynamic;
+
+	public function new()
+  {
+		super("ModMenuPortrait");
+
+    fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
+
+    portraits = DataAssets.listDataFilesInPath("portraits/");
+    trace(portraits);
+
+    for(character in 0...portraits.length) {
+      FunkinSprite.cacheSparrow("modmenu/portraits/" + portraits[character]);
+      var filePath = Paths.json('portraits/' + portraits[character]);
+      if(Assets.exists(filePath)) {
+        portraitData.push(Tools.getValue(Parser.parse(Assets.getText(filePath), filePath)));
+      }
+    }
+    //trace(portraitData);
+    characterSprite = new FunkinSprite(0, 0);
+    characterSprite.loadSparrow("modmenu/portraits/" + portraits[curPortrait]);
+    //trace(portraitData[curPortrait]);
+    for(item in 0...portraitData[curPortrait].animations.length) {
+      var animationData = portraitData[curPortrait].animations[item];
+      trace(animationData);
+      characterSprite.animation.addByPrefix(animationData.name, animationData.prefix, 24, (animationData.name == "idle") ? true:false);
+    }
+    add(characterSprite);
+
+    colorShader = new AdjustColorShader();
+    characterSprite.shader = colorShader;
+
+    poofSprite = new FlxSprite(0,0);
+    poofSprite.frames = Paths.getSparrowAtlas("modmenu/smokePuff");
+    poofSprite.animation.addByPrefix("poof", "explosion", 24, false);
+    add(poofSprite);
+    //poofSprite.animation.play("poof");
+
+    characterSprite.setPosition(FlxG.width - characterSprite.width + 5, FlxG.height - characterSprite.height + 5);
+    poofSprite.setPosition(FlxG.width - poofSprite.width, FlxG.height - poofSprite.height);
+
+    switchCharacterPortrait();
+	}
+
+  override function update(elapsed:Float):Void
+  {
+    super.update(elapsed);
+    if (characterSprite.animation.finished && characterSprite.animation.name != "idle") {
+      characterSprite.animation.play("idle");
+    }
+    if (poofSprite.animation.finished) {
+      poofSprite.visible = false;
+    }
+    if (poofSprite.frame.name == "explosion0002" && switchingPortrait) {
+      switchingPortrait = false;
+      var lastPortrait = curPortrait;
+      while(curPortrait == lastPortrait) curPortrait = FlxG.random.int(0, portraits.length-1);
+      if(trueRandom) {
+        curPortrait = FlxG.random.int(0, portraits.length-1);
+        trueRandom = false;
+      }
+      trace(curPortrait);
+
+      characterSprite.loadSparrow("modmenu/portraits/" + portraits[curPortrait]);
+
+      for(item in 0...portraitData[curPortrait].animations.length) {
+        var animationData = portraitData[curPortrait].animations[item];
+        trace(animationData);
+        characterSprite.animation.addByPrefix(animationData.name, animationData.prefix, animationData.fps, (animationData.name == "idle") ? true:false);
+      }
+
+      characterSprite.animation.play("idle");
+      characterSprite.setPosition(FlxG.width - characterSprite.width + 5, FlxG.height - characterSprite.height + 5);
+
+      colorShader.brightness = 0;
+      colorShader.contrast = 0;
+    }
+    //trace(poofSprite.frame);
+
+    if(portraitData[curPortrait].waiting.canWait) {
+      if(FlxG.random.int(0,portraitData[curPortrait].waiting.waitChance)) {
+        if(characterSprite.animation.name == "idle" && allowedToPlayAnimation) {
+          var totalWaitingAnimations = 0;
+          for(item in 0...portraitData[curPortrait].animations.length) {
+            var animationData = portraitData[curPortrait].animations[item];
+            if(StringTools.startsWith(animationData.name, "waiting")) {
+              //trace("ok");
+              totalWaitingAnimations += 1;
+            }
+          }
+          //trace(totalWaitingAnimations);
+          var randomWaitAnimation = "waiting" + FlxG.random.int(1,totalWaitingAnimations);
+          //trace(randomWaitAnimation);
+          characterSprite.animation.play(randomWaitAnimation);
+          allowedToPlayAnimation = false;
+          new FlxTimer().start(portraitData[curPortrait].waiting.waitDelay, ()->{ allowedToPlayAnimation = true; });
+        }
+      }
+    }
+  }
+
+  public function playEnableAnimation() {
+    if(characterSprite.animation.getByName("enable") != null)
+      characterSprite.animation.play("enable");
+  }
+
+  public function switchCharacterPortrait() {
+    if(!poofSprite.animation.finished) return;
+    switchingPortrait = true;
+    poofSprite.visible = true;
+    poofSprite.animation.play("poof");
+    colorShader.brightness = 100;
+    colorShader.contrast = 100;
+  }
+}

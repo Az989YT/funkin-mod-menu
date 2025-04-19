@@ -1,0 +1,148 @@
+import funkin.audio.FunkinSound;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.modding.PolymodHandler;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+import funkin.modding.base.ScriptedMusicBeatState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.ui.title.TitleState;
+import funkin.util.tools.ArrayTools;
+
+import funkin.data.dialogue.conversation.ConversationRegistry;
+import funkin.data.dialogue.dialoguebox.DialogueBoxRegistry;
+import funkin.data.dialogue.speaker.SpeakerRegistry;
+import funkin.data.event.SongEventRegistry;
+import funkin.data.story.level.LevelRegistry;
+import funkin.data.notestyle.NoteStyleRegistry;
+import funkin.play.notes.notekind.NoteKindManager;
+import funkin.data.song.SongRegistry;
+import funkin.data.freeplay.player.PlayerRegistry;
+import funkin.data.stage.StageRegistry;
+import funkin.play.character.CharacterDataParser;
+import funkin.data.freeplay.album.AlbumRegistry;
+import funkin.modding.module.ModuleHandler;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.transition.TransitionData;
+import flixel.math.FlxPoint;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxSave;
+import flixel.util.FlxTimer;
+
+import haxe.Unserializer;
+
+class ModLoadingState extends ScriptedMusicBeatState {
+
+  var polymod:Dynamic;
+  var fileSystem:Dynamic;
+  var file:Dynamic;
+  var thread:Dynamic;
+
+  var funkinModMenuID = "Funkin' Mod Menu";
+  var foundFunkinModMenu = false;
+  var registeredModsPath = "mods/Funkin' Mod Menu/registeredMods/";
+  var registeredModFileExtension = ".fmm";
+
+  var modsToLoad = [];
+
+  public function new() {
+		super("ModLoadingState");
+	}
+
+  override public function create():Void {
+		super.create();
+    this.persistentUpdate = true;
+    this.persistentDraw = true;
+    MainMenuState.rememberedSelectedIndex = 0;
+
+    thread = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.thread.Thread');
+    polymod = Unserializer.DEFAULT_RESOLVER.resolveClass('polymod.Polymod');
+    fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
+    file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
+
+    var colorBg:FlxSprite = new FlxSprite(0, 0);
+    colorBg.makeGraphic(FlxG.width, FlxG.height, 0xff050005);
+    add(colorBg);
+
+    var loadingText:FlxSprite = new FlxSprite(0,0);
+    loadingText.frames = Paths.getSparrowAtlas("modmenu/LoadingGraphic");
+		loadingText.animation.addByPrefix("idle", "loadingMods", 24, true);
+		loadingText.animation.play("idle");
+    loadingText.setPosition(25, FlxG.height - loadingText.height - 12.5);
+    loadingText.alpha = 0;
+		add(loadingText);
+
+    var detectedMods = PolymodHandler.getAllMods();
+
+    if(!foundFunkinModMenu) {
+      for(mod in 0...detectedMods.length) {
+        //trace(detectedMods[mod].title);
+        if(detectedMods[mod].title == funkinModMenuID) {
+          foundFunkinModMenu = true;
+          funkinModMenuID = detectedMods[mod].id;
+          registeredModsPath = "mods/" + funkinModMenuID + "/registeredMods/";
+          trace(funkinModMenuID);
+          break;
+        }
+      }
+    }
+
+    for(mod in 0...detectedMods.length) {
+      var currentModPath = registeredModsPath + detectedMods[mod].id + registeredModFileExtension;
+      if (fileSystem.exists(currentModPath)) {
+        trace("found file!");
+
+        if(file.getContent(currentModPath) == "true") {
+          modsToLoad.push(detectedMods[mod].id);
+        }
+      }
+    }
+    trace(modsToLoad);
+
+    FlxTween.tween(loadingText, {alpha: 1}, 3, {ease: FlxEase.cubeInOut, onComplete: function():Void {
+      loadEnabledMods();
+    }});
+
+  }
+
+  function loadEnabledMods() {
+    trace('starting');
+    PolymodHandler.loadModsById(modsToLoad);
+
+    ModuleHandler.clearModuleCache();
+    polymod.clearScripts();
+
+    polymod.registerAllScriptClasses();
+
+    SongEventRegistry.loadEventCache();
+
+    SongRegistry.instance.loadEntries();
+    LevelRegistry.instance.loadEntries();
+    NoteStyleRegistry.instance.loadEntries();
+    PlayerRegistry.instance.loadEntries();
+    ConversationRegistry.instance.loadEntries();
+    DialogueBoxRegistry.instance.loadEntries();
+    SpeakerRegistry.instance.loadEntries();
+    AlbumRegistry.instance.loadEntries();
+    StageRegistry.instance.loadEntries();
+
+    CharacterDataParser.loadCharacterCache();
+    NoteKindManager.loadScripts();
+    ModuleHandler.loadModuleCache();
+
+    trace("completed");
+
+    var targetState:NextState = () -> new MainMenuState();
+    FlxTransitionableState.skipNextTransIn = false;
+    FlxTransitionableState.skipNextTransOut = false;
+    var black:FlxSprite = new FlxSprite(0, 0);
+    black.makeGraphic(FlxG.width, FlxG.height, 0xff000000);
+    black.alpha = 0;
+    add(black);
+    FlxTween.tween(black, {alpha: 1}, 2, {ease: FlxEase.cubeInOut, onComplete: function():Void {
+      FlxG.switchState(targetState);
+    }});
+  }
+}

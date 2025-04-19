@@ -1,0 +1,21 @@
+{
+  "title": "Funkin' Mod Menu",
+  "description": "Organize your mods yo!",
+  "contributors": [
+    {
+      "name": "Az989YT",
+      "role": "Programmer"
+    },
+    {
+      "name": "ChazbillYT",
+      "role": "Artist"
+    },
+    {
+      "name": "wallpaper0",
+      "role": "Musician"
+    }
+  ],
+  "api_version": "0.5.0",
+  "mod_version": "1.0.0",
+  "license": "Apache-2.0"
+}
