@@ -24,12 +24,19 @@ class FullModCase extends ScriptedFlxSpriteGroup {
   var caseSprite:FlxSprite;
 
   var metadata:ModMetadata;
+  var modTitle:FlxText;
+  var modAuthors:FlxText;
+  var modIcon:FlxSprite;
+  var modDescription:FlxText;
 
   var fileSystem:Dynamic;
 
-	public function new()
+	public function new(?meta:ModMetadata = null)
   {
 		super("FullModCase");
+
+    metadata = meta;
+    trace(meta);
 
     // FileSystem workaround! (found from https://github.com/Burgerballs/ModBootstrap/, thank you SO much vro)
     fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
@@ -37,7 +44,8 @@ class FullModCase extends ScriptedFlxSpriteGroup {
     caseSprite = new FlxSprite(0, 0).loadGraphic(Paths.image("modmenu/modCaseFull"));
     add(caseSprite);
 
-    var modTitle:FlxText = new FlxText(25 , 61, 590, "Mod Name", 32);
+    modTitle = new FlxText(25 , 61, 729, "Mod Name", 32);
+    if (metadata != null) modTitle.text = metadata.title;
     modTitle.font = "Pixel Arial 11";
     modTitle.borderColor = 0xff5F91C1;
     modTitle.borderSize = 5;
@@ -46,7 +54,18 @@ class FullModCase extends ScriptedFlxSpriteGroup {
     //if (modTitle.text.length > 16) modTitle.text = modTitle.text.substring(0, 16) + "...";
     add(modTitle);
 
-    var modAuthors:FlxText = new FlxText(271 - 12.5, 220 - 12.5, 590, "Author One - Programming \n\nAuthor Two - Art \n\nAuthor Three - Music", 32);
+    modAuthors = new FlxText(271 - 12.5, 220 - 12.5, 469, "Author One - Programming \n\nAuthor Two - Art \n\nAuthor Three - Music", 32);
+    if (metadata != null) {
+      modAuthors.text = "";
+      if(metadata.contributors != null) {
+        for (contributor in 0...metadata.contributors.length) {
+          if (contributor == metadata.contributors.length-1) { modAuthors.text += metadata.contributors[contributor].name + " - " + metadata.contributors[contributor].role; }
+          else { modAuthors.text += metadata.contributors[contributor].name + " - " + metadata.contributors[contributor].role + "\n\n"; }
+        }
+      } else {
+        modAuthors.text = metadata._author;
+      }
+    }
     modAuthors.font = "5by7";
     modAuthors.borderColor = 0xff5F91C1;
     modAuthors.borderSize = 2;
@@ -55,7 +74,21 @@ class FullModCase extends ScriptedFlxSpriteGroup {
     //if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
     add(modAuthors);
 
-    var modDescription:FlxText = new FlxText(12.5, 134, 241 - 25, "Mod description here. this might be really long, or really short. maybe people will be lazy and not put one at all. oh well!", 24);
+    modIcon = new FlxSprite(0,121).loadGraphic(Paths.image("modmenu/no_icon"));
+    if (metadata != null) {
+      var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
+      //trace(iconPath);
+      if (fileSystem.exists(iconPath)) {
+        var modIconBitmap:BitmapData = BitmapData.fromFile(iconPath);
+        modIcon.loadGraphic(FlxGraphic.fromBitmapData(modIconBitmap, false, iconPath));
+      }
+    }
+    modIcon.setGraphicSize(241, 241);
+    modIcon.updateHitbox();
+    add(modIcon);
+
+    modDescription = new FlxText(12.5, 134 + modIcon.height, 241 - 25, "Mod description here. this might be really long, or really short. maybe people will be lazy and not put one at all. oh well!", 24);
+    if (metadata != null) modDescription.text = metadata.description;
     modDescription.font = "5by7";
     modDescription.borderColor = 0xffDA4E89;
     modDescription.borderSize = 2;
@@ -66,5 +99,34 @@ class FullModCase extends ScriptedFlxSpriteGroup {
   override function update(elapsed:Float):Void
   {
     super.update(elapsed);
+  }
+
+  public function updateMetadata()
+  {
+    if (metadata != null)
+    {
+      modTitle.text = metadata.title;
+
+      modAuthors.text = "";
+      if(metadata.contributors != null) {
+        for (contributor in 0...metadata.contributors.length) {
+          if (contributor == metadata.contributors.length-1) { modAuthors.text += metadata.contributors[contributor].name + ": \n" + metadata.contributors[contributor].role; }
+          else { modAuthors.text += metadata.contributors[contributor].name + ": \n" + metadata.contributors[contributor].role + "\n\n"; }
+        }
+      } else {
+        modAuthors.text = metadata._author;
+      }
+
+      modDescription.text = metadata.description;
+
+      var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
+      //trace(iconPath);
+      if (fileSystem.exists(iconPath)) {
+        var modIconBitmap:BitmapData = BitmapData.fromFile(iconPath);
+        modIcon.loadGraphic(FlxGraphic.fromBitmapData(modIconBitmap, false, iconPath));
+      }
+      modIcon.setGraphicSize(241, 241);
+      modIcon.updateHitbox();
+    }
   }
 }

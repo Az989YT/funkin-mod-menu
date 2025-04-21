@@ -5,6 +5,8 @@ import funkin.modding.PolymodHandler;
 import funkin.modding.base.ScriptedMusicBeatState;
 import funkin.modding.base.ScriptedMusicBeatSubState;
 import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.ui.transition.LoadingState;
 import funkin.util.ReflectUtil;
 import funkin.util.plugins.ReloadAssetsDebugPlugin;
 
@@ -36,7 +38,6 @@ class OverrideHotReload extends Module
   var polymod:Dynamic;
   var fileSystem:Dynamic;
   var file:Dynamic;
-  var thread:Dynamic;
 
   var funkinModMenuID = "Funkin' Mod Menu";
   var foundFunkinModMenu = false;
@@ -50,12 +51,12 @@ class OverrideHotReload extends Module
 
   public function onCreate(event:ScriptEvent)
   {
-    trace(FlxG.plugins.list);
+    //trace(FlxG.plugins.list);
     for(plugin in 0...FlxG.plugins.list.length)
     {
       if(Std.isOfType(FlxG.plugins.list[plugin], ReloadAssetsDebugPlugin))
         FlxG.plugins.remove(FlxG.plugins.list[plugin]);
-        trace("blegh");
+        //trace("blegh");
     }
   }
   public function onUpdate(event:UpdateScriptEvent)
@@ -68,7 +69,6 @@ class OverrideHotReload extends Module
         scriptedStateName = ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name");
         trace(scriptedStateName);
       }
-      thread = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.thread.Thread');
       polymod = Unserializer.DEFAULT_RESOLVER.resolveClass('polymod.Polymod');
       fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
       file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
@@ -129,6 +129,14 @@ class OverrideHotReload extends Module
         FlxG.switchState(targetState);
         FlxTransitionableState.skipNextTransIn = true;
         FlxTransitionableState.skipNextTransOut = true;
+      }
+      else if(Std.isOfType(FlxG.state, PlayState))
+      {
+        //trace(PlayState.lastParams);
+        //trace(SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id));
+        PlayState.lastParams.targetSong = SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id);
+        PlayState.instance.remove(PlayState.instance.currentStage);
+        LoadingState.loadPlayState(PlayState.lastParams);
       }
       else
         FlxG.resetState();

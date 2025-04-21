@@ -38,7 +38,6 @@ class ModLoadingState extends ScriptedMusicBeatState {
   var polymod:Dynamic;
   var fileSystem:Dynamic;
   var file:Dynamic;
-  var thread:Dynamic;
 
   var funkinModMenuID = "Funkin' Mod Menu";
   var foundFunkinModMenu = false;
@@ -59,13 +58,13 @@ class ModLoadingState extends ScriptedMusicBeatState {
     this.persistentDraw = true;
     MainMenuState.rememberedSelectedIndex = 0;
 
-    thread = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.thread.Thread');
     polymod = Unserializer.DEFAULT_RESOLVER.resolveClass('polymod.Polymod');
     fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
     file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
 
     var colorBg:FlxSprite = new FlxSprite(0, 0);
     colorBg.makeGraphic(FlxG.width, FlxG.height, 0xff050005);
+    colorBg.alpha = 0;
     add(colorBg);
 
     var loadingText:FlxSprite = new FlxSprite(0,0);
@@ -103,6 +102,7 @@ class ModLoadingState extends ScriptedMusicBeatState {
     }
     trace(modsToLoad);
 
+    FlxTween.tween(colorBg, {alpha: 1}, 3, {ease: FlxEase.cubeInOut});
     FlxTween.tween(loadingText, {alpha: 1}, 3, {ease: FlxEase.cubeInOut, onComplete: function():Void {
       loadEnabledMods();
     }});

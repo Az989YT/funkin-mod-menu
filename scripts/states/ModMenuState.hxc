@@ -188,7 +188,7 @@ class ModMenuState extends ScriptedMusicBeatState {
       grpModCases.add(modCase);
     }
 
-    modCaseFull = ScriptedFlxSpriteGroup.init("FullModCase", 0, 0, detectedMods[0]);
+    modCaseFull = ScriptedFlxSpriteGroup.init("FullModCase", detectedMods[3]);
     modCaseFull.cameras = [foregroundCamera];
     add(modCaseFull);
     modCaseFull.setPosition(0, -FlxG.height);
@@ -244,6 +244,8 @@ class ModMenuState extends ScriptedMusicBeatState {
     if (controls.FREEPLAY_CHAR_SELECT)
     {
       if (transitioningFullModView) return;
+      modCaseFull.scriptSet("metadata", detectedMods[curSelected]);
+      modCaseFull.scriptCall("updateMetadata");
       if(!inFullModView)
       {
         transitioningFullModView = true;
