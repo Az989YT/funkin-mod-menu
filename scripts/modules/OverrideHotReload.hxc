@@ -2,8 +2,10 @@ import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 
 import funkin.modding.PolymodHandler;
+import funkin.modding.base.ScriptedMusicBeatState;
 import funkin.modding.base.ScriptedMusicBeatSubState;
 import funkin.modding.module.Module;
+import funkin.util.ReflectUtil;
 import funkin.util.plugins.ReloadAssetsDebugPlugin;
 
 import funkin.data.dialogue.conversation.ConversationRegistry;
@@ -19,6 +21,8 @@ import funkin.data.stage.StageRegistry;
 import funkin.play.character.CharacterDataParser;
 import funkin.data.freeplay.album.AlbumRegistry;
 import funkin.modding.module.ModuleHandler;
+
+import funkin.ui.mainmenu.MainMenuState;
 
 import haxe.Unserializer;
 
@@ -41,6 +45,9 @@ class OverrideHotReload extends Module
 
   var modsToLoad = [];
 
+  var isScriptedState = false;
+  var scriptedStateName = "";
+
   public function onCreate(event:ScriptEvent)
   {
     trace(FlxG.plugins.list);
@@ -55,6 +62,12 @@ class OverrideHotReload extends Module
   {
     if (FlxG.keys.justPressed.F5)
     {
+      if(Std.isOfType(FlxG.state, ScriptedMusicBeatState))
+      {
+        isScriptedState = true;
+        scriptedStateName = ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name");
+        trace(scriptedStateName);
+      }
       thread = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.thread.Thread');
       polymod = Unserializer.DEFAULT_RESOLVER.resolveClass('polymod.Polymod');
       fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
@@ -110,7 +123,15 @@ class OverrideHotReload extends Module
       NoteKindManager.loadScripts();
       ModuleHandler.loadModuleCache();
 
-      FlxG.resetState();
+      if(isScriptedState)
+      {
+        var targetState:NextState = ScriptedMusicBeatState.init(scriptedStateName);
+        FlxG.switchState(targetState);
+        FlxTransitionableState.skipNextTransIn = true;
+        FlxTransitionableState.skipNextTransOut = true;
+      }
+      else
+        FlxG.resetState();
     }
   }
 }

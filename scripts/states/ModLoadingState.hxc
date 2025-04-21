@@ -47,6 +47,8 @@ class ModLoadingState extends ScriptedMusicBeatState {
 
   var modsToLoad = [];
 
+  var transitionToTitleScreen = false;
+
   public function new() {
 		super("ModLoadingState");
 	}
@@ -134,7 +136,10 @@ class ModLoadingState extends ScriptedMusicBeatState {
 
     trace("completed");
 
-    var targetState:NextState = () -> new MainMenuState();
+    if(transitionToTitleScreen)
+      var targetState:NextState = () -> new TitleState();
+    else
+      var targetState:NextState = () -> new MainMenuState();
     FlxTransitionableState.skipNextTransIn = false;
     FlxTransitionableState.skipNextTransOut = false;
     var black:FlxSprite = new FlxSprite(0, 0);

@@ -208,10 +208,6 @@ class ModMenuState extends ScriptedMusicBeatState {
 		add(topBarBubbles);
 	}
 
-  override function reloadAssets() {
-    trace("no way this works");
-  }
-
   override function update(elapsed:Float):Void
   {
     super.update(elapsed);
@@ -222,6 +218,8 @@ class ModMenuState extends ScriptedMusicBeatState {
 		if (controls.BACK)
     {
       var targetState:NextState = ScriptedMusicBeatState.init('ModLoadingState');
+      targetState.scriptSet("transitionToTitleScreen", false);
+      trace(targetState.scriptGet("transitionToTitleScreen"));
       FlxG.switchState(targetState);
       FlxTransitionableState.skipNextTransIn = true;
       FlxTransitionableState.skipNextTransOut = true;
