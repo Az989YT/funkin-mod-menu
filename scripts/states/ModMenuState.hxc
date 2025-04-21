@@ -61,6 +61,10 @@ class ModMenuState extends ScriptedMusicBeatState {
 	var scrollingCamera:FlxCamera;
   var foregroundCamera:FlxCamera;
 
+  var inFullModView = false;
+  var transitioningFullModView = false;
+  var modCaseFull;
+
 	public function new() {
 		super("ModMenuState");
 	}
@@ -184,6 +188,11 @@ class ModMenuState extends ScriptedMusicBeatState {
       grpModCases.add(modCase);
     }
 
+    modCaseFull = ScriptedFlxSpriteGroup.init("FullModCase", 0, 0, detectedMods[0]);
+    modCaseFull.cameras = [foregroundCamera];
+    add(modCaseFull);
+    modCaseFull.setPosition(0, -FlxG.height);
+
     var topBar:FlxSprite = new FlxSprite(0,0);
 		topBar.frames = Paths.getSparrowAtlas("modmenu/topBar");
 		topBar.animation.addByPrefix("idle", "bar", 24, true);
@@ -219,6 +228,7 @@ class ModMenuState extends ScriptedMusicBeatState {
     }
     if (controls.ACCEPT)
     {
+      if(inFullModView) return;
       var modCaseObject = grpModCases.members[curSelected];
       if (modCaseObject.scriptGet("metadata").id == funkinModMenuID) { // dont allow disable to prevent being locked out of the mod menu
         modCaseObject.x -= 5;
@@ -233,12 +243,65 @@ class ModMenuState extends ScriptedMusicBeatState {
         file.saveContent(registeredModsPath + detectedMods[curSelected].id + registeredModFileExtension, modCaseObject.scriptGet("enabled"));
       }
     }
+    if (controls.FREEPLAY_CHAR_SELECT)
+    {
+      if (transitioningFullModView) return;
+      if(!inFullModView)
+      {
+        transitioningFullModView = true;
+        inFullModView = true;
+        for(modCase in 0...grpModCases.length) {
+          var modCaseObject = grpModCases.members[modCase];
+
+          if(modCase == curSelected)
+          {
+            FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
+            FlxTween.tween(modCaseObject, {y: -modCaseObject.height }, 0.75, {ease: FlxEase.cubeIn, onComplete: function():Void {
+              FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
+              FlxTween.tween(modCaseFull, {y: 0 }, 1, {ease: FlxEase.cubeOut, onComplete: function():Void {
+                transitioningFullModView = false;
+              }});
+            }});
+          }
+          else
+          {
+            FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
+            FlxTween.tween(modCaseObject, {x: -modCaseObject.width + modCaseOffsetX(modCase)*3 }, 1 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
+          }
+        }
+      }
+      else
+      {
+        transitioningFullModView = true;
+        for(modCase in 0...grpModCases.length) {
+            var modCaseObject = grpModCases.members[modCase];
+
+            if(modCase == curSelected)
+            {
+              FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
+              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.75, {ease: FlxEase.cubeIn, onComplete: function():Void {
+                FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
+                FlxTween.tween(modCaseObject, {y: 300 }, 1, {ease: FlxEase.cubeOut, onComplete: function():Void {
+                  inFullModView = false;
+                  transitioningFullModView = false;
+                }});
+              }});
+            }
+            else
+            {
+              FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
+              FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 1 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
+            }
+          }
+        }
+      }
     if (controls.UI_UP_P)     scrollMenu(false);
     if (controls.UI_DOWN_P)   scrollMenu(true);
     if (controls.RESET)       charPortrait.scriptCall("switchCharacterPortrait");
   }
 
   function scrollMenu(down:Bool) {
+    if(inFullModView) return;
 		if(down) {
 			curSelected += 1;
 			if (curSelected > detectedMods.length-1) curSelected = 0;

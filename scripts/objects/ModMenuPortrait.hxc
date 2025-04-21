@@ -87,6 +87,8 @@ class ModMenuPortrait extends ScriptedFlxSpriteGroup {
     poofSprite.setPosition(FlxG.width - poofSprite.width, FlxG.height - poofSprite.height);
 
     switchCharacterPortrait();
+    colorShader.brightness = 0;
+    colorShader.contrast = 0;
 	}
 
   override function update(elapsed:Float):Void
@@ -124,13 +126,18 @@ class ModMenuPortrait extends ScriptedFlxSpriteGroup {
     }
     //trace(poofSprite.frame);
 
-    if(portraitData[curPortrait].waiting.canWait) {
-      if(FlxG.random.int(0,portraitData[curPortrait].waiting.waitChance)) {
-        if(characterSprite.animation.name == "idle" && allowedToPlayAnimation) {
+    if(portraitData[curPortrait].waiting.canWait)
+    {
+      if(FlxG.random.int(0,portraitData[curPortrait].waiting.waitChance))
+      {
+        if(characterSprite.animation.name == "idle" && allowedToPlayAnimation)
+        {
           var totalWaitingAnimations = 0;
-          for(item in 0...portraitData[curPortrait].animations.length) {
+          for(item in 0...portraitData[curPortrait].animations.length)
+          {
             var animationData = portraitData[curPortrait].animations[item];
-            if(StringTools.startsWith(animationData.name, "waiting")) {
+            if(StringTools.startsWith(animationData.name, "waiting"))
+            {
               //trace("ok");
               totalWaitingAnimations += 1;
             }
