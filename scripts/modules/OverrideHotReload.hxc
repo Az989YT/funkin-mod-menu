@@ -101,6 +101,8 @@ class OverrideHotReload extends Module
       trace(modsToLoad);
 
       PolymodHandler.loadModsById(modsToLoad);
+      if(modsToLoad.length == 0)
+        PolymodHandler.loadAllMods();
 
       ModuleHandler.clearModuleCache();
       polymod.clearScripts();
