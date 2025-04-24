@@ -112,6 +112,8 @@ class ModLoadingState extends ScriptedMusicBeatState {
   function loadEnabledMods() {
     trace('starting');
     PolymodHandler.loadModsById(modsToLoad);
+    if(modsToLoad.length == 0)
+      PolymodHandler.loadAllMods();
 
     ModuleHandler.clearModuleCache();
     polymod.clearScripts();

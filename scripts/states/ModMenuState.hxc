@@ -3,6 +3,7 @@ import funkin.graphics.shaders.AdjustColorShader;
 import funkin.modding.PolymodHandler;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.base.ScriptedMusicBeatState;
+import funkin.modding.base.ScriptedMusicBeatSubState;
 import funkin.ui.mainmenu.MainMenuState;
 import funkin.util.tools.ArrayTools;
 
@@ -190,6 +191,7 @@ class ModMenuState extends ScriptedMusicBeatState {
 
     modCaseFull = ScriptedFlxSpriteGroup.init("FullModCase", detectedMods[3]);
     modCaseFull.cameras = [foregroundCamera];
+    modCaseFull.visible = false;
     add(modCaseFull);
     modCaseFull.setPosition(0, -FlxG.height);
 
@@ -228,13 +230,25 @@ class ModMenuState extends ScriptedMusicBeatState {
     {
       if(inFullModView) return;
       var modCaseObject = grpModCases.members[curSelected];
-      if (modCaseObject.scriptGet("metadata").id == funkinModMenuID) { // dont allow disable to prevent being locked out of the mod menu
+      if (modCaseObject.scriptGet("metadata").id == funkinModMenuID)
+      { // dont allow disable to prevent being locked out of the mod menu
         modCaseObject.x -= 5;
         FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
         FlxTween.tween(modCaseObject, {x: modCaseOffsetX(curSelected)*3 }, 0.5, {ease: FlxEase.elasticOut});
 
         FlxG.sound.play(Paths.sound("CS_locked"));
-      } else {
+      }
+      else if (modCaseObject.scriptGet("isMissingDependencies"))
+      {
+        FlxG.sound.play(Paths.sound("cancelMenu"));
+        this.persistentUpdate = false;
+        //this.persistentDraw = true;
+        var substate = ScriptedMusicBeatSubState.init('ModDependencySubState', [modCaseObject.scriptGet("missingDependenciesNames"), modCaseObject.scriptGet("missingDependenciesURLS")]);
+        substate.camera = foregroundCamera;
+        FlxG.state.openSubState(substate);
+      }
+      else
+      {
         modCaseObject.scriptSet("enabled", !modCaseObject.scriptGet("enabled"));
         modCaseObject.scriptCall("toggleCaseSpriteAnimation");
         if(modCaseObject.scriptGet("enabled")) charPortrait.scriptCall("playEnableAnimation");
@@ -248,6 +262,7 @@ class ModMenuState extends ScriptedMusicBeatState {
       modCaseFull.scriptCall("updateMetadata");
       if(!inFullModView)
       {
+        modCaseFull.visible = true;
         transitioningFullModView = true;
         inFullModView = true;
         for(modCase in 0...grpModCases.length) {
@@ -281,6 +296,7 @@ class ModMenuState extends ScriptedMusicBeatState {
               FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
               FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.75, {ease: FlxEase.cubeIn, onComplete: function():Void {
                 FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
+                modCaseFull.visible = false;
                 FlxTween.tween(modCaseObject, {y: 300 }, 1, {ease: FlxEase.cubeOut, onComplete: function():Void {
                   inFullModView = false;
                   transitioningFullModView = false;

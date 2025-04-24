@@ -12,7 +12,12 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
+import haxe.Json;
 import haxe.Unserializer;
+import funkin.util.FileUtil;
+
+import hxjsonast.Parser;
+import hxjsonast.Tools;
 
 import openfl.display.BitmapData;
 
@@ -27,7 +32,14 @@ class ModCase extends ScriptedFlxSpriteGroup {
   var enabled:Bool = true;
   var isNew:Bool = true;
 
+  var dependencies = [];
+  var missingDependencies = [];
+  var missingDependenciesNames = [];
+  var missingDependenciesURLS = [];
+  var isMissingDependencies = false;
+
   var fileSystem:Dynamic;
+  var file:Dynamic;
 
 	public function new(xPos:Float = 0, yPos:Float = 0, ?args:Array = [])
   {
@@ -40,6 +52,7 @@ class ModCase extends ScriptedFlxSpriteGroup {
 
     // FileSystem workaround! (found from https://github.com/Burgerballs/ModBootstrap/, thank you SO much vro)
     fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
+    file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
 
 		var colorBg:FlxSkewedSprite = new FlxSkewedSprite(633, 5);
     colorBg.makeGraphic(107, 107, 0xffFFDFD3);
@@ -70,14 +83,14 @@ class ModCase extends ScriptedFlxSpriteGroup {
     else { caseSprite.animation.play("loopDisabled"); }
     add(caseSprite);
 
-    var modTitle:FlxText = new FlxText(115 , 61, 590, "Mod Name", 32);
-    if (metadata != null) modTitle.text = metadata.title;
+    var modTitle:FlxText = new FlxText(100 , 61, 590, "Mod Name", 32);
+    if (metadata != null) modTitle.text = " " + metadata.title;
     modTitle.font = "Pixel Arial 11";
     modTitle.borderColor = 0xff5F91C1;
     modTitle.borderSize = 5;
     modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
     modTitle.bold = true;
-    if (modTitle.text.length > 16) modTitle.text = modTitle.text.substring(0, 16) + "...";
+    if (modTitle.text.length > 19) modTitle.text = modTitle.text.substring(0, 19) + "...";
     add(modTitle);
 
     var modAuthors:FlxText = new FlxText(110 , 9, 590, "Authors", 32);
@@ -115,6 +128,55 @@ class ModCase extends ScriptedFlxSpriteGroup {
     grpOffset.add(modTitle);
     grpOffset.add(modAuthors);
     if(isNew) grpOffset.add(newNotifSprite);
+
+    var dependenciesPath = "mods/" + metadata.id + "/dependencies.json";
+    if (fileSystem.exists(dependenciesPath)) {
+      var dependencyShit = Tools.getValue(Parser.parse(file.getContent(dependenciesPath)));
+      for(dependency in 0...dependencyShit.dependencies.length) {
+        dependencies.push(dependencyShit.dependencies[dependency].id);
+      }
+
+      var registeredModsPath = FlxG.state.scriptGet("registeredModsPath");
+      var registeredMods = [];
+      for(modFile in 0...fileSystem.readDirectory(registeredModsPath).length)
+      {
+        registeredMods.push(fileSystem.readDirectory(registeredModsPath)[modFile].substring(0, fileSystem.readDirectory(registeredModsPath)[modFile].length - 4));
+      }
+      trace(registeredMods);
+
+      for(dependency in 0...dependencies.length) {
+        for(mod in 0...registeredMods.length) {
+          if(registeredMods[mod] == dependencies[dependency]) {
+            if (missingDependencies.contains(dependencies[dependency]))
+            {
+              missingDependencies.remove(dependencies[dependency]);
+              missingDependenciesNames.remove(dependencyShit.dependencies[dependency].name);
+              missingDependenciesURLS.remove(dependencyShit.dependencies[dependency].downloadLink);
+            }
+            // trace(missingDependencies);
+            break;
+          }
+          else {
+            if (!missingDependencies.contains(dependencies[dependency]))
+            {
+              missingDependencies.push(dependencies[dependency]);
+              missingDependenciesNames.push(dependencyShit.dependencies[dependency].name);
+              missingDependenciesURLS.push(dependencyShit.dependencies[dependency].downloadLink);
+            }
+            // trace(missingDependencies);
+          }
+        }
+      }
+      trace(missingDependencies);
+      trace(missingDependenciesURLS);
+      if(missingDependencies.length > 0)
+      {
+        isMissingDependencies = true;
+        enabled = false;
+        caseSprite.animation.play("loopDisabled");
+        file.saveContent(FlxG.state.scriptGet("registeredModsPath") + metadata.id + FlxG.state.scriptGet("registeredModFileExtension"), enabled);
+      }
+    }
 	}
 
   override function update(elapsed:Float):Void

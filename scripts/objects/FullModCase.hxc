@@ -3,6 +3,7 @@ import funkin.modding.base.ScriptedFlxSpriteGroup;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.addons.display.FlxRuntimeShader;
 import flixel.addons.effects.FlxSkewedSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.math.FlxPoint;
@@ -44,8 +45,8 @@ class FullModCase extends ScriptedFlxSpriteGroup {
     caseSprite = new FlxSprite(0, 0).loadGraphic(Paths.image("modmenu/modCaseFull"));
     add(caseSprite);
 
-    modTitle = new FlxText(25 , 61, 729, "Mod Name", 32);
-    if (metadata != null) modTitle.text = metadata.title;
+    modTitle = new FlxText(10 , 61, 729, "Mod Name", 32);
+    if (metadata != null) modTitle.text = " " + metadata.title;
     modTitle.font = "Pixel Arial 11";
     modTitle.borderColor = 0xff5F91C1;
     modTitle.borderSize = 5;
@@ -54,7 +55,7 @@ class FullModCase extends ScriptedFlxSpriteGroup {
     //if (modTitle.text.length > 16) modTitle.text = modTitle.text.substring(0, 16) + "...";
     add(modTitle);
 
-    modAuthors = new FlxText(271 - 12.5, 220 - 12.5, 469, "Author One - Programming \n\nAuthor Two - Art \n\nAuthor Three - Music", 32);
+    modAuthors = new FlxText(271 - 12.5, 220 - 12.5, 469, "Author One - Programming \n\nAuthor Two - Art \n\nAuthor Three - Music", 18);
     if (metadata != null) {
       modAuthors.text = "";
       if(metadata.contributors != null) {
@@ -66,11 +67,12 @@ class FullModCase extends ScriptedFlxSpriteGroup {
         modAuthors.text = metadata._author;
       }
     }
-    modAuthors.font = "5by7";
-    modAuthors.borderColor = 0xff5F91C1;
-    modAuthors.borderSize = 2;
-    modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
-    //modAuthors.bold = true;
+    modAuthors.font = "Pixel Arial 11";
+    modAuthors.color = 0xff5F91C1;
+    // modAuthors.borderColor = 0xff85c5d0;
+    // modAuthors.borderSize = 3;
+    // modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modAuthors.bold = true;
     //if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
     add(modAuthors);
 
@@ -86,13 +88,15 @@ class FullModCase extends ScriptedFlxSpriteGroup {
     modIcon.setGraphicSize(241, 241);
     modIcon.updateHitbox();
     add(modIcon);
+    modIcon.shader = new FlxRuntimeShader(Assets.getText(Paths.frag('bevelImage')));
 
-    modDescription = new FlxText(12.5, 134 + modIcon.height, 241 - 25, "Mod description here. this might be really long, or really short. maybe people will be lazy and not put one at all. oh well!", 24);
+    modDescription = new FlxText(12.5, 134 + modIcon.height, 241 - 25, "Mod description here. this might be really long, or really short. maybe people will be lazy and not put one at all. oh well!", 18);
     if (metadata != null) modDescription.text = metadata.description;
-    modDescription.font = "5by7";
-    modDescription.borderColor = 0xffDA4E89;
-    modDescription.borderSize = 2;
-    modDescription.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modDescription.font = "Pixel Arial 11";
+    modDescription.color = 0xffed99b0;
+    // modDescription.borderSize = 3;
+    // modDescription.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modDescription.bold = true;
     add(modDescription);
 	}
 
@@ -105,7 +109,7 @@ class FullModCase extends ScriptedFlxSpriteGroup {
   {
     if (metadata != null)
     {
-      modTitle.text = metadata.title;
+      modTitle.text = " " + metadata.title;
 
       modAuthors.text = "";
       if(metadata.contributors != null) {
@@ -119,6 +123,7 @@ class FullModCase extends ScriptedFlxSpriteGroup {
 
       modDescription.text = metadata.description;
 
+      modIcon.loadGraphic(Paths.image("modmenu/no_icon"));
       var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
       //trace(iconPath);
       if (fileSystem.exists(iconPath)) {
