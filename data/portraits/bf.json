@@ -1,0 +1,27 @@
+{
+  "animations": [
+    {
+      "name": "idle",
+      "prefix": "idle",
+      "offsets": [0, 0],
+      "fps": 24
+    },
+    {
+      "name": "enable",
+      "prefix": "enable",
+      "offsets": [0, 0],
+      "fps": 24
+    },
+    {
+      "name": "waiting1",
+      "prefix": "waiting1",
+      "offsets": [0, 0],
+      "fps": 24
+    }
+  ],
+  "waiting": {
+    "canWait": true,
+    "waitDelay": 2,
+    "waitChance": 50
+  }
+}
