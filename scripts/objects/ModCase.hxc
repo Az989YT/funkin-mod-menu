@@ -85,7 +85,7 @@ class ModCase extends ScriptedFlxSpriteGroup {
 
     var modTitle:FlxText = new FlxText(100 , 61, 590, "Mod Name", 32);
     if (metadata != null) modTitle.text = " " + metadata.title;
-    modTitle.font = "Pixel Arial 11";
+    modTitle.font = "images/fonts/Letterstuff";
     modTitle.borderColor = 0xff5F91C1;
     modTitle.borderSize = 5;
     modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
@@ -105,7 +105,7 @@ class ModCase extends ScriptedFlxSpriteGroup {
         modAuthors.text = metadata._author;
       }
     }
-    modAuthors.font = "5by7";
+    modAuthors.font = "Tardling v1.1";
     modAuthors.borderColor = 0xff3D7DFF;
     modAuthors.borderSize = 2;
     modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
