@@ -21,7 +21,7 @@
   ],
   "waiting": {
     "canWait": true,
-    "waitDelay": 2,
-    "waitChance": 50
+    "waitDelay": 5,
+    "waitChance": 125
   }
 }
