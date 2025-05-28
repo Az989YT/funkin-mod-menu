@@ -47,9 +47,9 @@ class FullModCase extends ScriptedFlxSpriteGroup {
 
     modTitle = new FlxText(10 , 61, 729, "Mod Name", 32);
     if (metadata != null) modTitle.text = " " + metadata.title;
-    modTitle.font = "Pixel Arial 11";
+    modTitle.font = "Letterstuff Regular";
     modTitle.borderColor = 0xff5F91C1;
-    modTitle.borderSize = 5;
+    modTitle.borderSize = 2;
     modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
     modTitle.bold = true;
     //if (modTitle.text.length > 16) modTitle.text = modTitle.text.substring(0, 16) + "...";

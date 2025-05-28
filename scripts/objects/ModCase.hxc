@@ -83,25 +83,13 @@ class ModCase extends ScriptedFlxSpriteGroup {
     else { caseSprite.animation.play("loopDisabled"); }
     add(caseSprite);
 
-    var modTitleShadow:FlxText = new FlxText(100 , 61+3, 590, "Mod Name", 42);
-    if (metadata != null) modTitleShadow.text = " " + metadata.title;
-    modTitleShadow.font = "Letterstuff Regular";
-    modTitleShadow.color = 0xfff194a3;
-    // modTitle.borderColor = 0xff802B6A;
-    // modTitle.borderSize = 2;
-    // modTitle.borderStyle = FlxTextBorderStyle.SHADOW_XY(0, 2);
-    modTitleShadow.bold = true;
-    if (modTitleShadow.text.length > 19) modTitleShadow.text = modTitleShadow.text.substring(0, 19) + "...";
-    modTitleShadow.alpha = 0.5;
-    add(modTitleShadow);
-
     var modTitle:FlxText = new FlxText(100 , 61, 590, "Mod Name", 42);
     if (metadata != null) modTitle.text = " " + metadata.title;
     modTitle.font = "Letterstuff Regular";
-    modTitle.color = 0xffda4e89;
-    // modTitle.borderColor = 0xff802B6A;
-    // modTitle.borderSize = 2;
-    // modTitle.borderStyle = FlxTextBorderStyle.SHADOW_XY(0, 2);
+    modTitle.color = 0xffFFFFFF;
+    modTitle.borderColor = 0xff5F91C1;
+    modTitle.borderSize = 3;
+    modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
     modTitle.bold = true;
     if (modTitle.text.length > 19) modTitle.text = modTitle.text.substring(0, 19) + "...";
     add(modTitle);
@@ -118,7 +106,7 @@ class ModCase extends ScriptedFlxSpriteGroup {
         modAuthors.text = metadata._author;
       }
     }
-    modAuthors.font = "Tardling Regular";
+    modAuthors.font = "Tardling Solid Regular";
     modAuthors.borderColor = 0xff3D7DFF;
     modAuthors.borderSize = 2;
     modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
