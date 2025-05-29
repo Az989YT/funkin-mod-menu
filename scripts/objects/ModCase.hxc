@@ -26,6 +26,8 @@ import polymod.Polymod;
 class ModCase extends ScriptedFlxSpriteGroup {
 
   var caseSprite:FlxSprite;
+  var buttonSprite:FlxSprite;
+  var favSprite:FlxSprite;
   var grpOffset:ScriptedFlxSpriteGroup;
 
   var metadata:ModMetadata;
@@ -54,12 +56,12 @@ class ModCase extends ScriptedFlxSpriteGroup {
     fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
     file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
 
-		var colorBg:FlxSkewedSprite = new FlxSkewedSprite(633, 5);
-    colorBg.makeGraphic(107, 107, 0xffFFDFD3);
+		var colorBg:FlxSkewedSprite = new FlxSkewedSprite(634, 5);
+    colorBg.makeGraphic(109, 107, 0xffFFDFD3);
     colorBg.skew.set(22,0);
     add(colorBg);
 
-    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(633,5).loadGraphic(Paths.image("modmenu/no_icon"));
+    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(634,5).loadGraphic(Paths.image("modmenu/no_icon"));
     if (metadata != null) {
       var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
       //trace(iconPath);
@@ -68,20 +70,29 @@ class ModCase extends ScriptedFlxSpriteGroup {
         modIcon.loadGraphic(FlxGraphic.fromBitmapData(modIconBitmap, false, iconPath));
       }
     }
-    modIcon.setGraphicSize(107, 107);
+    modIcon.setGraphicSize(109, 107);
     modIcon.updateHitbox();
     modIcon.skew.set(22,0);
     add(modIcon);
 
-    caseSprite = new FlxSprite(0, 0);
+    caseSprite = new FlxSprite(1, -2);
     caseSprite.frames = Paths.getSparrowAtlas("modmenu/modcase");
-    caseSprite.animation.addByPrefix("enabled", "enabled", 24, false);
-    caseSprite.animation.addByPrefix("loopEnabled", "loopEnabled", 24, true);
-    caseSprite.animation.addByPrefix("disabled", "disabled", 24, false);
-    caseSprite.animation.addByPrefix("loopDisabled", "loopDisabled", 24, true);
-    if (enabled) { caseSprite.animation.play("loopEnabled"); }
-    else { caseSprite.animation.play("loopDisabled"); }
+    caseSprite.animation.addByPrefix("press", "casePress", 24, false);
+    caseSprite.animation.addByPrefix("loop", "caseIdle", 24, true);
+    caseSprite.animation.addByPrefix("dim", "caseDimmed", 24, true);
+    caseSprite.animation.play("loop");
     add(caseSprite);
+    
+    buttonSprite = new FlxSprite(1, -2);
+    buttonSprite.frames = Paths.getSparrowAtlas("modmenu/modcase");
+    buttonSprite.animation.addByPrefix("enabled", "lightEnable0", 24, false);
+    buttonSprite.animation.addByPrefix("loopEnabled", "lightEnableLoop", 24, true);
+    buttonSprite.animation.addByPrefix("disabled", "lightDisable0", 24, false);
+    buttonSprite.animation.addByPrefix("loopDisabled", "lightDisableLoop", 24, true);
+    buttonSprite.animation.addByPrefix("missingDependencies", "lightMissingDependancies0", 24, true);
+    if (enabled) { buttonSprite.animation.play("loopEnabled"); }
+    else { buttonSprite.animation.play("loopDisabled"); }
+    add(buttonSprite);
 
     var modTitle:FlxText = new FlxText(100 , 61, 590, "Mod Name", 42);
     if (metadata != null) modTitle.text = " " + metadata.title;
@@ -184,10 +195,11 @@ class ModCase extends ScriptedFlxSpriteGroup {
   {
     super.update(elapsed);
     if (caseSprite.animation.finished) {
+      caseSprite.animation.play("loop");
       if(enabled) {
-        caseSprite.animation.play("loopEnabled");
+        buttonSprite.animation.play("loopEnabled");
       } else {
-        caseSprite.animation.play("loopDisabled");
+        buttonSprite.animation.play("loopDisabled");
       }
       grpOffset.y = 0;
     }
@@ -196,14 +208,15 @@ class ModCase extends ScriptedFlxSpriteGroup {
 
   public function toggleCaseSpriteAnimation() {
     var soundToPlay = '';
+    caseSprite.animation.play("press");
     if(enabled) {
-      caseSprite.animation.play("enabled");
+      buttonSprite.animation.play("enabled");
       soundToPlay = 'fav';
-      grpOffset.y = 3;
+      grpOffset.y = 4;
     } else {
-      caseSprite.animation.play("disabled");
+      buttonSprite.animation.play("disabled");
       soundToPlay = 'unfav';
-      grpOffset.y = 2;
+      grpOffset.y = 4;
     }
     FlxG.sound.play(Paths.sound(soundToPlay));
   }

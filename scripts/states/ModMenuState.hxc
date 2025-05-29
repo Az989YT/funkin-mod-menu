@@ -185,7 +185,7 @@ class ModMenuState extends ScriptedMusicBeatState {
       add(modCase);
       modCase.cameras = [foregroundCamera];
       modCase.x -= modCase.width;
-      FlxTween.tween(modCase, {x: modCaseOffsetX(mod)*3 }, 1.5 + 0.5*mod, {ease: FlxEase.cubeOut});
+      FlxTween.tween(modCase, {x: modCaseOffsetX(mod)*3 }, 0.5 + 0.2*mod, {ease: FlxEase.cubeOut});
       grpModCases.add(modCase);
     }
 
@@ -271,17 +271,20 @@ class ModMenuState extends ScriptedMusicBeatState {
           if(modCase == curSelected)
           {
             FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
-            FlxTween.tween(modCaseObject, {y: -modCaseObject.height }, 0.75, {ease: FlxEase.cubeIn, onComplete: function():Void {
+            FlxTween.tween(modCaseObject, {y: 300 + 10}, 0.2, {ease: FlxEase.linear, onComplete: function():Void {
               FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-              FlxTween.tween(modCaseFull, {y: 0 }, 1, {ease: FlxEase.cubeOut, onComplete: function():Void {
-                transitioningFullModView = false;
+              FlxTween.tween(modCaseObject, {y: -modCaseObject.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
+                FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
+                FlxTween.tween(modCaseFull, {y: 0 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
+                  transitioningFullModView = false;
+                }});
               }});
             }});
           }
           else
           {
             FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-            FlxTween.tween(modCaseObject, {x: -modCaseObject.width + modCaseOffsetX(modCase)*3 }, 1 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
+            FlxTween.tween(modCaseObject, {x: -modCaseObject.width + modCaseOffsetX(modCase)*3 }, 0.5 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
           }
         }
       }
@@ -294,10 +297,10 @@ class ModMenuState extends ScriptedMusicBeatState {
             if(modCase == curSelected)
             {
               FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.75, {ease: FlxEase.cubeIn, onComplete: function():Void {
+              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
                 FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
                 modCaseFull.visible = false;
-                FlxTween.tween(modCaseObject, {y: 300 }, 1, {ease: FlxEase.cubeOut, onComplete: function():Void {
+                FlxTween.tween(modCaseObject, {y: 300 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
                   inFullModView = false;
                   transitioningFullModView = false;
                 }});
@@ -306,7 +309,7 @@ class ModMenuState extends ScriptedMusicBeatState {
             else
             {
               FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-              FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 1 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
+              FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 0.5 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
             }
           }
         }
@@ -332,7 +335,7 @@ class ModMenuState extends ScriptedMusicBeatState {
       var modCaseObject = grpModCases.members[modCase];
 
       FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-      FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 1, {ease: FlxEase.expoOut});
+      FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 0.5, {ease: FlxEase.expoOut});
       if(modCase == curSelected)
         {  }
       else if(Math.abs(modCase - curSelected) == 1)
@@ -343,7 +346,7 @@ class ModMenuState extends ScriptedMusicBeatState {
         {  }
 
       FlxTween.globalManager.cancelTweensOf(grpModCases, "y");
-      FlxTween.tween(grpModCases, {y: 300 -150*curSelected }, 0.75, {ease: FlxEase.expoOut});
+      FlxTween.tween(grpModCases, {y: 300 -150*curSelected }, 0.5, {ease: FlxEase.expoOut});
     }
 
     if (grpModCases.length > 0) FlxG.sound.play(Paths.sound('scrollMenu'));
