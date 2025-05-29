@@ -185,7 +185,7 @@ class ModMenuState extends ScriptedMusicBeatState {
       add(modCase);
       modCase.cameras = [foregroundCamera];
       modCase.x -= modCase.width;
-      FlxTween.tween(modCase, {x: modCaseOffsetX(mod)*3 }, 0.5 + 0.2*mod, {ease: FlxEase.cubeOut});
+      FlxTween.tween(modCase, {x: modCaseOffsetX(mod)*3 }, 0.5 + 0.1*mod, {ease: FlxEase.cubeOut});
       grpModCases.add(modCase);
     }
 
