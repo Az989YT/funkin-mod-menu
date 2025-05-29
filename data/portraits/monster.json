@@ -3,37 +3,37 @@
     {
       "name": "idle",
       "prefix": "idle",
-      "offsets": [0, -500],
+      "offsets": [0, 0],
       "fps": 24
     },
     {
       "name": "waiting1",
       "prefix": "waiting1",
-      "offsets": [0, -500],
+      "offsets": [0, 0],
       "fps": 24
     },
     {
       "name": "waiting2",
       "prefix": "waiting2",
-      "offsets": [0, -500],
+      "offsets": [0, 0],
       "fps": 24
     },
     {
       "name": "waiting3",
-      "prefix": "waiting3",
-      "offsets": [0, -500],
+      "prefix": "jumpscare",
+      "offsets": [0, 0],
       "fps": 24
     },
     {
       "name": "waiting4",
       "prefix": "waiting4",
-      "offsets": [0, -500],
+      "offsets": [0, 0],
       "fps": 24
     },
     {
       "name": "waiting5",
-      "prefix": "waiting5",
-      "offsets": [0, -500],
+      "prefix": "fall",
+      "offsets": [0, 0],
       "fps": 24
     }
   ],
