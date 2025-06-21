@@ -219,6 +219,7 @@ class ModMenuState extends ScriptedMusicBeatState {
     colorShaderMini.hue -= 1;
 		if (controls.BACK)
     {
+      if (transitioningFullModView) return;
       if(inFullModView)
       {
         transitioningFullModView = true;
