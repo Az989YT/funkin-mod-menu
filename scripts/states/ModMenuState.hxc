@@ -75,8 +75,8 @@ class ModMenuState extends ScriptedMusicBeatState {
     this.persistentUpdate = true;
     this.persistentDraw = true;
     MainMenuState.rememberedSelectedIndex = 0;
-    FlxG.sound.cache(Paths.music('girlfriendsRingtone/girlfriendsRingtone'));
-    FunkinSound.playMusic('girlfriendsRingtone',
+    FlxG.sound.cache(Paths.music('exploration/exploration'));
+    FunkinSound.playMusic('exploration',
       {
         startingVolume: 0.0,
         overrideExisting: true,
@@ -84,7 +84,7 @@ class ModMenuState extends ScriptedMusicBeatState {
         // Continue playing this music between states, until a different music track gets played.
         persist: false
       });
-    FlxG.sound.music.fadeIn(1, 0, 0.5);
+    FlxG.sound.music.fadeIn(2, 0, 0.5);
 
     detectedMods = PolymodHandler.getAllMods();
     polymod = Unserializer.DEFAULT_RESOLVER.resolveClass('polymod.Polymod');
