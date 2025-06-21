@@ -219,12 +219,40 @@ class ModMenuState extends ScriptedMusicBeatState {
     colorShaderMini.hue -= 1;
 		if (controls.BACK)
     {
-      var targetState:NextState = ScriptedMusicBeatState.init('ModLoadingState');
-      targetState.scriptSet("transitionToTitleScreen", false);
-      trace(targetState.scriptGet("transitionToTitleScreen"));
-      FlxG.switchState(targetState);
-      FlxTransitionableState.skipNextTransIn = true;
-      FlxTransitionableState.skipNextTransOut = true;
+      if(inFullModView)
+      {
+        transitioningFullModView = true;
+        for(modCase in 0...grpModCases.length) {
+            var modCaseObject = grpModCases.members[modCase];
+
+            if(modCase == curSelected)
+            {
+              FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
+              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
+                FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
+                modCaseFull.visible = false;
+                FlxTween.tween(modCaseObject, {y: 300 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
+                  inFullModView = false;
+                  transitioningFullModView = false;
+                }});
+              }});
+            }
+            else
+            {
+              FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
+              FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 0.5 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
+            }
+          }
+        }
+      else
+      {
+        var targetState:NextState = ScriptedMusicBeatState.init('ModLoadingState');
+        targetState.scriptSet("transitionToTitleScreen", false);
+        trace(targetState.scriptGet("transitionToTitleScreen"));
+        FlxG.switchState(targetState);
+        FlxTransitionableState.skipNextTransIn = true;
+        FlxTransitionableState.skipNextTransOut = true;
+      }
     }
     if (controls.ACCEPT)
     {
