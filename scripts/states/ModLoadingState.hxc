@@ -148,7 +148,8 @@ class ModLoadingState extends ScriptedMusicBeatState {
     black.makeGraphic(FlxG.width, FlxG.height, 0xff000000);
     black.alpha = 0;
     add(black);
-    FlxTween.tween(black, {alpha: 1}, 0.5, {ease: FlxEase.cubeInOut, onComplete: function():Void {
+    FlxG.sound.play(Paths.sound('modsLoaded'));
+    FlxTween.tween(black, {alpha: 1}, 1, {ease: FlxEase.cubeInOut, onComplete: function():Void {
       FlxG.switchState(targetState);
     }});
   }

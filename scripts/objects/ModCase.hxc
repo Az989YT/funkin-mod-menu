@@ -212,11 +212,11 @@ class ModCase extends ScriptedFlxSpriteGroup {
     caseSprite.animation.play("press");
     if(enabled) {
       buttonSprite.animation.play("enabled");
-      soundToPlay = 'fav';
+      soundToPlay = 'modEnable';
       grpOffset.y = 4;
     } else {
       buttonSprite.animation.play("disabled");
-      soundToPlay = 'unfav';
+      soundToPlay = 'modDisabled';
       grpOffset.y = 4;
     }
     FlxG.sound.play(Paths.sound(soundToPlay));
