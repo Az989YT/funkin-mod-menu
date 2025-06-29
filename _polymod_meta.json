@@ -13,6 +13,10 @@
     {
       "name": "wallpaper0",
       "role": "Musician"
+    },
+    {
+      "name": "Hl33",
+      "role": "turned the base game fonts into ttf's"
     }
   ],
   "api_version": "0.6.3",
