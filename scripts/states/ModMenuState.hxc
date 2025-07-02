@@ -2,23 +2,13 @@ import funkin.audio.FunkinSound;
 import funkin.graphics.shaders.AdjustColorShader;
 import funkin.modding.PolymodHandler;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
-import funkin.modding.base.ScriptedMusicBeatState;
-import funkin.modding.base.ScriptedMusicBeatSubState;
+import funkin.ui.ScriptedMusicBeatState;
+import funkin.ui.ScriptedMusicBeatSubState;
 import funkin.ui.mainmenu.MainMenuState;
 import funkin.util.tools.ArrayTools;
+import funkin.util.FileUtil;
+import funkin.util.FileWriteMode;
 
-import funkin.data.dialogue.conversation.ConversationRegistry;
-import funkin.data.dialogue.dialoguebox.DialogueBoxRegistry;
-import funkin.data.dialogue.speaker.SpeakerRegistry;
-import funkin.data.event.SongEventRegistry;
-import funkin.data.story.level.LevelRegistry;
-import funkin.data.notestyle.NoteStyleRegistry;
-import funkin.play.notes.notekind.NoteKindManager;
-import funkin.data.song.SongRegistry;
-import funkin.data.freeplay.player.PlayerRegistry;
-import funkin.data.stage.StageRegistry;
-import funkin.play.character.CharacterDataParser;
-import funkin.data.freeplay.album.AlbumRegistry;
 import funkin.modding.module.ModuleHandler;
 
 import flixel.FlxCamera;
@@ -32,26 +22,17 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
 
-import haxe.Unserializer;
+// import haxe.Unserializer;
 
-class ModMenuState extends ScriptedMusicBeatState {
+class ModMenuState extends ScriptedMusicBeatState
+{
+  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
 
   var swirlBig:FlxSprite;
   var swirlMini:FlxSprite;
 
   var grpModCases:ScriptedFlxSpriteGroup;
   var curSelected:Int = 0;
-
-  var detectedMods:Array<ModMetadata> = [];
-
-  var polymod:Dynamic;
-  var fileSystem:Dynamic;
-  var file:Dynamic;
-
-  var funkinModMenuID = "Funkin' Mod Menu";
-  var foundFunkinModMenu = false;
-  var registeredModsPath = "mods/Funkin' Mod Menu/registeredMods/";
-  var registeredModFileExtension = ".fmm";
 
   var colorShaderBig:AdjustColorShader;
   var colorShaderMini:AdjustColorShader;
@@ -66,15 +47,19 @@ class ModMenuState extends ScriptedMusicBeatState {
   var transitioningFullModView = false;
   var modCaseFull;
 
-	public function new() {
+	public function new()
+  {
 		super("ModMenuState");
 	}
 
-	override public function create():Void {
+	override public function create():Void
+  {
 		super.create();
+
     this.persistentUpdate = true;
     this.persistentDraw = true;
     MainMenuState.rememberedSelectedIndex = 0;
+
     FlxG.sound.cache(Paths.music('exploration/exploration'));
     FunkinSound.playMusic('exploration',
       {
@@ -86,13 +71,12 @@ class ModMenuState extends ScriptedMusicBeatState {
       });
     FlxG.sound.music.fadeIn(2, 0, 0.5);
 
-    detectedMods = PolymodHandler.getAllMods();
-    polymod = Unserializer.DEFAULT_RESOLVER.resolveClass('polymod.Polymod');
-    fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
-    file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
+    trace(ModMenuUtils.modMenuID);
+    trace(ModMenuUtils.registeredModsPath);
+    trace(ModMenuUtils.modMenuIsZIP);
 
     backgroundCamera = new FlxCamera(0,0,FlxG.width,FlxG.height);
-		scrollingCamera = new FlxCamera(0,-300,FlxG.width,FlxG.height*1.5);
+		scrollingCamera = new FlxCamera((FlxG.width - FlxG.width*1.5)/2,(FlxG.height - FlxG.height*1.5)/2,FlxG.width*1.5,FlxG.height*1.5);
 		scrollingCamera.bgColor = 0x00000000;
     scrollingCamera.angle = -22.5;
     foregroundCamera = new FlxCamera(0,0,FlxG.width,FlxG.height);
@@ -101,30 +85,16 @@ class ModMenuState extends ScriptedMusicBeatState {
 		FlxG.cameras.add(scrollingCamera,false);
     FlxG.cameras.add(foregroundCamera,false);
 
-    if(!foundFunkinModMenu) {
-      for(mod in 0...detectedMods.length) {
-        //trace(detectedMods[mod].title);
-        if(detectedMods[mod].title == funkinModMenuID) {
-          foundFunkinModMenu = true;
-          funkinModMenuID = detectedMods[mod].id;
-          registeredModsPath = "mods/" + funkinModMenuID + "/registeredMods/";
-          trace(funkinModMenuID);
-          break;
-        }
-     }
-    }
-    if(fileSystem.exists("mods/" + funkinModMenuID + ".zip")) {
-      trace("yeah");
+    if(ModMenuUtils.modMenuIsZIP)
+    {
       var targetState:NextState = ScriptedMusicBeatState.init('UnzipWarningState');
       FlxG.switchState(targetState);
       FlxTransitionableState.skipNextTransIn = false;
       FlxTransitionableState.skipNextTransOut = false;
     }
-    if(!fileSystem.exists(registeredModsPath)) fileSystem.createDirectory(registeredModsPath);
 
 		var colorBg:FlxSprite = new FlxSprite(0, 0);
     colorBg.makeGraphic(FlxG.width, FlxG.height, 0xffFFFAE1);
-    //colorBg.makeGraphic(FlxG.width, FlxG.height, 0xff000000);
     add(colorBg);
 
     swirlBig = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlBig"));
@@ -136,7 +106,7 @@ class ModMenuState extends ScriptedMusicBeatState {
     add(swirlMini);
 
     var bgScrollMid = ScriptedFlxSpriteGroup.init("ModMenuScrollingElements", true);
-    bgScrollMid.y = (FlxG.height - bgScrollMid.height)/2 + 300;
+    bgScrollMid.y = (FlxG.height*1.5 - bgScrollMid.height)/2;
     bgScrollMid.cameras = [scrollingCamera];
     add(bgScrollMid);
 
@@ -154,8 +124,6 @@ class ModMenuState extends ScriptedMusicBeatState {
     colorShaderMini = new AdjustColorShader();
     swirlBig.shader = colorShaderBig;
     swirlMini.shader = colorShaderMini;
-    //swirlBig.blend = 12;
-    //swirlMini.blend = 12;
 
     charPortrait = ScriptedFlxSpriteGroup.init("ModMenuPortrait", 0, 0);
     charPortrait.cameras = [foregroundCamera];
@@ -163,23 +131,14 @@ class ModMenuState extends ScriptedMusicBeatState {
 
     grpModCases = new ScriptedFlxSpriteGroup(0,300);
     grpModCases.cameras = [foregroundCamera];
-    for(mod in 0...detectedMods.length) {
-      //trace(detectedMods[mod].title);
-      var args = [true, detectedMods[mod], true];
-      //   args[0] = save.data.mods[mod][1];
-      var currentModPath = registeredModsPath + detectedMods[mod].id + registeredModFileExtension;
-      if (fileSystem.exists(currentModPath)) {
-        trace("found file!");
-
-        if(file.getContent(currentModPath) == "false") {
-          args[0] = false;
-        }
-        args[2] = false;
-      } else {
-        trace("file not found. writing file");
-        file.write(currentModPath);
-        file.saveContent(currentModPath, "true");
-      }
+    for(mod in 0...ModMenuUtils.detectedMods.length)
+    {
+      var args =
+      [
+        ModMenuUtils.isModEnabled(ModMenuUtils.detectedMods[mod]),
+        ModMenuUtils.detectedMods[mod],
+        ModMenuUtils.isModNew(ModMenuUtils.detectedMods[mod])
+      ];
 
       modCase = ScriptedFlxSpriteGroup.init("ModCase", 0, 150*mod, args);
       add(modCase);
@@ -189,7 +148,7 @@ class ModMenuState extends ScriptedMusicBeatState {
       grpModCases.add(modCase);
     }
 
-    modCaseFull = ScriptedFlxSpriteGroup.init("FullModCase", detectedMods[3]);
+    modCaseFull = ScriptedFlxSpriteGroup.init("FullModCase", ModMenuUtils.detectedMods[3]);
     modCaseFull.cameras = [foregroundCamera];
     modCaseFull.visible = false;
     add(modCaseFull);
@@ -213,38 +172,43 @@ class ModMenuState extends ScriptedMusicBeatState {
   override function update(elapsed:Float):Void
   {
     super.update(elapsed);
+
     swirlBig.angle += 0.25;
     swirlMini.angle -= 0.5;
     colorShaderBig.hue += 1;
     colorShaderMini.hue -= 1;
+
 		if (controls.BACK)
     {
       if (transitioningFullModView) return;
       if(inFullModView)
       {
         transitioningFullModView = true;
-        for(modCase in 0...grpModCases.length) {
-            var modCaseObject = grpModCases.members[modCase];
+        for(modCase in 0...grpModCases.length)
+        {
+          var modCaseObject = grpModCases.members[modCase];
 
-            if(modCase == curSelected)
+          if(modCase == curSelected)
+          {
+            FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
+            FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void
             {
-              FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
-                FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
-                modCaseFull.visible = false;
-                FlxTween.tween(modCaseObject, {y: 300 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
-                  inFullModView = false;
-                  transitioningFullModView = false;
-                }});
+              FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
+              modCaseFull.visible = false;
+              FlxTween.tween(modCaseObject, {y: 300 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void
+              {
+                inFullModView = false;
+                transitioningFullModView = false;
               }});
-            }
-            else
-            {
-              FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-              FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 0.5 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
-            }
+            }});
+          }
+          else
+          {
+            FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
+            FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 0.5 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
           }
         }
+      }
       else
       {
         var targetState:NextState = ScriptedMusicBeatState.init('ModLoadingState');
@@ -259,7 +223,7 @@ class ModMenuState extends ScriptedMusicBeatState {
     {
       if(inFullModView) return;
       var modCaseObject = grpModCases.members[curSelected];
-      if (modCaseObject.scriptGet("metadata").id == funkinModMenuID)
+      if (modCaseObject.scriptGet("metadata").id == ModMenuUtils.modMenuID)
       { // dont allow disable to prevent being locked out of the mod menu
         modCaseObject.x -= 5;
         FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
@@ -267,27 +231,18 @@ class ModMenuState extends ScriptedMusicBeatState {
 
         FlxG.sound.play(Paths.sound("CS_locked"));
       }
-      else if (modCaseObject.scriptGet("isMissingDependencies"))
-      {
-        FlxG.sound.play(Paths.sound("cancelMenu"));
-        this.persistentUpdate = false;
-        //this.persistentDraw = true;
-        var substate = ScriptedMusicBeatSubState.init('ModDependencySubState', [modCaseObject.scriptGet("missingDependenciesNames"), modCaseObject.scriptGet("missingDependenciesURLS")]);
-        substate.camera = foregroundCamera;
-        FlxG.state.openSubState(substate);
-      }
       else
       {
         modCaseObject.scriptSet("enabled", !modCaseObject.scriptGet("enabled"));
         modCaseObject.scriptCall("toggleCaseSpriteAnimation");
-        if(modCaseObject.scriptGet("enabled")) charPortrait.scriptCall("playEnableAnimation");
-        file.saveContent(registeredModsPath + detectedMods[curSelected].id + registeredModFileExtension, modCaseObject.scriptGet("enabled"));
+        if(modCaseObject.scriptGet("enabled")) charPortrait.scriptCall("playToggleAnimation");
+        ModMenuUtils.toggleMod(modCaseObject.scriptGet("metadata"), modCaseObject.scriptGet("enabled"));
       }
     }
     if (controls.FREEPLAY_CHAR_SELECT)
     {
       if (transitioningFullModView) return;
-      modCaseFull.scriptSet("metadata", detectedMods[curSelected]);
+      modCaseFull.scriptSet("metadata", ModMenuUtils.detectedMods[curSelected]);
       modCaseFull.scriptCall("updateMetadata");
       if(!inFullModView)
       {
@@ -300,11 +255,14 @@ class ModMenuState extends ScriptedMusicBeatState {
           if(modCase == curSelected)
           {
             FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
-            FlxTween.tween(modCaseObject, {y: 300 + 10}, 0.2, {ease: FlxEase.linear, onComplete: function():Void {
+            FlxTween.tween(modCaseObject, {y: 300 + 10}, 0.2, {ease: FlxEase.linear, onComplete: function():Void
+            {
               FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-              FlxTween.tween(modCaseObject, {y: -modCaseObject.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
+              FlxTween.tween(modCaseObject, {y: -modCaseObject.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void
+              {
                 FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-                FlxTween.tween(modCaseFull, {y: 0 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
+                FlxTween.tween(modCaseFull, {y: 0 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void
+                {
                   transitioningFullModView = false;
                 }});
               }});
@@ -326,10 +284,12 @@ class ModMenuState extends ScriptedMusicBeatState {
             if(modCase == curSelected)
             {
               FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
+              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void
+              {
                 FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
                 modCaseFull.visible = false;
-                FlxTween.tween(modCaseObject, {y: 300 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
+                FlxTween.tween(modCaseObject, {y: 300 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void
+                {
                   inFullModView = false;
                   transitioningFullModView = false;
                 }});
@@ -348,19 +308,23 @@ class ModMenuState extends ScriptedMusicBeatState {
     if (controls.RESET)       charPortrait.scriptCall("switchCharacterPortrait");
   }
 
-  function scrollMenu(down:Bool) {
+  function scrollMenu(down:Bool)
+  {
     if(inFullModView) return;
-		if(down) {
+		if(down)
+    {
 			curSelected += 1;
-			if (curSelected > detectedMods.length-1) curSelected = 0;
+			if (curSelected > ModMenuUtils.detectedMods.length-1) curSelected = 0;
 		}
-		else {
+		else
+    {
 			curSelected -= 1;
-			if (curSelected < 0) curSelected = detectedMods.length-1;
+			if (curSelected < 0) curSelected = ModMenuUtils.detectedMods.length-1;
 		}
     //trace(curSelected);
 
-    for(modCase in 0...grpModCases.length) {
+    for(modCase in 0...grpModCases.length)
+    {
       var modCaseObject = grpModCases.members[modCase];
 
       FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
@@ -381,7 +345,8 @@ class ModMenuState extends ScriptedMusicBeatState {
     if (grpModCases.length > 0) FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
-  function modCaseOffsetX(modCase:Int) {
+  function modCaseOffsetX(modCase:Int)
+  {
     return (-60 * (Math.sin(modCase - curSelected - 2))) - 55;
   }
 }

@@ -1,4 +1,5 @@
 import funkin.modding.PolymodHandler;
+import funkin.modding.module.ModuleHandler;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 
 import flixel.FlxG;
@@ -22,6 +23,8 @@ import polymod.Polymod;
 
 class FullModCase extends ScriptedFlxSpriteGroup {
 
+  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
+
   var caseSprite:FlxSprite;
 
   var metadata:ModMetadata;
@@ -30,17 +33,12 @@ class FullModCase extends ScriptedFlxSpriteGroup {
   var modIcon:FlxSprite;
   var modDescription:FlxText;
 
-  var fileSystem:Dynamic;
-
 	public function new(?meta:ModMetadata = null)
   {
 		super("FullModCase");
 
     metadata = meta;
     trace(meta);
-
-    // FileSystem workaround! (found from https://github.com/Burgerballs/ModBootstrap/, thank you SO much vro)
-    fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
 
     caseSprite = new FlxSprite(0, 0).loadGraphic(Paths.image("modmenu/modCaseFull"));
     add(caseSprite);
@@ -76,15 +74,7 @@ class FullModCase extends ScriptedFlxSpriteGroup {
     //if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
     add(modAuthors);
 
-    modIcon = new FlxSprite(0,121).loadGraphic(Paths.image("modmenu/no_icon"));
-    if (metadata != null) {
-      var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
-      //trace(iconPath);
-      if (fileSystem.exists(iconPath)) {
-        var modIconBitmap:BitmapData = BitmapData.fromFile(iconPath);
-        modIcon.loadGraphic(FlxGraphic.fromBitmapData(modIconBitmap, false, iconPath));
-      }
-    }
+    modIcon = new FlxSprite(0,121).loadGraphic(ModMenuUtils.getModIcon(metadata));
     modIcon.setGraphicSize(241, 241);
     modIcon.updateHitbox();
     add(modIcon);
@@ -123,13 +113,7 @@ class FullModCase extends ScriptedFlxSpriteGroup {
 
       modDescription.text = metadata.description;
 
-      modIcon.loadGraphic(Paths.image("modmenu/no_icon"));
-      var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
-      //trace(iconPath);
-      if (fileSystem.exists(iconPath)) {
-        var modIconBitmap:BitmapData = BitmapData.fromFile(iconPath);
-        modIcon.loadGraphic(FlxGraphic.fromBitmapData(modIconBitmap, false, iconPath));
-      }
+      modIcon.loadGraphic(ModMenuUtils.getModIcon(metadata));
       modIcon.setGraphicSize(241, 241);
       modIcon.updateHitbox();
     }

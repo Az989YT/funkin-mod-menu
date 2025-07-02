@@ -1,6 +1,6 @@
 import funkin.audio.FunkinSound;
 import funkin.modding.PolymodHandler;
-import funkin.modding.base.ScriptedMusicBeatState;
+import funkin.ui.ScriptedMusicBeatState;
 import funkin.ui.mainmenu.MainMenuState;
 
 import flixel.FlxG;

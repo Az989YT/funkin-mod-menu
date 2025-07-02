@@ -1,4 +1,5 @@
 import funkin.modding.PolymodHandler;
+import funkin.modding.module.ModuleHandler;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 
 import flixel.FlxG;
@@ -13,7 +14,6 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
 import haxe.Json;
-import haxe.Unserializer;
 import funkin.util.FileUtil;
 
 import hxjsonast.Parser;
@@ -25,6 +25,8 @@ import polymod.Polymod;
 
 class ModCase extends ScriptedFlxSpriteGroup {
 
+  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
+
   var caseSprite:FlxSprite;
   var buttonSprite:FlxSprite;
   var favSprite:FlxSprite;
@@ -34,42 +36,21 @@ class ModCase extends ScriptedFlxSpriteGroup {
   var enabled:Bool = true;
   var isNew:Bool = true;
 
-  var dependencies = [];
-  var missingDependencies = [];
-  var missingDependenciesNames = [];
-  var missingDependenciesURLS = [];
-  var isMissingDependencies = false;
-
-  var fileSystem:Dynamic;
-  var file:Dynamic;
-
 	public function new(xPos:Float = 0, yPos:Float = 0, ?args:Array = [])
   {
 		super("ModCase", xPos, yPos);
     this.setPosition(xPos, yPos);
+
     enabled = args[0];
     metadata = args[1];
     isNew = args[2];
-    //trace(args);
-
-    // FileSystem workaround! (found from https://github.com/Burgerballs/ModBootstrap/, thank you SO much vro)
-    fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
-    file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
 
 		var colorBg:FlxSkewedSprite = new FlxSkewedSprite(634, 5);
     colorBg.makeGraphic(109, 107, 0xffFFDFD3);
     colorBg.skew.set(22,0);
     add(colorBg);
 
-    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(634,5).loadGraphic(Paths.image("modmenu/no_icon"));
-    if (metadata != null) {
-      var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
-      //trace(iconPath);
-      if (fileSystem.exists(iconPath)) {
-        var modIconBitmap:BitmapData = BitmapData.fromFile(iconPath);
-        modIcon.loadGraphic(FlxGraphic.fromBitmapData(modIconBitmap, false, iconPath));
-      }
-    }
+    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(634,5).loadGraphic(ModMenuUtils.getModIcon(metadata));
     modIcon.setGraphicSize(109, 107);
     modIcon.updateHitbox();
     modIcon.skew.set(22,0);
@@ -82,7 +63,7 @@ class ModCase extends ScriptedFlxSpriteGroup {
     caseSprite.animation.addByPrefix("dim", "caseDimmed", 24, true);
     caseSprite.animation.play("loop");
     add(caseSprite);
-    
+
     buttonSprite = new FlxSprite(1, -2);
     buttonSprite.frames = Paths.getSparrowAtlas("modmenu/modcase");
     buttonSprite.animation.addByPrefix("enabled", "lightEnable0", 24, false);
@@ -123,7 +104,6 @@ class ModCase extends ScriptedFlxSpriteGroup {
     modAuthors.borderSize = 2;
     modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
     modAuthors.blend = 0;
-    //modAuthors.bold = true;
     if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
     add(modAuthors);
 
@@ -141,55 +121,6 @@ class ModCase extends ScriptedFlxSpriteGroup {
     grpOffset.add(modTitle);
     grpOffset.add(modAuthors);
     if(isNew) grpOffset.add(newNotifSprite);
-
-    var dependenciesPath = "mods/" + metadata.id + "/dependencies.json";
-    if (fileSystem.exists(dependenciesPath)) {
-      var dependencyShit = Tools.getValue(Parser.parse(file.getContent(dependenciesPath)));
-      for(dependency in 0...dependencyShit.dependencies.length) {
-        dependencies.push(dependencyShit.dependencies[dependency].id);
-      }
-
-      var registeredModsPath = FlxG.state.scriptGet("registeredModsPath");
-      var registeredMods = [];
-      for(modFile in 0...fileSystem.readDirectory(registeredModsPath).length)
-      {
-        registeredMods.push(fileSystem.readDirectory(registeredModsPath)[modFile].substring(0, fileSystem.readDirectory(registeredModsPath)[modFile].length - 4));
-      }
-      trace(registeredMods);
-
-      for(dependency in 0...dependencies.length) {
-        for(mod in 0...registeredMods.length) {
-          if(registeredMods[mod] == dependencies[dependency]) {
-            if (missingDependencies.contains(dependencies[dependency]))
-            {
-              missingDependencies.remove(dependencies[dependency]);
-              missingDependenciesNames.remove(dependencyShit.dependencies[dependency].name);
-              missingDependenciesURLS.remove(dependencyShit.dependencies[dependency].downloadLink);
-            }
-            // trace(missingDependencies);
-            break;
-          }
-          else {
-            if (!missingDependencies.contains(dependencies[dependency]))
-            {
-              missingDependencies.push(dependencies[dependency]);
-              missingDependenciesNames.push(dependencyShit.dependencies[dependency].name);
-              missingDependenciesURLS.push(dependencyShit.dependencies[dependency].downloadLink);
-            }
-            // trace(missingDependencies);
-          }
-        }
-      }
-      trace(missingDependencies);
-      trace(missingDependenciesURLS);
-      if(missingDependencies.length > 0)
-      {
-        isMissingDependencies = true;
-        enabled = false;
-        caseSprite.animation.play("loopDisabled");
-        file.saveContent(FlxG.state.scriptGet("registeredModsPath") + metadata.id + FlxG.state.scriptGet("registeredModFileExtension"), enabled);
-      }
-    }
 	}
 
   override function update(elapsed:Float):Void

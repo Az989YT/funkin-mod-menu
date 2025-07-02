@@ -1,64 +1,37 @@
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
+import flixel.util.FlxTimer;
 
-import funkin.modding.PolymodHandler;
 import funkin.modding.base.ScriptedMusicBeatState;
-import funkin.modding.base.ScriptedMusicBeatSubState;
 import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
 import funkin.play.PlayState;
 import funkin.ui.transition.LoadingState;
 import funkin.util.ReflectUtil;
 import funkin.util.plugins.ReloadAssetsDebugPlugin;
 
-import funkin.data.dialogue.conversation.ConversationRegistry;
-import funkin.data.dialogue.dialoguebox.DialogueBoxRegistry;
-import funkin.data.dialogue.speaker.SpeakerRegistry;
-import funkin.data.event.SongEventRegistry;
-import funkin.data.story.level.LevelRegistry;
-import funkin.data.notestyle.NoteStyleRegistry;
-import funkin.play.notes.notekind.NoteKindManager;
-import funkin.data.song.SongRegistry;
-import funkin.data.freeplay.player.PlayerRegistry;
-import funkin.data.stage.StageRegistry;
-import funkin.play.character.CharacterDataParser;
-import funkin.data.freeplay.album.AlbumRegistry;
-import funkin.modding.module.ModuleHandler;
-
-import funkin.ui.mainmenu.MainMenuState;
-
-import haxe.Unserializer;
-
 class OverrideHotReload extends Module
 {
+
+  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
+
+  var isScriptedState = false;
+  var scriptedStateName = "";
+
 	public function new()
 	{
 		super('OverrideHotReload');
 	}
 
-  var polymod:Dynamic;
-  var fileSystem:Dynamic;
-  var file:Dynamic;
-
-  var funkinModMenuID = "Funkin' Mod Menu";
-  var foundFunkinModMenu = false;
-  var registeredModsPath = "mods/Funkin' Mod Menu/registeredMods/";
-  var registeredModFileExtension = ".fmm";
-
-  var modsToLoad = [];
-
-  var isScriptedState = false;
-  var scriptedStateName = "";
-
   public function onCreate(event:ScriptEvent)
   {
-    //trace(FlxG.plugins.list);
-    for(plugin in 0...FlxG.plugins.list.length)
+    for(plugin in FlxG.plugins.list)
     {
-      if(Std.isOfType(FlxG.plugins.list[plugin], ReloadAssetsDebugPlugin))
-        FlxG.plugins.remove(FlxG.plugins.list[plugin]);
-        //trace("blegh");
+      if(Std.isOfType(plugin, ReloadAssetsDebugPlugin))
+        FlxG.plugins.remove(plugin);
     }
   }
+
   public function onUpdate(event:UpdateScriptEvent)
   {
     if (FlxG.keys.justPressed.F5)
@@ -69,79 +42,26 @@ class OverrideHotReload extends Module
         scriptedStateName = ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name");
         trace(scriptedStateName);
       }
-      polymod = Unserializer.DEFAULT_RESOLVER.resolveClass('polymod.Polymod');
-      fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
-      file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
 
-      var detectedMods = PolymodHandler.getAllMods();
-
-      if(!foundFunkinModMenu) {
-        for(mod in 0...detectedMods.length) {
-          //trace(detectedMods[mod].title);
-          if(detectedMods[mod].title == funkinModMenuID) {
-            foundFunkinModMenu = true;
-            funkinModMenuID = detectedMods[mod].id;
-            registeredModsPath = "mods/" + funkinModMenuID + "/registeredMods/";
-            trace(funkinModMenuID);
-            break;
-          }
-        }
-      }
-
-      for(mod in 0...detectedMods.length) {
-        var currentModPath = registeredModsPath + detectedMods[mod].id + registeredModFileExtension;
-        if (fileSystem.exists(currentModPath)) {
-          trace("found file!");
-
-          if(file.getContent(currentModPath) == "true") {
-            modsToLoad.push(detectedMods[mod].id);
-          }
-        }
-      }
-      trace(modsToLoad);
-
-      PolymodHandler.loadModsById(modsToLoad);
-      if(modsToLoad.length == 0)
-        PolymodHandler.loadAllMods();
-
-      ModuleHandler.clearModuleCache();
-      polymod.clearScripts();
-
-      polymod.registerAllScriptClasses();
-
-      SongEventRegistry.loadEventCache();
-
-      SongRegistry.instance.loadEntries();
-      LevelRegistry.instance.loadEntries();
-      NoteStyleRegistry.instance.loadEntries();
-      PlayerRegistry.instance.loadEntries();
-      ConversationRegistry.instance.loadEntries();
-      DialogueBoxRegistry.instance.loadEntries();
-      SpeakerRegistry.instance.loadEntries();
-      AlbumRegistry.instance.loadEntries();
-      StageRegistry.instance.loadEntries();
-
-      CharacterDataParser.loadCharacterCache();
-      NoteKindManager.loadScripts();
-      ModuleHandler.loadModuleCache();
-
-      if(isScriptedState)
+      ModMenuUtils.loadEnabledMods();
+      new FlxTimer().start(1, ()->
       {
-        var targetState:NextState = ScriptedMusicBeatState.init(scriptedStateName);
-        FlxG.switchState(targetState);
-        FlxTransitionableState.skipNextTransIn = true;
-        FlxTransitionableState.skipNextTransOut = true;
-      }
-      else if(Std.isOfType(FlxG.state, PlayState))
-      {
-        //trace(PlayState.lastParams);
-        //trace(SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id));
-        PlayState.lastParams.targetSong = SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id);
-        PlayState.instance.remove(PlayState.instance.currentStage);
-        LoadingState.loadPlayState(PlayState.lastParams);
-      }
-      else
-        FlxG.resetState();
+        if(isScriptedState)
+        {
+          var targetState:NextState = ScriptedMusicBeatState.init(scriptedStateName);
+          FlxG.switchState(targetState);
+          FlxTransitionableState.skipNextTransIn = true;
+          FlxTransitionableState.skipNextTransOut = true;
+        }
+        else if(Std.isOfType(FlxG.state, PlayState))
+        {
+          PlayState.lastParams.targetSong = SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id);
+          PlayState.instance.remove(PlayState.instance.currentStage);
+          LoadingState.loadPlayState(PlayState.lastParams);
+        }
+        else
+          FlxG.resetState();
+      });
     }
   }
 }

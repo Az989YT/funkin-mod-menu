@@ -1,0 +1,144 @@
+import funkin.data.DataParse;
+import funkin.graphics.FunkinSprite;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.modding.PolymodHandler;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+import funkin.util.assets.DataAssets;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.addons.effects.FlxSkewedSprite;
+import flixel.graphics.FlxGraphic;
+import flixel.math.FlxPoint;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+
+import hxjsonast.Parser;
+import hxjsonast.Tools;
+
+import openfl.display.BitmapData;
+
+import polymod.Polymod;
+
+import StringTools;
+
+class monsterPortrait extends ScriptedFlxSpriteGroup
+{
+  var characterSprite:FunkinSprite;
+  var colorShader:AdjustColorShader;
+
+  var character = "monster";
+  var portraitData;
+
+  var totalWaitingAnimations:Int = 0;
+  var allowedToPlayAnimation:Bool = true;
+
+  function new()
+  {
+    super("monsterPortrait");
+
+    var filePath = Paths.json('portraits/' + character);
+    if(Assets.exists(filePath))
+      portraitData = Tools.getValue(Parser.parse(Assets.getText(filePath), filePath));
+
+    colorShader = new AdjustColorShader();
+
+    characterSprite = new FunkinSprite(0, 0);
+    characterSprite.loadSparrow("modmenu/portraits/" + character);
+    characterSprite.shader = colorShader;
+    for(item in 0...portraitData.animations.length)
+    {
+      var animationData = portraitData.animations[item];
+      if(StringTools.startsWith(animationData.name, "waiting"))
+        totalWaitingAnimations += 1;
+      characterSprite.animation.addByPrefix(animationData.name, animationData.prefix, 24, (animationData.name == "idle") ? true:false);
+    }
+    add(characterSprite);
+    playIdleAnimation();
+  }
+
+  override function update(elapsed:Float):Void
+  {
+    super.update(elapsed);
+
+    if (characterSprite.animation.finished && characterSprite.animation.name != "idle")
+    {
+      playIdleAnimation();
+    }
+
+    // WAITING LOGIC
+    if(portraitData.waiting.canWait && allowedToPlayAnimation)
+    {
+      // trace("Attempting Wait Animation.");
+      if(FlxG.random.int(0,portraitData.waiting.waitChance) && characterSprite.animation.name == "idle")
+      {
+        playWaitingAnimation(FlxG.random.int(1,totalWaitingAnimations));
+      }
+      else
+      {
+        // trace("Wait Attempt Failed.");
+      }
+    }
+  }
+
+  public function playIdleAnimation()
+  {
+    characterSprite.animation.play("idle");
+    applyAnimationOffsets("idle");
+    trace("Character Idling.");
+  }
+
+  public function playWaitingAnimation(waitAnimationIndex:Int = 0)
+  {
+    characterSprite.animation.play("waiting" + waitAnimationIndex);
+    applyAnimationOffsets("waiting" + waitAnimationIndex);
+    allowedToPlayAnimation = false;
+    trace("Played Waiting Animation: waiting" + waitAnimationIndex + ".");
+
+    new FlxTimer().start(portraitData.waiting.waitDelay, ()->
+    {
+      allowedToPlayAnimation = true;
+      trace("Character Allowed to Wait.");
+    });
+  }
+
+  public function playToggleAnimation(enabled:Bool = true)
+  {
+    if(enabled && characterSprite.animation.getByName("enable") != null)
+    {
+      characterSprite.animation.play("enable");
+      applyAnimationOffsets("enable");
+      trace("Played Enable Animation.");
+    }
+    else if(!enabled && characterSprite.animation.getByName("disable") != null)
+    {
+      characterSprite.animation.play("disable");
+      applyAnimationOffsets("disable");
+      trace("Played Disable Animation.");
+    }
+  }
+
+  function applyAnimationOffsets(animation:String = "idle")
+  {
+    for(item in 0...portraitData.animations.length)
+      {
+        if(portraitData.animations[item].name == animation)
+        {
+          trace("Applying Offsets.");
+          characterSprite.setPosition(FlxG.width - characterSprite.width, FlxG.height - characterSprite.height);
+          characterSprite.x += portraitData.animations[item].offsets[0];
+          characterSprite.y += portraitData.animations[item].offsets[1];
+        }
+      }
+  }
+
+  function flash()
+  {
+    trace("Flashing.");
+    colorShader.brightness = 100;
+    colorShader.contrast = 100;
+  }
+}

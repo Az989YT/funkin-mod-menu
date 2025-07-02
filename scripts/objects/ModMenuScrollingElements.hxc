@@ -47,10 +47,10 @@ class ModMenuScrollingElements extends ScriptedFlxSpriteGroup {
 		super("ModMenuScrollingElements");
     direction = _direction;
     var randomElements = elements;
-    for(item in 0...5) {
+    for(item in 0...7) {
       var randomElement = randomElements[FlxG.random.int(0, randomElements.length-1)];
       randomElements.remove(randomElement);
-      trace(randomElement);
+      // trace(randomElement);
       elementSprite = new FlxSprite(300*item,0);
       elementSprite.frames = Paths.getSparrowAtlas("modmenu/scrollingElements");
       elementSprite.animation.addByPrefix("idle", randomElement, 24, true);
@@ -62,14 +62,14 @@ class ModMenuScrollingElements extends ScriptedFlxSpriteGroup {
   override function update(elapsed:Float):Void
   {
     super.update(elapsed);
-    for(item in 0...5) {
+    for(item in 0...7) {
       if(direction) {
         this.members[item].x += 2;
-        if(this.members[item].x > FlxG.width) this.members[item].x = -this.members[item].width;
+        if(this.members[item].x > FlxG.width*1.5) this.members[item].x = -this.members[item].width;
       }
       else {
         this.members[item].x -= 2;
-        if(this.members[item].x < -this.members[item].width) this.members[item].x = FlxG.width;
+        if(this.members[item].x < -this.members[item].width) this.members[item].x = FlxG.width*1.5;
       }
     }
   }
