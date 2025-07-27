@@ -16,10 +16,10 @@
     },
     {
       "name": "Hl33",
-      "role": "turned the base game fonts into ttf's"
+      "role": "Turned the base game fonts into TTFs"
     }
   ],
-  "api_version": "0.6.3",
-  "mod_version": "1.0.0",
+  "api_version": "0.7.3",
+  "mod_version": "2.0.0",
   "license": "Apache-2.0"
 }

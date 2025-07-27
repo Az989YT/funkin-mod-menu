@@ -71,17 +71,18 @@ class modCase extends ScriptedFlxSpriteGroup
       }
     });
     buttonSprite.animation.play((ModMenuUtils.isModEnabled(metadata)) ? "loopEnabled":"loopDisabled");
+    if(ModMenuUtils.isModMissingDependencies(metadata)) buttonSprite.animation.play("missingDependencies");
     this.add(buttonSprite);
 
     favSprite = new FlxSprite(0, 0);
     favSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
     favSprite.animation.addByPrefix("favorite", "favourite0", 24, false);
-    favSprite.animation.addByPrefix("pressFavorite", "favouritePress", 24, false);
+    // favSprite.animation.addByPrefix("pressFavorite", "favouritePress", 24, false);
     favSprite.animation.addByPrefix("loopFavorite", "favouriteLoop", 24, true);
     favSprite.animation.addByPrefix("unfavorite", "unFavourite0", 24, false);
-    favSprite.animation.addByPrefix("pressUnfavorite", "unFavouritePress", 24, false);
+    // favSprite.animation.addByPrefix("pressUnfavorite", "unFavouritePress", 24, false);
     favSprite.animation.addByPrefix("loopUnfavorite", "unFavouriteLoop", 24, true);
-    favSprite.animation.play((favorited) ? "loopFavorite":"loopUnfavorite");
+    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "loopFavorite":"loopUnfavorite");
     this.add(favSprite);
 
     var modTitle:FlxText = new FlxText(100, 63, 590, " " + metadata.title, 42);
@@ -138,5 +139,12 @@ class modCase extends ScriptedFlxSpriteGroup
     buttonSprite.animation.play((ModMenuUtils.isModEnabled(metadata)) ? "enabled":"disabled");
     pressOffsetGroup.y = 4;
     FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModEnabled(metadata)) ? "modEnable":"modDisabled")));
+  }
+
+  function toggleFavorite()
+  {
+    ModMenuUtils.toggleFavorite(metadata);
+    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
+    FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModFavorited(metadata)) ? "fav":"unfav")));
   }
 }

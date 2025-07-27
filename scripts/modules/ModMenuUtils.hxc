@@ -1,6 +1,7 @@
 import funkin.modding.PolymodHandler;
 import funkin.modding.module.Module;
 import funkin.save.Save;
+import funkin.util.VersionUtil;
 import funkin.util.FileUtil;
 import funkin.util.FileWriteMode;
 
@@ -27,18 +28,16 @@ import funkin.modding.module.ModuleHandler;
 class ModMenuUtils extends Module
 {
     var modMenuID = "Funkin' Mod Menu";
-    var registeredModsPath = "mods/Funkin' Mod Menu/registeredMods/";
-    var registeredModFileExtension = ".fmm";
-    var modMenuIsZIP = false;
+    var modMenuSaveInstance = Save.instance.modOptions.get("Funkin' Mod Menu");
     var modMenuSaveData = [
         "mod-id" => {
         enabled: true,
         favorited: false
         }
     ];
-    var modMenuSaveInstance = Save.instance.modOptions.get("Funkin' Mod Menu");
 
     var detectedMods = PolymodHandler.getAllMods();
+    var detectedModIds = PolymodHandler.getAllModIds();
 
     public function new()
     {
@@ -46,28 +45,11 @@ class ModMenuUtils extends Module
 
         trace("Mod Menu Utils Initialized.");
 
-        for(mod in 0...detectedMods.length)
+        for(mod in detectedMods)
         {
-            if(detectedMods[mod].title == modMenuID)
+            if(mod.title == modMenuID)
             {
-                modMenuID = detectedMods[mod].id;
-                registeredModsPath = "mods/" + modMenuID + "/registeredMods/";
-
-                var modmenu = detectedMods[mod];
-                // detectedMods.remove(modmenu);
-                // detectedMods.unshift(modmenu);
-                trace("Detected Mods: " + detectedMods.join(", "));
-
-                if(FileUtil.pathExists("mods/" + modMenuID + ".zip"))
-                {
-                    modMenuIsZIP = true;
-                    break;
-                }
-
-                trace("Found Menu Path, Mod Menu ID = " + modMenuID + ", Registered Mods Path = " + registeredModsPath, ", Mod Menu is ZIP = " + modMenuIsZIP);
-
-                FileUtil.createDirIfNotExists(registeredModsPath);
-
+                modMenuID = mod.id;
                 break;
             }
         }
@@ -124,19 +106,53 @@ class ModMenuUtils extends Module
         }
     }
 
+    public function toggleFavorite(mod:ModMetadata)
+    {
+        if(modMenuSaveInstance.exists(mod.id))
+        {
+            modMenuSaveInstance.get(mod.id).favorited = !modMenuSaveInstance.get(mod.id).favorited;
+            trace("Mod Favorite Status Updated; " + modMenuSaveInstance.get(mod.id).favorited);
+        }
+    }
+
+    public function isModFavorited(mod:ModMetadata)
+    {
+        if(modMenuSaveInstance.exists(mod.id))
+        {
+            // trace("Mod Favorite Status Found; " + modMenuSaveInstance.get(mod.id).favorited);
+            return modMenuSaveInstance.get(mod.id).favorited;
+        }
+    }
+
     public function isModNew(mod:ModMetadata)
     {
-        var modPath = registeredModsPath + mod.id + registeredModFileExtension;
-        if (FileUtil.pathExists(modPath))
-            return false;
-
-        return true;
+        return false;
     }
 
     public function isModMissingDependencies(mod:ModMetadata)
     {
         if(mod.dependencies == null) return false;
-        trace(mod.dependencies.keys());
+        var missingDependencies = [];
+        for(dependency in mod.dependencies.keys())
+        {
+            if(detectedModIds.contains(dependency))
+            {
+                if(!VersionUtil.validateVersion(detectedMods[detectedModIds.indexOf(dependency)].modVersion, mod.dependencies.get(dependency)))
+                {
+                    missingDependencies.push(dependency);
+                }
+            }
+            else
+            {
+                missingDependencies.push(dependency);
+            }
+        }
+        if(missingDependencies.length > 0)
+        {
+            // do more shit
+            return true;
+        }
+        return false;
     }
 
     public function loadEnabledMods()

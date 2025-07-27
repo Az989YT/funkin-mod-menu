@@ -105,9 +105,24 @@ class ModMenuState extends ScriptedMusicBeatState
         swirlBig.shader.hue += 1;
         swirlMini.shader.hue -= 1;
 
-        if(controls.ACCEPT)
+        if(controls.ACCEPT && !FlxG.keys.pressed.SHIFT)
         {
-            modCasesGroup.members[curSelected].toggleMod();
+            if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
+            {
+                FunkinSound.playOnce(Paths.sound('missnote1'));
+            }
+            else if(ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata) || modCasesGroup.members[curSelected].metadata.id == ModMenuUtils.modMenuID)
+            {
+                FunkinSound.playOnce(Paths.sound('CS_locked'));
+            }
+            else
+            {
+                modCasesGroup.members[curSelected].toggleMod();
+            }
+        }
+        if(controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT))
+        {
+            modCasesGroup.members[curSelected].toggleFavorite();
         }
         if(controls.UI_UP_P)
         {
