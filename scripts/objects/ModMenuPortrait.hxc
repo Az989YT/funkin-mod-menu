@@ -65,14 +65,17 @@ class ModMenuPortrait extends ScriptedFlxSpriteGroup {
   override function update(elapsed:Float):Void
   {
     super.update(elapsed);
-    if (poofSprite.animation.finished) {
+
+    if (poofSprite.animation.finished)
       poofSprite.visible = false;
-    }
-    if (poofSprite.frame.name == "explosion0002" && switchingPortrait) {
+
+    if (poofSprite.frame.name == "explosion0002" && switchingPortrait)
+    {
       switchingPortrait = false;
       var lastPortrait = curPortrait;
       while(curPortrait == lastPortrait) curPortrait = portraits[FlxG.random.int(0, portraits.length-1)];
-      if(trueRandom) {
+      if(trueRandom)
+      {
         curPortrait = portraits[FlxG.random.int(0, portraits.length-1)];
         trueRandom = false;
       }
@@ -98,13 +101,19 @@ class ModMenuPortrait extends ScriptedFlxSpriteGroup {
     }
   }
 
-  public function playToggleAnimation(enabled:Bool = true) {
+  public function playToggleAnimation(enabled:Bool = true)
+  {
     characterPortrait.scriptCall("playToggleAnimation", enabled);
   }
 
-  public function switchCharacterPortrait() {
-    if(!poofSprite.animation.finished) return;
-    if(characterPortrait != null) characterPortrait.scriptCall("flash");
+  public function switchCharacterPortrait()
+  {
+    if(!poofSprite.animation.finished)
+    return;
+
+    if(characterPortrait != null)
+      characterPortrait.scriptCall("flash");
+
     switchingPortrait = true;
     poofSprite.visible = true;
     poofSprite.animation.play("poof");

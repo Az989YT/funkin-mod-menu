@@ -1,0 +1,156 @@
+import funkin.modding.PolymodHandler;
+import funkin.modding.module.ModuleHandler;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.addons.effects.FlxSkewedSprite;
+import flixel.graphics.FlxGraphic;
+import flixel.math.FlxPoint;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+
+import haxe.Json;
+import funkin.util.FileUtil;
+
+import hxjsonast.Parser;
+import hxjsonast.Tools;
+
+import openfl.display.BitmapData;
+
+import polymod.Polymod;
+
+class ModCase extends ScriptedFlxSpriteGroup {
+
+  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
+
+  var caseSprite:FlxSprite;
+  var buttonSprite:FlxSprite;
+  var favSprite:FlxSprite;
+  var grpOffset:ScriptedFlxSpriteGroup;
+
+  var metadata:ModMetadata;
+  var enabled:Bool = true;
+  var isNew:Bool = true;
+  var favorited:Bool = false;
+
+	public function new(xPos:Float = 0, yPos:Float = 0, ?args:Array = [])
+  {
+		super("ModCase", xPos, yPos);
+    this.setPosition(xPos, yPos);
+
+    enabled = args[0];
+    metadata = args[1];
+    isNew = args[2];
+
+		var colorBg:FlxSkewedSprite = new FlxSkewedSprite(634, 5);
+    colorBg.makeGraphic(109, 107, 0xffFFDFD3);
+    colorBg.skew.set(22,0);
+    add(colorBg);
+
+    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(634,5).loadGraphic(ModMenuUtils.getModIcon(metadata));
+    modIcon.setGraphicSize(109, 107);
+    modIcon.updateHitbox();
+    modIcon.skew.set(22,0);
+    add(modIcon);
+
+    caseSprite = new FlxSprite(1, -2);
+    caseSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
+    caseSprite.animation.addByPrefix("press", "casePress", 24, false);
+    caseSprite.animation.addByPrefix("loop", "caseIdle", 24, true);
+    caseSprite.animation.addByPrefix("dim", "caseDimmed", 24, true);
+    caseSprite.animation.play("loop");
+    add(caseSprite);
+
+    buttonSprite = new FlxSprite(1, -2);
+    buttonSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
+    buttonSprite.animation.addByPrefix("enabled", "lightEnable0", 24, false);
+    buttonSprite.animation.addByPrefix("loopEnabled", "lightEnableLoop", 24, true);
+    buttonSprite.animation.addByPrefix("disabled", "lightDisable0", 24, false);
+    buttonSprite.animation.addByPrefix("loopDisabled", "lightDisableLoop", 24, true);
+    buttonSprite.animation.addByPrefix("missingDependencies", "lightMissingDependancies0", 24, true);
+    if (enabled) { buttonSprite.animation.play("loopEnabled"); }
+    else { buttonSprite.animation.play("loopDisabled"); }
+    add(buttonSprite);
+
+    var modTitle:FlxText = new FlxText(100 , 61, 590, "Mod Name", 42);
+    if (metadata != null) modTitle.text = " " + metadata.title;
+    modTitle.font = "Letterstuff Regular";
+    modTitle.color = 0xffFFFFFF;
+    modTitle.borderColor = 0xff5F91C1;
+    modTitle.borderSize = 3;
+    modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modTitle.bold = true;
+    if (modTitle.text.length > 19)
+      modTitle.text = modTitle.text.substring(0, 18) + "-";
+    add(modTitle);
+
+    var modAuthors:FlxText = new FlxText(110 , 9, 590, "Authors", 32);
+    if (metadata != null) {
+      modAuthors.text = "";
+      if(metadata.contributors != null) {
+        for (contributor in 0...metadata.contributors.length) {
+          if (contributor == metadata.contributors.length-1) { modAuthors.text += metadata.contributors[contributor].name; }
+          else { modAuthors.text += metadata.contributors[contributor].name + ", "; }
+        }
+      } else {
+        modAuthors.text = metadata._author;
+      }
+    }
+    modAuthors.font = "Tardling Solid Regular";
+    modAuthors.borderColor = 0xff3D7DFF;
+    modAuthors.borderSize = 2;
+    modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modAuthors.blend = 0;
+    if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
+    add(modAuthors);
+
+    if(isNew) {
+      newNotifSprite = new FlxSprite(caseSprite.width - 176, -20);
+      newNotifSprite.frames = Paths.getSparrowAtlas("freeplay/freeplayCapsule/new");
+      newNotifSprite.animation.addByPrefix("idle", "NEW notif", 24, true);
+      newNotifSprite.animation.play("idle");
+      add(newNotifSprite);
+    }
+
+    grpOffset = new ScriptedFlxSpriteGroup(0, 0);
+    grpOffset.add(colorBg);
+    grpOffset.add(modIcon);
+    grpOffset.add(modTitle);
+    grpOffset.add(modAuthors);
+    if(isNew) grpOffset.add(newNotifSprite);
+	}
+
+  override function update(elapsed:Float):Void
+  {
+    super.update(elapsed);
+    if (caseSprite.animation.finished) {
+      caseSprite.animation.play("loop");
+      if(enabled) {
+        buttonSprite.animation.play("loopEnabled");
+      } else {
+        buttonSprite.animation.play("loopDisabled");
+      }
+      grpOffset.y = 0;
+    }
+
+  }
+
+  public function toggleCaseSpriteAnimation() {
+    var soundToPlay = '';
+    caseSprite.animation.play("press");
+    if(enabled) {
+      buttonSprite.animation.play("enabled");
+      soundToPlay = 'modEnable';
+      grpOffset.y = 4;
+    } else {
+      buttonSprite.animation.play("disabled");
+      soundToPlay = 'modDisabled';
+      grpOffset.y = 4;
+    }
+    FlxG.sound.play(Paths.sound(soundToPlay));
+  }
+}

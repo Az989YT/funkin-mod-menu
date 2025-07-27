@@ -10,7 +10,7 @@ class LoadEnabledModsBeforeTitle extends Module
 {
 	public function new()
 	{
-		super('LoadEnabledModsBeforeTitle');
+		super('LoadEnabledModsBeforeTitle', 2147483647);
 	}
 
   var allowedToSwitchState = true;

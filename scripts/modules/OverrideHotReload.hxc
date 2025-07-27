@@ -1,3 +1,4 @@
+/*
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.FlxTimer;
@@ -65,3 +66,4 @@ class OverrideHotReload extends Module
     }
   }
 }
+*/

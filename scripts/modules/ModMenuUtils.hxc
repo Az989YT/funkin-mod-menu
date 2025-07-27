@@ -1,5 +1,6 @@
 import funkin.modding.PolymodHandler;
 import funkin.modding.module.Module;
+import funkin.save.Save;
 import funkin.util.FileUtil;
 import funkin.util.FileWriteMode;
 
@@ -25,127 +26,160 @@ import funkin.modding.module.ModuleHandler;
 
 class ModMenuUtils extends Module
 {
-  // USEFUL VARIABLES
-  var modMenuID = "Funkin' Mod Menu";
-  var registeredModsPath = "mods/Funkin' Mod Menu/registeredMods/";
-  var registeredModFileExtension = ".fmm";
-  var modMenuIsZIP = false;
+    var modMenuID = "Funkin' Mod Menu";
+    var registeredModsPath = "mods/Funkin' Mod Menu/registeredMods/";
+    var registeredModFileExtension = ".fmm";
+    var modMenuIsZIP = false;
+    var modMenuSaveData = [
+        "mod-id" => {
+        enabled: true,
+        favorited: false
+        }
+    ];
+    var modMenuSaveInstance = Save.instance.modOptions.get("Funkin' Mod Menu");
 
-  var detectedMods = PolymodHandler.getAllMods();
+    var detectedMods = PolymodHandler.getAllMods();
 
-  public function new()
-  {
-    super('ModMenuUtils');
-
-    trace("Mod Menu Utils Initialized.");
-
-    for(mod in 0...detectedMods.length)
+    public function new()
     {
-      if(detectedMods[mod].title == modMenuID)
-      {
-        FoundModMenuPath = true;
-        modMenuID = detectedMods[mod].id;
-        registeredModsPath = "mods/" + modMenuID + "/registeredMods/";
+        super('ModMenuUtils');
 
-        if(FileUtil.pathExists("mods/" + modMenuID + ".zip"))
+        trace("Mod Menu Utils Initialized.");
+
+        for(mod in 0...detectedMods.length)
         {
-          modMenuIsZIP = true;
-          break;
+            if(detectedMods[mod].title == modMenuID)
+            {
+                modMenuID = detectedMods[mod].id;
+                registeredModsPath = "mods/" + modMenuID + "/registeredMods/";
+
+                var modmenu = detectedMods[mod];
+                // detectedMods.remove(modmenu);
+                // detectedMods.unshift(modmenu);
+                trace("Detected Mods: " + detectedMods.join(", "));
+
+                if(FileUtil.pathExists("mods/" + modMenuID + ".zip"))
+                {
+                    modMenuIsZIP = true;
+                    break;
+                }
+
+                trace("Found Menu Path, Mod Menu ID = " + modMenuID + ", Registered Mods Path = " + registeredModsPath, ", Mod Menu is ZIP = " + modMenuIsZIP);
+
+                FileUtil.createDirIfNotExists(registeredModsPath);
+
+                break;
+            }
         }
 
-        trace("Found Menu Path, Mod Menu ID = " + modMenuID + ", Registered Mods Path = " + registeredModsPath, ", Mod Menu is ZIP = " + modMenuIsZIP);
-
-        FileUtil.createDirIfNotExists(registeredModsPath);
-
-        break;
-      }
+        modMenuSaveData.clear();
+        if(modMenuSaveInstance == null)
+        {
+            trace("No Funkin' Mod Menu Save Data; Generating Save Data.");
+            for(mod in detectedMods)
+            {
+                modMenuSaveData.set(mod.id, { enabled: true, favorited: false });
+            }
+        }
+        else
+        {
+            trace("Funkin' Mod Menu Save Data Found; Appending New Mods.");
+            modMenuSaveData = modMenuSaveInstance;
+            for(mod in detectedMods)
+            {
+                if(!modMenuSaveData.exists(mod.id))
+                {
+                    trace("Appending Mod ID: " + mod.id);
+                    modMenuSaveData.set(mod.id, { enabled: true, favorited: false });
+                }
+            }
+        }
+        Save.instance.modOptions.set("Funkin' Mod Menu", modMenuSaveData);
+        trace(modMenuSaveInstance);
     }
-  }
 
-  public function getModIcon(mod:ModMetadata)
-  {
-    if(mod == null || mod.icon == null)
-      return Paths.image("modmenu/no_icon");
-
-      return (FlxGraphic.fromBitmapData(BitmapData.fromBytes(ByteArrayData.fromBytes(mod.icon)), false));
-  }
-
-  public function toggleMod(mod:ModMetadata, enabled:Bool)
-  {
-    var modPath = registeredModsPath + mod.id + registeredModFileExtension;
-    FileUtil.writeStringToPath(modPath, enabled, FileWriteMode.Force);
-  }
-
-  public function isModEnabled(mod:ModMetadata)
-  {
-    var modPath = registeredModsPath + mod.id + registeredModFileExtension;
-    if (FileUtil.pathExists(modPath))
+    public function getModIcon(mod:ModMetadata)
     {
-      trace("Mod FMM File Found.");
+        if(mod == null || mod.icon == null)
+            return Paths.image("modmenu/no_icon");
 
-      if(FileUtil.readStringFromPath(modPath) == "false")
-        return false;
+        return (FlxGraphic.fromBitmapData(BitmapData.fromBytes(ByteArrayData.fromBytes(mod.icon)), false));
+    }
+
+    public function toggleMod(mod:ModMetadata)
+    {
+        if(modMenuSaveInstance.exists(mod.id))
+        {
+            modMenuSaveInstance.get(mod.id).enabled = !modMenuSaveInstance.get(mod.id).enabled;
+            trace("Mod Toggle Status Updated; " + modMenuSaveInstance.get(mod.id).enabled);
+        }
+    }
+
+    public function isModEnabled(mod:ModMetadata)
+    {
+        if(modMenuSaveInstance.exists(mod.id))
+        {
+            // trace("Mod Toggle Status Found; " + modMenuSaveInstance.get(mod.id).enabled);
+            return modMenuSaveInstance.get(mod.id).enabled;
+        }
+    }
+
+    public function isModNew(mod:ModMetadata)
+    {
+        var modPath = registeredModsPath + mod.id + registeredModFileExtension;
+        if (FileUtil.pathExists(modPath))
+            return false;
 
         return true;
     }
-    else
+
+    public function isModMissingDependencies(mod:ModMetadata)
     {
-      trace("Mod FMM File Not Found. Writing File to: " + modPath);
-      FileUtil.writeStringToPath(modPath, "true", FileWriteMode.Force);
-      return true;
-    }
-  }
-
-  public function isModNew(mod:ModMetadata)
-  {
-    var modPath = registeredModsPath + mod.id + registeredModFileExtension;
-    if (FileUtil.pathExists(modPath))
-      return false;
-
-      return true;
-  }
-
-  public function loadEnabledMods()
-  {
-    var modsToLoad = [];
-    for(mod in detectedMods)
-    {
-      if(isModEnabled(mod))
-        modsToLoad.push(mod.id);
+        if(mod.dependencies == null) return false;
+        trace(mod.dependencies.keys());
     }
 
-    if(modsToLoad.length > 0)
+    public function loadEnabledMods()
     {
-      trace("Loading Mods: " + modsToLoad.join(", "));
-      PolymodHandler.loadModsById(modsToLoad);
+        var modsToLoad = [];
+        for(mod in detectedMods)
+        {
+            if(isModEnabled(mod))
+                modsToLoad.push(mod.id);
+        }
+
+        if(modsToLoad.length > 0)
+        {
+            trace("Loading Mods: " + modsToLoad.join(", "));
+            PolymodHandler.loadModsById(modsToLoad);
+        }
+        else
+        {
+            trace("No Mods Enabled, Loading All Mods.");
+            PolymodHandler.loadAllMods();
+        }
+
+        ModuleHandler.clearModuleCache();
+
+        // Polymod.clearScripts();
+        // Polymod.registerAllScriptClasses();
+
+        SongEventRegistry.loadEventCache();
+
+        SongRegistry.instance.loadEntries();
+        LevelRegistry.instance.loadEntries();
+        NoteStyleRegistry.instance.loadEntries();
+        PlayerRegistry.instance.loadEntries();
+        ConversationRegistry.instance.loadEntries();
+        DialogueBoxRegistry.instance.loadEntries();
+        SpeakerRegistry.instance.loadEntries();
+        AlbumRegistry.instance.loadEntries();
+        StageRegistry.instance.loadEntries();
+
+        CharacterDataParser.loadCharacterCache();
+        NoteKindManager.loadScripts();
+        ModuleHandler.loadModuleCache();
+
+        trace("Mod Loading Completed.");
     }
-    else
-    {
-      trace("No Mods Enabled, Loading All Mods.");
-      PolymodHandler.loadAllMods();
-    }
-
-    ModuleHandler.clearModuleCache();
-
-    // Polymod.clearScripts();
-    // Polymod.registerAllScriptClasses();
-
-    SongEventRegistry.loadEventCache();
-
-    SongRegistry.instance.loadEntries();
-    LevelRegistry.instance.loadEntries();
-    NoteStyleRegistry.instance.loadEntries();
-    PlayerRegistry.instance.loadEntries();
-    ConversationRegistry.instance.loadEntries();
-    DialogueBoxRegistry.instance.loadEntries();
-    SpeakerRegistry.instance.loadEntries();
-    AlbumRegistry.instance.loadEntries();
-    StageRegistry.instance.loadEntries();
-
-    CharacterDataParser.loadCharacterCache();
-    NoteKindManager.loadScripts();
-    ModuleHandler.loadModuleCache();
-
-    trace("Mod Loading Completed.");
-  }
 }

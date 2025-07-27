@@ -128,9 +128,7 @@ class monsterPortrait extends ScriptedFlxSpriteGroup
         if(portraitData.animations[item].name == animation)
         {
           trace("Applying Offsets.");
-          characterSprite.setPosition(FlxG.width - characterSprite.width, FlxG.height - characterSprite.height);
-          characterSprite.x += portraitData.animations[item].offsets[0];
-          characterSprite.y += portraitData.animations[item].offsets[1];
+          characterSprite.offset.set(-portraitData.animations[item].offsets[0], -portraitData.animations[item].offsets[1]);
         }
       }
   }

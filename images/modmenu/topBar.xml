@@ -1,21 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TextureAtlas imagePath="topBar.png">
+<?xml version="1.0" encoding="utf-8"?><TextureAtlas imagePath="topBar.png">
 	<!-- Created using the Spritesheet and XML generator -->
 	<!-- https://uncertainprod.github.io/FNF-Spritesheet-XML-generator-Web -->
-	<SubTexture name="bubbles0000" x="167" y="206" width="57" height="31" frameX="-1195" frameY="-74" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0001" x="167" y="206" width="57" height="31" frameX="-1195" frameY="-74" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0002" x="167" y="206" width="57" height="31" frameX="-1195" frameY="-74" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0003" x="167" y="206" width="57" height="31" frameX="-1195" frameY="-74" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0004" x="0" y="206" width="55" height="36" frameX="-1196" frameY="-71" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0005" x="0" y="206" width="55" height="36" frameX="-1196" frameY="-71" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0006" x="0" y="206" width="55" height="36" frameX="-1196" frameY="-71" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0007" x="0" y="206" width="55" height="36" frameX="-1196" frameY="-71" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0008" x="112" y="206" width="55" height="34" frameX="-1195" frameY="-72" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0009" x="112" y="206" width="55" height="34" frameX="-1195" frameY="-72" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0010" x="112" y="206" width="55" height="34" frameX="-1195" frameY="-72" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0011" x="55" y="206" width="57" height="34" frameX="-1195" frameY="-73" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0012" x="55" y="206" width="57" height="34" frameX="-1195" frameY="-73" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0013" x="55" y="206" width="57" height="34" frameX="-1195" frameY="-73" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bubbles0014" x="55" y="206" width="57" height="34" frameX="-1195" frameY="-73" frameWidth="1280" frameHeight="720"/>
-	<SubTexture name="bar0000" x="0" y="0" width="1284" height="206" frameX="2" frameY="2" frameWidth="1280" frameHeight="720"/>
+	<SubTexture name="bubbles0000" x="57" y="220" width="57" height="31" frameX="-71" frameY="-74" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0001" x="57" y="220" width="57" height="31" frameX="-71" frameY="-74" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0002" x="57" y="220" width="57" height="31" frameX="-71" frameY="-74" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0003" x="57" y="220" width="57" height="31" frameX="-71" frameY="-74" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0004" x="0" y="184" width="55" height="36" frameX="-72" frameY="-71" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0005" x="0" y="184" width="55" height="36" frameX="-72" frameY="-71" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0006" x="0" y="184" width="55" height="36" frameX="-72" frameY="-71" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0007" x="0" y="184" width="55" height="36" frameX="-72" frameY="-71" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0008" x="55" y="184" width="55" height="34" frameX="-71" frameY="-72" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0009" x="55" y="184" width="55" height="34" frameX="-71" frameY="-72" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0010" x="55" y="184" width="55" height="34" frameX="-71" frameY="-72" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0011" x="0" y="220" width="57" height="34" frameX="-71" frameY="-73" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0012" x="0" y="220" width="57" height="34" frameX="-71" frameY="-73" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0013" x="0" y="220" width="57" height="34" frameX="-71" frameY="-73" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bubbles0014" x="0" y="220" width="57" height="34" frameX="-71" frameY="-73" frameWidth="156" frameHeight="180"/>
+	<SubTexture name="bar0000" x="0" y="0" width="159" height="184" frameX="1" frameY="2" frameWidth="156" frameHeight="180"/>
 </TextureAtlas>
