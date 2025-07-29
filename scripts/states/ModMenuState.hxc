@@ -6,6 +6,8 @@ import funkin.modding.module.ModuleHandler;
 import funkin.ui.ScriptedMusicBeatState;
 import funkin.ui.ScriptedMusicBeatSubState;
 import funkin.ui.mainmenu.MainMenuState;
+import funkin.util.TouchUtil;
+import funkin.util.SwipeUtil;
 import funkin.util.tools.ArrayTools;
 
 import flixel.FlxCamera;
@@ -91,7 +93,7 @@ class ModMenuState extends ScriptedMusicBeatState
         for(scrollingElement in [scrollingElementsTop, scrollingElementsMiddle, scrollingElementsBottom])
         {
             scrollingElement.screenCenter();
-            scrollingElement.scrollX = FlxG.random.int(0, FlxG.width*5);
+            scrollingElement.scrollX = 275*FlxG.random.int(0, FlxG.width*5);
         }
 
         scrollingElementsTop.y -= 275;
@@ -153,7 +155,7 @@ class ModMenuState extends ScriptedMusicBeatState
         scrollingElementsMiddle.scrollX += elapsed*150;
         scrollingElementsBottom.scrollX -= elapsed*150;
 
-        if(controls.ACCEPT && !FlxG.keys.pressed.SHIFT)
+        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
         {
             if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
             {
