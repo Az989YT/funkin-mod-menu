@@ -6,8 +6,10 @@ import funkin.modding.module.ModuleHandler;
 import funkin.ui.ScriptedMusicBeatState;
 import funkin.ui.ScriptedMusicBeatSubState;
 import funkin.ui.mainmenu.MainMenuState;
-import funkin.util.TouchUtil;
+import funkin.util.Constants;
+import funkin.util.HapticUtil;
 import funkin.util.SwipeUtil;
+import funkin.util.TouchUtil;
 import funkin.util.tools.ArrayTools;
 
 import flixel.FlxCamera;
@@ -139,6 +141,17 @@ class ModMenuState extends ScriptedMusicBeatState
             var modCase = new ModCase(0, 150*ModMenuUtils.detectedMods.indexOf(mod), mod);
             modCasesGroup.add(modCase);
         }
+
+        if(FlxG.onMobile)
+            addBackButton(0, 0, 0xffFFFFFF, ()->{
+                var targetState:NextState = ScriptedMusicBeatState.init('ModLoadingState');
+                targetState.scriptSet("transitionToTitleScreen", false);
+                trace(targetState.scriptGet("transitionToTitleScreen"));
+                FlxG.switchState(targetState);
+                FlxTransitionableState.skipNextTransIn = true;
+                FlxTransitionableState.skipNextTransOut = true;
+            }, 0.75);
+
         scrollMenu();
 	}
 
@@ -155,27 +168,32 @@ class ModMenuState extends ScriptedMusicBeatState
         scrollingElementsMiddle.scrollX += elapsed*150;
         scrollingElementsBottom.scrollX -= elapsed*150;
 
-        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
+        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
         {
             if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
             {
                 FunkinSound.playOnce(Paths.sound('missnote1'));
+                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
             }
             else if(ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata) || modCasesGroup.members[curSelected].metadata.id == ModMenuUtils.modMenuID)
             {
                 FunkinSound.playOnce(Paths.sound('CS_locked'));
                 characterPortrait.playAnimCallback("locked");
+                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
             }
             else
             {
                 modCasesGroup.members[curSelected].toggleMod();
                 characterPortrait.playAnimCallback((ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) ? "enable":"disable");
+                HapticUtil.vibrate();
             }
         }
-        if(controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT))
+        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.touch.ticksDeltaSincePress >= 500))
         {
             modCasesGroup.members[curSelected].toggleFavorite();
             characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
+            if(FlxG.onMobile)
+                TouchUtil.touch.recycle();
         }
         if(controls.UI_UP_P)
         {

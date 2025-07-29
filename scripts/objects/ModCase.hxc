@@ -1,6 +1,7 @@
 import funkin.audio.FunkinSound;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.ModuleHandler;
+import funkin.util.tools.ArrayTools;
 
 import flixel.FlxSprite;
 import flixel.addons.effects.FlxSkewedSprite;
@@ -98,9 +99,13 @@ class ModCase extends ScriptedFlxSpriteGroup
 
     var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);
     var contributors = [];
-    for(contributor in metadata.contributors)
+    if(metadata.author != null) ArrayTools.pushUnique(contributors, metadata.author);
+    if(metadata.contributors != null)
     {
-        contributors.push(contributor.name);
+      for(contributor in metadata.contributors)
+      {
+        ArrayTools.pushUnique(contributors, contributor.name);
+      }
     }
     modAuthors.text = contributors.join(", ");
     modAuthors.font = "Tardling Solid Regular";
