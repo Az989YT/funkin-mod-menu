@@ -11,6 +11,7 @@ import funkin.util.tools.ArrayTools;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.addons.display.FlxTiledSprite;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.transition.TransitionData;
 import flixel.group.FlxTypedSpriteGroup;
@@ -34,6 +35,10 @@ class ModMenuState extends ScriptedMusicBeatState
     var modCasesGroup:FlxTypedSpriteGroup;
     var characterPortrait:FunkinSprite;
     var poofSprite:FlxSprite;
+
+    var scrollingElementsTop:FlxTiledSprite;
+    var scrollingElementsMiddle:FlxTiledSprite;
+    var scrollingElementsBottom:FlxTiledSprite;
 
 	public function new()
     {
@@ -79,6 +84,19 @@ class ModMenuState extends ScriptedMusicBeatState
         swirlBig.setPosition(FlxG.width - swirlBig.width, (FlxG.height - swirlBig.height)/2);
         swirlMini.setPosition(swirlBig.x + (swirlBig.width - swirlMini.width)/2, swirlBig.y + (swirlBig.height - swirlMini.height)/2);
 
+        scrollingElementsTop = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width*1.5, 275, true, false);
+        scrollingElementsMiddle = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width*1.5, 275, true, false);
+        scrollingElementsBottom = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width*1.5, 275, true, false);
+
+        for(scrollingElement in [scrollingElementsTop, scrollingElementsMiddle, scrollingElementsBottom])
+        {
+            scrollingElement.screenCenter();
+            scrollingElement.scrollX = FlxG.random.int(0, FlxG.width*5);
+        }
+
+        scrollingElementsTop.y -= 275;
+        scrollingElementsBottom.y += 275;
+
         characterPortrait = new CharacterPortrait();
 
         modCasesGroup = new FlxTypedSpriteGroup(0,300,0);
@@ -104,7 +122,7 @@ class ModMenuState extends ScriptedMusicBeatState
         });
         poofSprite.setPosition(FlxG.width - poofSprite.width, FlxG.height - poofSprite.height);
 
-        for(object in [colorBg, swirlBig, swirlMini, characterPortrait, poofSprite, modCasesGroup, topBar, topBarEdge, topBarBubbles])
+        for(object in [colorBg, swirlBig, swirlMini, scrollingElementsTop, scrollingElementsMiddle, scrollingElementsBottom, characterPortrait, poofSprite, modCasesGroup, topBar, topBarEdge, topBarBubbles])
         {
             add(object);
         }
@@ -130,6 +148,10 @@ class ModMenuState extends ScriptedMusicBeatState
         swirlMini.angle -= 0.5;
         swirlBig.shader.hue += 1;
         swirlMini.shader.hue -= 1;
+
+        scrollingElementsTop.scrollX -= elapsed*150;
+        scrollingElementsMiddle.scrollX += elapsed*150;
+        scrollingElementsBottom.scrollX -= elapsed*150;
 
         if(controls.ACCEPT && !FlxG.keys.pressed.SHIFT)
         {
