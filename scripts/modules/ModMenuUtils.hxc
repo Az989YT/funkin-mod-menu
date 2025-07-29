@@ -2,8 +2,6 @@ import funkin.modding.PolymodHandler;
 import funkin.modding.module.Module;
 import funkin.save.Save;
 import funkin.util.VersionUtil;
-import funkin.util.FileUtil;
-import funkin.util.FileWriteMode;
 
 import flixel.graphics.FlxGraphic;
 

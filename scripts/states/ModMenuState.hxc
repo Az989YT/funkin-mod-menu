@@ -1,4 +1,5 @@
 import funkin.audio.FunkinSound;
+import funkin.graphics.ScriptedFunkinSprite;
 import funkin.graphics.shaders.AdjustColorShader;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.ModuleHandler;
@@ -31,6 +32,8 @@ class ModMenuState extends ScriptedMusicBeatState
     var swirlBig:FlxSprite;
     var swirlMini:FlxSprite;
     var modCasesGroup:FlxTypedSpriteGroup;
+    var characterPortrait:FunkinSprite;
+    var poofSprite:FlxSprite;
 
 	public function new()
     {
@@ -76,9 +79,32 @@ class ModMenuState extends ScriptedMusicBeatState
         swirlBig.setPosition(FlxG.width - swirlBig.width, (FlxG.height - swirlBig.height)/2);
         swirlMini.setPosition(swirlBig.x + (swirlBig.width - swirlMini.width)/2, swirlBig.y + (swirlBig.height - swirlMini.height)/2);
 
+        characterPortrait = new CharacterPortrait();
+
         modCasesGroup = new FlxTypedSpriteGroup(0,300,0);
 
-        for(object in [colorBg, swirlBig, swirlMini, modCasesGroup, topBar, topBarEdge, topBarBubbles])
+        poofSprite = new FlxSprite(0,0);
+        poofSprite.frames = Paths.getSparrowAtlas("modmenu/smokePuff");
+        poofSprite.animation.addByPrefix("poof", "explosion", 24, false);
+        poofSprite.animation.play("poof");
+        poofSprite.animation.onFinish.add(()->{ poofSprite.visible = false; });
+        poofSprite.animation.onFrameChange.add((name, frame)->{
+            if(frame == 1)
+            {
+                poofSprite.visible = true;
+                characterPortrait.shader.brightness = 100;
+                characterPortrait.shader.contrast = 100;
+            }
+            if(frame == 3)
+            {
+                characterPortrait.initRandomCharacter();
+                characterPortrait.shader.brightness = 0;
+                characterPortrait.shader.contrast = 0;
+            }
+        });
+        poofSprite.setPosition(FlxG.width - poofSprite.width, FlxG.height - poofSprite.height);
+
+        for(object in [colorBg, swirlBig, swirlMini, characterPortrait, poofSprite, modCasesGroup, topBar, topBarEdge, topBarBubbles])
         {
             add(object);
         }
@@ -90,7 +116,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         for(mod in ModMenuUtils.detectedMods)
         {
-            var modCase = ScriptedFlxSpriteGroup.init("modCase", 0, 150*ModMenuUtils.detectedMods.indexOf(mod), mod);
+            var modCase = new ModCase(0, 150*ModMenuUtils.detectedMods.indexOf(mod), mod);
             modCasesGroup.add(modCase);
         }
         scrollMenu();
@@ -114,15 +140,18 @@ class ModMenuState extends ScriptedMusicBeatState
             else if(ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata) || modCasesGroup.members[curSelected].metadata.id == ModMenuUtils.modMenuID)
             {
                 FunkinSound.playOnce(Paths.sound('CS_locked'));
+                characterPortrait.playAnimCallback("locked");
             }
             else
             {
                 modCasesGroup.members[curSelected].toggleMod();
+                characterPortrait.playAnimCallback((ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) ? "enable":"disable");
             }
         }
         if(controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT))
         {
             modCasesGroup.members[curSelected].toggleFavorite();
+            characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
         }
         if(controls.UI_UP_P)
         {
@@ -131,6 +160,10 @@ class ModMenuState extends ScriptedMusicBeatState
         if(controls.UI_DOWN_P)
         {
             scrollMenu(1);
+        }
+        if(controls.RESET)
+        {
+            poofSprite.animation.play("poof");
         }
     }
 
