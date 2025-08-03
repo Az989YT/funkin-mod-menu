@@ -102,6 +102,7 @@ class ModMenuUtils extends Module
             // trace("Mod Toggle Status Found; " + modMenuSaveInstance.get(mod.id).enabled);
             return modMenuSaveInstance.get(mod.id).enabled;
         }
+        return true;
     }
 
     public function toggleFavorite(mod:ModMetadata)
@@ -120,10 +121,15 @@ class ModMenuUtils extends Module
             // trace("Mod Favorite Status Found; " + modMenuSaveInstance.get(mod.id).favorited);
             return modMenuSaveInstance.get(mod.id).favorited;
         }
+        return true;
     }
 
     public function isModNew(mod:ModMetadata)
     {
+        if(!modMenuSaveInstance.exists(mod.id))
+        {
+            return true;
+        }
         return false;
     }
 
@@ -153,7 +159,7 @@ class ModMenuUtils extends Module
         return false;
     }
 
-    public function loadEnabledMods()
+    public function loadEnabledMods() // NOTE: NO LONGER ABLE TO 100% REPLICATE RELOAD FUNCTIONALITY. POLYMOD CLASS IS BLACKLISTED.
     {
         var modsToLoad = [];
         for(mod in detectedMods)

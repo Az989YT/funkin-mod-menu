@@ -54,6 +54,6 @@ class ModLoadingSubState extends ScriptedMusicBeatSubState
                 // close();
             }});
         }});
-        if(FlxG.sound.music != null) FlxTween.tween(FlxG.sound.music, { pitch: 0 }, 1, { ease: FlxEase.circOut });
+        if(FlxG.sound.music != null) FlxTween.tween(FlxG.sound.music, { pitch: 0 }, 1, { ease: FlxEase.circOut, onComplete: FlxG.sound.music.pause });
     }
 }

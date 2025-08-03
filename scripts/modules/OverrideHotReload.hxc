@@ -1,69 +1,65 @@
-/*
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.util.FlxTimer;
 
 import funkin.modding.base.ScriptedMusicBeatState;
 import funkin.modding.module.Module;
 import funkin.modding.module.ModuleHandler;
 import funkin.play.PlayState;
+import funkin.data.song.SongRegistry;
 import funkin.ui.transition.LoadingState;
 import funkin.util.ReflectUtil;
 import funkin.util.plugins.ReloadAssetsDebugPlugin;
 
 class OverrideHotReload extends Module
 {
+    var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
 
-  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
-
-  var isScriptedState = false;
-  var scriptedStateName = "";
+    var isScriptedState = false;
+    var scriptedStateName = "";
 
 	public function new()
 	{
 		super('OverrideHotReload');
 	}
 
-  public function onCreate(event:ScriptEvent)
-  {
-    for(plugin in FlxG.plugins.list)
+    public function onCreate(event:ScriptEvent)
     {
-      if(Std.isOfType(plugin, ReloadAssetsDebugPlugin))
-        FlxG.plugins.remove(plugin);
+        for(plugin in FlxG.plugins.list)
+        {
+            if(Std.isOfType(plugin, ReloadAssetsDebugPlugin))
+                FlxG.plugins.remove(plugin);
+        }
     }
-  }
 
-  public function onUpdate(event:UpdateScriptEvent)
-  {
-    if (FlxG.keys.justPressed.F5)
+    public function onUpdate(event:UpdateScriptEvent)
     {
-      if(Std.isOfType(FlxG.state, ScriptedMusicBeatState))
-      {
-        isScriptedState = true;
-        scriptedStateName = ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name");
-        trace(scriptedStateName);
-      }
-
-      ModMenuUtils.loadEnabledMods();
-      new FlxTimer().start(1, ()->
-      {
-        if(isScriptedState)
+        if (FlxG.keys.justPressed.F5)
         {
-          var targetState:NextState = ScriptedMusicBeatState.init(scriptedStateName);
-          FlxG.switchState(targetState);
-          FlxTransitionableState.skipNextTransIn = true;
-          FlxTransitionableState.skipNextTransOut = true;
+            if(Std.isOfType(FlxG.state, ScriptedMusicBeatState))
+            {
+                isScriptedState = true;
+                scriptedStateName = ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name");
+                trace(scriptedStateName);
+            }
+            ModMenuUtils.loadEnabledMods();
+            if(isScriptedState)
+            {
+                var targetState:NextState = ScriptedMusicBeatState.init(scriptedStateName);
+                FlxG.switchState(targetState);
+                FlxTransitionableState.skipNextTransIn = true;
+                FlxTransitionableState.skipNextTransOut = true;
+            }
+            else if(Std.isOfType(FlxG.state, PlayState))
+            {
+                PlayState.lastParams.targetSong = SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id);
+                PlayState.instance.remove(PlayState.instance.currentStage);
+                LoadingState.loadPlayState(PlayState.lastParams);
+            }
+            else
+            {
+                FlxG.resetState();
+            }
         }
-        else if(Std.isOfType(FlxG.state, PlayState))
-        {
-          PlayState.lastParams.targetSong = SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id);
-          PlayState.instance.remove(PlayState.instance.currentStage);
-          LoadingState.loadPlayState(PlayState.lastParams);
-        }
-        else
-          FlxG.resetState();
-      });
     }
-  }
 }
-*/
+

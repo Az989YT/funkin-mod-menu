@@ -147,7 +147,7 @@ class ModMenuState extends ScriptedMusicBeatState
                 openSubState(new ModLoadingSubState(new MainMenuState()));
             }, 0.75);
 
-        scrollMenu();
+        scrollMenu(0);
 	}
 
     override function update(elapsed:Float):Void
