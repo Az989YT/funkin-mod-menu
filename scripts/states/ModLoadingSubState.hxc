@@ -1,0 +1,59 @@
+import funkin.audio.FunkinSound;
+import funkin.modding.module.ModuleHandler;
+import funkin.ui.ScriptedMusicBeatSubState;
+import funkin.ui.mainmenu.MainMenuState;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+
+class ModLoadingSubState extends ScriptedMusicBeatSubState
+{
+    var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
+    var targetState = null;
+
+    public function new(?_targetState:NextState = null)
+    {
+        super();
+        targetState = _targetState;
+    }
+
+    override public function create():Void
+    {
+        super.create();
+        FlxG.state.persistentUpdate = false;
+
+        var background:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, FlxG.height, 0xff050005);
+        var loadingText:FlxSprite = new FlxSprite(0,0);
+        loadingText.frames = Paths.getSparrowAtlas("modmenu/LoadingGraphic");
+		loadingText.animation.addByPrefix("idle", "loadingMods", 24, true);
+		loadingText.animation.play("idle");
+        loadingText.setPosition(0, FlxG.height - loadingText.height - 12.5);
+
+        for(object in [background, loadingText])
+        {
+            add(object);
+            object.alpha = 0;
+        }
+        FlxTween.tween(background, { alpha: 1 }, 0.5, { ease: FlxEase.cubeOut });
+        FlxTween.tween(loadingText, { x: 25, alpha: 1 }, 1.5, { ease: FlxEase.cubeInOut, onComplete: ()-> {
+            ModMenuUtils.loadEnabledMods();
+            FunkinSound.playOnce(Paths.sound('modsLoaded'));
+            FlxG.state.persistentDraw = false;
+            FlxTween.tween(background, { alpha: 0 }, 1.5, { ease: FlxEase.cubeInOut });
+            FlxTween.tween(loadingText, { x: 0, alpha: 0 }, 1.5, { ease: FlxEase.cubeInOut, onComplete: ()-> {
+                if(targetState == null)
+                {
+                    FlxG.switchState(new ModMenuState());
+                }
+                else
+                {
+                    FlxG.switchState(targetState);
+                }
+                // close();
+            }});
+        }});
+        if(FlxG.sound.music != null) FlxTween.tween(FlxG.sound.music, { pitch: 0 }, 1, { ease: FlxEase.circOut });
+    }
+}
