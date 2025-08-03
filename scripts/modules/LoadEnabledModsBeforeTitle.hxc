@@ -1,35 +1,28 @@
 import flixel.FlxG;
-import flixel.addons.transition.FlxTransitionableState;
 
-import funkin.modding.base.ScriptedMusicBeatState;
 import funkin.modding.module.Module;
-
+import funkin.modding.module.ModuleHandler;
 import funkin.ui.title.TitleState;
 
 class LoadEnabledModsBeforeTitle extends Module
 {
+    var allowedToLoadMods = true;
+
 	public function new()
 	{
-		super('LoadEnabledModsBeforeTitle', 2147483647);
+		super('LoadEnabledModsBeforeTitle');
 	}
 
-  var allowedToSwitchState = true;
-
-  public function onStateChangeBegin(event:StateChangeScriptEvent)
-  {
-    allowedToSwitchState = false;
-  }
-
-  public function onStateChangeEnd(event:StateChangeScriptEvent)
-  {
-    if(Std.isOfType(event.targetState, TitleState) && allowedToSwitchState)
+    public function onStateChangeBegin(event:StateChangeScriptEvent)
     {
-      var targetState:NextState = ScriptedMusicBeatState.init('ModLoadingState');
-      targetState.scriptSet("transitionToTitleScreen", true);
-      trace(targetState.scriptGet("transitionToTitleScreen"));
-      FlxG.switchState(targetState);
-      FlxTransitionableState.skipNextTransIn = true;
-      FlxTransitionableState.skipNextTransOut = true;
+        allowedToLoadMods = false;
     }
-  }
+
+    public function onStateChangeEnd(event:StateChangeScriptEvent)
+    {
+        if(Std.isOfType(event.targetState, TitleState) && allowedToLoadMods)
+        {
+            FlxG.switchState(new ModLoadingSubState(new TitleState()));
+        }
+    }
 }

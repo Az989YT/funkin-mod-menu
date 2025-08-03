@@ -46,7 +46,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
 	public function new()
     {
-		super("ModMenuState");
+		super();
 	}
 
     override public function create():Void

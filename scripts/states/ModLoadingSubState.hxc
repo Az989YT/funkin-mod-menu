@@ -29,7 +29,7 @@ class ModLoadingSubState extends ScriptedMusicBeatSubState
         loadingText.frames = Paths.getSparrowAtlas("modmenu/LoadingGraphic");
 		loadingText.animation.addByPrefix("idle", "loadingMods", 24, true);
 		loadingText.animation.play("idle");
-        loadingText.setPosition(0, FlxG.height - loadingText.height - 12.5);
+        loadingText.setPosition(25, FlxG.height - loadingText.height);
 
         for(object in [background, loadingText])
         {
@@ -37,12 +37,12 @@ class ModLoadingSubState extends ScriptedMusicBeatSubState
             object.alpha = 0;
         }
         FlxTween.tween(background, { alpha: 1 }, 0.5, { ease: FlxEase.cubeOut });
-        FlxTween.tween(loadingText, { x: 25, alpha: 1 }, 1.5, { ease: FlxEase.cubeInOut, onComplete: ()-> {
+        FlxTween.tween(loadingText, { y: FlxG.height - loadingText.height - 12.5, alpha: 1 }, 1.5, { ease: FlxEase.cubeInOut, onComplete: ()-> {
             ModMenuUtils.loadEnabledMods();
             FunkinSound.playOnce(Paths.sound('modsLoaded'));
             FlxG.state.persistentDraw = false;
             FlxTween.tween(background, { alpha: 0 }, 1.5, { ease: FlxEase.cubeInOut });
-            FlxTween.tween(loadingText, { x: 0, alpha: 0 }, 1.5, { ease: FlxEase.cubeInOut, onComplete: ()-> {
+            FlxTween.tween(loadingText, { y: FlxG.height - loadingText.height, alpha: 0 }, 1.5, { ease: FlxEase.cubeInOut, onComplete: ()-> {
                 if(targetState == null)
                 {
                     FlxG.switchState(new ModMenuState());

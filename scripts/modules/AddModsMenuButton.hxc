@@ -27,7 +27,7 @@ class AddModsMenuButton extends Module
 			function() {
 				trace('Transitioning to Mod Menu.');
 				var currentState = FlxG.state;
-				var targetState = ScriptedMusicBeatState.init('ModMenuState');
+				var targetState = new ModMenuState();
 				FlxTransitionableState.skipNextTransIn = true;
 				currentState.startExitState(targetState);
 			}, false);

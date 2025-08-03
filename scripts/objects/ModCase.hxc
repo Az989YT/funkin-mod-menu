@@ -27,16 +27,16 @@ class ModCase extends ScriptedFlxSpriteGroup
 
   function new(_x, _y, ?_meta:ModMetadata)
   {
-    super("ModCase", _x, _y);
+    super(_x, _y);
     this.setPosition(_x, _y);
     metadata = _meta;
 
-    var colorBg:FlxSkewedSprite = new FlxSkewedSprite(635, 7);
+    var colorBg:FlxSkewedSprite = new FlxSkewedSprite(634, 7);
     colorBg.makeGraphic(109, 107, 0xffFFDFD3);
     colorBg.skew.set(22,0);
     this.add(colorBg);
 
-    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(635,7).loadGraphic(ModMenuUtils.getModIcon(metadata));
+    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(634,7).loadGraphic(ModMenuUtils.getModIcon(metadata));
     modIcon.setGraphicSize(109, 107);
     modIcon.updateHitbox();
     modIcon.skew.set(22,0);
@@ -93,13 +93,13 @@ class ModCase extends ScriptedFlxSpriteGroup
     modTitle.borderSize = 3;
     modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
     modTitle.bold = true;
-    if (modTitle.text.length > 19)
+    if (modTitle.text.length > 18)
       modTitle.text = modTitle.text.substring(0, 18) + "-";
     add(modTitle);
 
     var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);
     var contributors = [];
-    if(metadata.author != null) ArrayTools.pushUnique(contributors, metadata.author);
+    if(metadata._author != null && metadata._author != "") ArrayTools.pushUnique(contributors, metadata._author);
     if(metadata.contributors != null)
     {
       for(contributor in metadata.contributors)
