@@ -52,7 +52,6 @@ class AddModsMenuButton extends Module
 
 	function repositionMenuItems(menuItems:AtlasMenuList)
 	{
-		// Reset position of menu items.
 		var spacing = 160;
 		var top = (FlxG.height - (spacing * (menuItems.length - 1))) / 2;
 		for (i in 0...menuItems.length)

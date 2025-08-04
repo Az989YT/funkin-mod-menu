@@ -69,6 +69,7 @@ class CharacterPortrait extends ScriptedFunkinSprite
         loadSparrow("modmenu/portraits/" + curCharacter);
         animation.destroyAnimations();
         totalWaitingAnims = 0;
+        updateHitbox();
         portraitScript = ModuleHandler.getModule(curCharacter + "-portrait");
         var filePath = Paths.json('portraits/' + curCharacter);
         characterData = Tools.getValue(Parser.parse(Assets.getText(filePath), filePath));

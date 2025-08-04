@@ -1,0 +1,74 @@
+import funkin.audio.FunkinSound;
+import funkin.modding.module.ModuleHandler;
+import funkin.ui.ScriptedMusicBeatState;
+import funkin.ui.ScriptedMusicBeatSubState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.util.ReflectUtil;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.addons.display.FlxRuntimeShader;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+
+class FullModViewSubState extends ScriptedMusicBeatSubState
+{
+    var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
+    var timesPressed = 0;
+
+    public function new()
+    {
+        super();
+    }
+
+    override public function create():Void
+    {
+        super.create();
+        if(!Std.isOfType(FlxG.state, ScriptedMusicBeatState) || ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name") != "ModMenuState")
+        {
+            trace("b");
+            close();
+            return;
+        }
+        FlxG.state.disableControls = true;
+        var curMod = FlxG.state.modCasesGroup.members[FlxG.state.curSelected];
+
+        var black:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+
+        var icon:FlxSprite = new FlxSprite(0,0).loadGraphic(ModMenuUtils.getModIcon(curMod.metadata));
+        icon.setGraphicSize(FlxG.width/4, FlxG.width/4);
+        icon.updateHitbox();
+        icon.setPosition(FlxG.width - icon.width - 50, 50);
+
+        var titleBack:FlxSprite = new FlxSprite(50,50).makeGraphic(FlxG.width - icon.width - 150, icon.height/2, 0xffFFFFFF);
+        var creditsBack:FlxSprite = new FlxSprite(50,50 + titleBack.height + 50).makeGraphic(titleBack.width/2 - 25, FlxG.height - titleBack.height - 150);
+        var descriptionBack:FlxSprite = new FlxSprite(50 + creditsBack.width + 50,50 + titleBack.height + 50).makeGraphic(titleBack.width/2 - 25, FlxG.height - titleBack.height - 150);
+        var dependencyBack:FlxSprite = new FlxSprite(icon.x, 50 + icon.height + 50).makeGraphic(icon.width, FlxG.height - icon.height - 150);
+
+        for(object in [black, icon, titleBack, creditsBack, descriptionBack, dependencyBack])
+        {
+            add(object);
+            object.alpha = 0;
+        }
+        FlxTween.tween(black, { alpha: 0.5 }, 1, { ease: FlxEase.cubeOut });
+        for(object in [icon, titleBack, creditsBack, descriptionBack, dependencyBack])
+        {
+            FlxTween.tween(object, { alpha: 1 }, 1, { ease: FlxEase.cubeInOut });
+        }
+    }
+
+    override function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        if(controls.BACK || controls.FREEPLAY_CHAR_SELECT)
+        {
+            timesPressed++;
+            if(timesPressed > 1)
+            {
+                FlxG.state.disableControls = false;
+                close();
+            }
+        }
+    }
+}

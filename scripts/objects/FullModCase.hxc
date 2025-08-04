@@ -1,0 +1,98 @@
+import funkin.audio.FunkinSound;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.tools.ArrayTools;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.addons.effects.FlxSkewedSprite;
+import flixel.group.FlxTypedSpriteGroup;
+import flixel.math.FlxPoint;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+
+import StringTools;
+
+class FullModCase extends ScriptedFlxSpriteGroup
+{
+    var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
+
+    var modIcon:FlxSprite;
+    var modTitle:FlxText;
+    var modAuthors:FlxText;
+    var modDescription:FlxText;
+
+    function new(_x, _y)
+    {
+        super(_x, _y);
+        this.setPosition(_x, _y);
+
+        var defaultMod = ModMenuUtils.detectedMods[0];
+
+        var caseSprite:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image("modmenu/modCaseFull"));
+        this.add(caseSprite);
+
+        modIcon = new FlxSprite(0, 121).loadGraphic(ModMenuUtils.getModIcon(defaultMod));
+        modIcon.setGraphicSize(241, 241);
+        modIcon.updateHitbox();
+        this.add(modIcon);
+
+        modTitle = new FlxText(0, 0, 0, defaultMod.title, 46);
+        modTitle.font = "Letterstuff Regular";
+        modTitle.color = 0xffFFFFFF;
+        modTitle.borderColor = 0xff5F91C1;
+        modTitle.borderSize = 3;
+        modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
+        modTitle.bold = true;
+        modTitle.setPosition((729 - modTitle.width)/2, 40 + (86 - modTitle.height)/2);
+        this.add(modTitle);
+
+        modAuthors = new FlxText(271 - 12.5, 220 - 12.5, 469 - 12.5, "", 32);
+        var contributors = [];
+        if(defaultMod._author != null && defaultMod._author != "") ArrayTools.pushUnique(contributors, [defaultMod._author, "Author"].join(":\n"));
+        if(defaultMod.contributors != null)
+        {
+            for(contributor in defaultMod.contributors)
+            {
+                ArrayTools.pushUnique(contributors, [contributor.name, contributor.role].join(":\n"));
+            }
+        }
+        modAuthors.text = contributors.join("\n\n");
+        modAuthors.font = "Tardling Solid Regular";
+        modAuthors.borderColor = 0xff5F91C1;
+        modAuthors.borderSize = 2;
+        modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
+        this.add(modAuthors);
+
+        modDescription = new FlxText(12.5, 134 + modIcon.height, 241 - 25, defaultMod.description, 32);
+        modDescription.font = "Tardling Solid Regular";
+        modDescription.borderColor = 0xffDA4E89;
+        modDescription.borderSize = 2;
+        modDescription.borderStyle = FlxTextBorderStyle.OUTLINE;
+        this.add(modDescription);
+
+    }
+
+    function updateModInfo(metadata:ModMetadata)
+    {
+        modIcon.loadGraphic(ModMenuUtils.getModIcon(metadata));
+        modIcon.setGraphicSize(241, 241);
+        modIcon.updateHitbox();
+
+        modTitle.text = metadata.title;
+        modTitle.setPosition((729 - modTitle.width)/2, this.y + 40 + (86 - modTitle.height)/2);
+
+        var contributors = [];
+        if(metadata._author != null && metadata._author != "") ArrayTools.pushUnique(contributors, [metadata._author, "Author"].join(":\n"));
+        if(metadata.contributors != null)
+        {
+            for(contributor in metadata.contributors)
+            {
+                ArrayTools.pushUnique(contributors, [contributor.name, contributor.role].join(":\n"));
+            }
+        }
+        modAuthors.text = contributors.join("\n\n");
+
+        modDescription.text = metadata.description;
+    }
+}
