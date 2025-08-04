@@ -173,6 +173,8 @@ class ModMenuState extends ScriptedMusicBeatState
         scrollingElementsMiddle.scrollX += elapsed*150;
         scrollingElementsBottom.scrollX -= elapsed*150;
 
+        if(disableControls) return;
+
         if( (controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(characterPortrait)) || (controls.BACK && inFullModView))
         {
             // openSubState(new FullModViewSubState());
@@ -225,6 +227,7 @@ class ModMenuState extends ScriptedMusicBeatState
             {
                 FunkinSound.playOnce(Paths.sound('missnote1'));
                 HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                openSubState(new ModDependenciesSubState());
             }
             else if(ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata) || modCasesGroup.members[curSelected].metadata.id == ModMenuUtils.modMenuID)
             {
@@ -248,6 +251,7 @@ class ModMenuState extends ScriptedMusicBeatState
             {
                 FunkinSound.playOnce(Paths.sound('missnote1'));
                 HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                openSubState(new ModDependenciesSubState());
             }
             else
             {
