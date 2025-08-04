@@ -244,11 +244,17 @@ class ModMenuState extends ScriptedMusicBeatState
         }
         if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.touch.ticksDeltaSincePress >= 500))
         {
-            modCasesGroup.members[curSelected].toggleFavorite();
-            if(!ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) modCasesGroup.members[curSelected].toggleMod();
-            characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
-            if(FlxG.onMobile)
-                TouchUtil.touch.recycle();
+            if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
+            {
+                FunkinSound.playOnce(Paths.sound('missnote1'));
+                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+            }
+            else
+            {
+                modCasesGroup.members[curSelected].toggleFavorite();
+                if(!ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) modCasesGroup.members[curSelected].toggleMod();
+                characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
+            }
         }
         if(controls.BACK && !inFullModView && !transitioning)
         {

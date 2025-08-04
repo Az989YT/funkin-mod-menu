@@ -153,7 +153,6 @@ class ModMenuUtils extends Module
         }
         if(missingDependencies.length > 0)
         {
-            // do more shit
             return true;
         }
         return false;
