@@ -1,7 +1,6 @@
 import flixel.FlxG;
 
 import funkin.modding.module.Module;
-import funkin.modding.module.ModuleHandler;
 import funkin.ui.title.TitleState;
 
 class LoadEnabledModsBeforeTitle extends Module

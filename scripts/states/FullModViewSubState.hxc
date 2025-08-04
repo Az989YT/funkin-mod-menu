@@ -1,13 +1,10 @@
-import funkin.audio.FunkinSound;
 import funkin.modding.module.ModuleHandler;
 import funkin.ui.ScriptedMusicBeatState;
 import funkin.ui.ScriptedMusicBeatSubState;
-import funkin.ui.mainmenu.MainMenuState;
 import funkin.util.ReflectUtil;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxRuntimeShader;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 

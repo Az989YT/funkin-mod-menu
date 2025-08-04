@@ -7,8 +7,6 @@ import funkin.modding.module.ModuleHandler;
 import flixel.FlxG;
 import flixel.util.FlxTimer;
 
-import haxe.ds.StringMap;
-
 import hxjsonast.Parser;
 import hxjsonast.Tools;
 

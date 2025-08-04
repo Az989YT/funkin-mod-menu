@@ -1,13 +1,8 @@
-import funkin.audio.FunkinSound;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.ModuleHandler;
 import funkin.util.tools.ArrayTools;
 
-import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.effects.FlxSkewedSprite;
-import flixel.group.FlxTypedSpriteGroup;
-import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.text.FlxTextBorderStyle;
 

@@ -1,7 +1,6 @@
 import funkin.audio.FunkinSound;
 import funkin.modding.module.ModuleHandler;
 import funkin.ui.ScriptedMusicBeatSubState;
-import funkin.ui.mainmenu.MainMenuState;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -51,7 +50,6 @@ class ModLoadingSubState extends ScriptedMusicBeatSubState
                 {
                     FlxG.switchState(targetState);
                 }
-                // close();
             }});
         }});
         if(FlxG.sound.music != null) FlxTween.tween(FlxG.sound.music, { pitch: 0 }, 1, { ease: FlxEase.circOut, onComplete: FlxG.sound.music.pause });

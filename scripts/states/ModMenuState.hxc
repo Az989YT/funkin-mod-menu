@@ -1,26 +1,17 @@
 import funkin.audio.FunkinSound;
-import funkin.graphics.ScriptedFunkinSprite;
 import funkin.graphics.shaders.AdjustColorShader;
-import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.ModuleHandler;
-import funkin.save.Save;
 import funkin.ui.ScriptedMusicBeatState;
-import funkin.ui.ScriptedMusicBeatSubState;
 import funkin.ui.mainmenu.MainMenuState;
 import funkin.util.Constants;
 import funkin.util.HapticUtil;
 import funkin.util.SwipeUtil;
 import funkin.util.TouchUtil;
-import funkin.util.tools.ArrayTools;
 
-import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.FlxTiledSprite;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.transition.TransitionData;
 import flixel.group.FlxTypedSpriteGroup;
-import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -30,9 +21,6 @@ class ModMenuState extends ScriptedMusicBeatState
 {
     var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
 
-    var modsMap:Map = [
-        "mod-id" => "modCase"
-    ];
     var curSelected = 0;
 
     var swirlBig:FlxSprite;

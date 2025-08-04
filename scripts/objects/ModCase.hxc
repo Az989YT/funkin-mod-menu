@@ -6,7 +6,6 @@ import funkin.util.tools.ArrayTools;
 import flixel.FlxSprite;
 import flixel.addons.effects.FlxSkewedSprite;
 import flixel.group.FlxTypedSpriteGroup;
-import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.text.FlxTextBorderStyle;
 

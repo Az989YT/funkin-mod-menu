@@ -1,16 +1,9 @@
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 
-import funkin.Conductor;
-import funkin.Paths;
-
+import funkin.modding.module.Module;
 import funkin.ui.mainmenu.MainMenuState;
 import funkin.ui.AtlasMenuItem;
-
-import funkin.modding.base.ScriptedMusicBeatState;
-import funkin.modding.module.Module;
-import funkin.modding.PolymodHandler;
-import funkin.save.Save;
 
 class AddModsMenuButton extends Module
 {
