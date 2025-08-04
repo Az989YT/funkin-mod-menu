@@ -32,13 +32,13 @@ class ModCase extends ScriptedFlxSpriteGroup
 
     ModMenuUtils.isModNew(metadata); // Called up here to initiliaze shit if new
 
-    var colorBg:FlxSkewedSprite = new FlxSkewedSprite(634, 7);
-    colorBg.makeGraphic(109, 107, 0xffFFDFD3);
+    var colorBg:FlxSkewedSprite = new FlxSkewedSprite(633, 7);
+    colorBg.makeGraphic(110, 107, 0xffFFDFD3);
     colorBg.skew.set(22,0);
     this.add(colorBg);
 
-    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(634,7).loadGraphic(ModMenuUtils.getModIcon(metadata));
-    modIcon.setGraphicSize(109, 107);
+    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(633,7).loadGraphic(ModMenuUtils.getModIcon(metadata));
+    modIcon.setGraphicSize(110, 107);
     modIcon.updateHitbox();
     modIcon.skew.set(22,0);
     this.add(modIcon);
