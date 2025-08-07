@@ -16,7 +16,11 @@
     },
     {
       "name": "Hl33",
-      "role": "Turned the base game fonts into TTFs"
+      "role": "Made Base Game Font TTFs"
+    },
+    {
+      "name": "Doggo, gardenGnostic",
+      "role": "Mobile Testing/Assistance"
     }
   ],
   "api_version": "0.7.3",

@@ -110,6 +110,7 @@ class ModMenuState extends ScriptedMusicBeatState
                 poofSprite.visible = true;
                 characterPortrait.shader.brightness = 100;
                 characterPortrait.shader.contrast = 100;
+                FunkinSound.playOnce(Paths.sound('characterPoof'), 0.5);
             }
             if(frame == 3)
             {
@@ -185,6 +186,7 @@ class ModMenuState extends ScriptedMusicBeatState
                         FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 1, { ease: FlxEase.cubeInOut });
                     }
                 }
+                FunkinSound.playOnce(Paths.sound('cancelMenu'));
             }
             else
             {
@@ -219,7 +221,7 @@ class ModMenuState extends ScriptedMusicBeatState
             }
             else if(ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata) || modCasesGroup.members[curSelected].metadata.id == ModMenuUtils.modMenuID)
             {
-                FunkinSound.playOnce(Paths.sound('CS_locked'));
+                FunkinSound.playOnce(Paths.sound('modFavoriteDisable'), 0.8);
                 characterPortrait.playAnimCallback("locked");
                 HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
                 FlxTween.cancelTweensOf(modCasesGroup.members[curSelected]);
@@ -248,7 +250,7 @@ class ModMenuState extends ScriptedMusicBeatState
                 characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
             }
         }
-        if(controls.BACK && !inFullModView && !transitioning)
+        if(controls.BACK && !inFullModView)
         {
             //trace(inFullModView);
             if(!inFullModView) openSubState(new ModLoadingSubState(new MainMenuState()));
