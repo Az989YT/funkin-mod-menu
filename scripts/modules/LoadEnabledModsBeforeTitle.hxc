@@ -1,27 +1,30 @@
 import flixel.FlxG;
-
 import funkin.modding.module.Module;
 import funkin.ui.title.TitleState;
 
 class LoadEnabledModsBeforeTitle extends Module
 {
-    var allowedToLoadMods = true;
+    var hasMoved:Bool = true; // Set to true on init so that we don't move to the state after hot-reloading.
 
-	public function new()
-	{
-		super('LoadEnabledModsBeforeTitle');
-	}
-
-    public function onStateChangeBegin(event:StateChangeScriptEvent)
+    public function new()
     {
-        allowedToLoadMods = false;
+        super('LoadEnabledModsBeforeTitle', 0);
     }
 
-    public function onStateChangeEnd(event:StateChangeScriptEvent)
+    public function onCreate(event:ScriptEvent)
     {
-        if(Std.isOfType(event.targetState, TitleState) && allowedToLoadMods)
-        {
-            FlxG.switchState(new ModLoadingSubState(new TitleState()));
-        }
+        super.onCreate(event);
+        hasMoved = false;
+        this.active = false;
+
+        FlxG.signals.preStateSwitch.add(start);
+    }
+
+    function start()
+    {
+        if (FlxG.game._nextState._asc != null || hasMoved) return;
+        hasMoved = true;
+
+        FlxG.switchState(new ModLoadingSubState(new TitleState()));
     }
 }
