@@ -252,7 +252,6 @@ class ModMenuState extends ScriptedMusicBeatState
         }
         if(controls.BACK && !inFullModView)
         {
-            //trace(inFullModView);
             if(!inFullModView) openSubState(new ModLoadingSubState(new MainMenuState()));
         }
         if(controls.UI_UP_P)

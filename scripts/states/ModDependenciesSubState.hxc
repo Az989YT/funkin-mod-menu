@@ -28,7 +28,6 @@ class ModDependenciesSubState extends ScriptedMusicBeatSubState
         super.create();
         if(!Std.isOfType(FlxG.state, ScriptedMusicBeatState) || ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name") != "ModMenuState")
         {
-            trace("b");
             close();
             return;
         }
