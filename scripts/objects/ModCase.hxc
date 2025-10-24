@@ -78,12 +78,8 @@ class ModCase extends ScriptedFlxSpriteGroup
     favSprite = new FlxSprite(0, 0);
     favSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
     favSprite.animation.addByPrefix("favorite", "favourite0", 24, false);
-    // favSprite.animation.addByPrefix("pressFavorite", "favouritePress", 24, false);
-    favSprite.animation.addByPrefix("loopFavorite", "favouriteLoop", 24, true);
     favSprite.animation.addByPrefix("unfavorite", "unFavourite0", 24, false);
-    // favSprite.animation.addByPrefix("pressUnfavorite", "unFavouritePress", 24, false);
-    favSprite.animation.addByPrefix("loopUnfavorite", "unFavouriteLoop", 24, true);
-    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "loopFavorite":"loopUnfavorite");
+    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
     this.add(favSprite);
 
     var modTitle:FlxText = new FlxText(100, 63, 590, " " + metadata.title, 42);

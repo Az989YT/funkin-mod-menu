@@ -70,18 +70,14 @@
 	<SubTexture name="lightMissingDependancies0011" x="1251" y="219" width="213" height="93" frameX="-659" frameY="0" frameWidth="870" frameHeight="124"/>
 	<SubTexture name="unFavourite0000" x="1593" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
 	<SubTexture name="unFavourite0001" x="1593" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="unFavouriteLoop0000" x="1494" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="unFavouriteLoop0001" x="1494" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="unFavouriteLoop0002" x="1494" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="unFavouritePress0000" x="1464" y="219" width="33" height="35" frameX="-763" frameY="-70" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="unFavouritePress0001" x="1464" y="219" width="33" height="35" frameX="-763" frameY="-70" frameWidth="870" frameHeight="124"/>
+	<SubTexture name="unFavourite0002" x="1494" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
+	<SubTexture name="unFavourite0003" x="1494" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
+	<SubTexture name="unFavourite0004" x="1494" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
 	<SubTexture name="favourite0000" x="1560" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
 	<SubTexture name="favourite0001" x="1560" y="166" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="favouriteLoop0000" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="favouriteLoop0001" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="favouriteLoop0002" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="favouriteLoop0003" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="favouriteLoop0004" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="favouritePress0000" x="1527" y="166" width="33" height="35" frameX="-763" frameY="-70" frameWidth="870" frameHeight="124"/>
-	<SubTexture name="favouritePress0001" x="1527" y="166" width="33" height="35" frameX="-763" frameY="-70" frameWidth="870" frameHeight="124"/>
+	<SubTexture name="favourite0002" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
+	<SubTexture name="favourite0003" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
+	<SubTexture name="favourite0004" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
+	<SubTexture name="favourite0005" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
+	<SubTexture name="favourite0006" x="1590" y="121" width="33" height="35" frameX="-763" frameY="-66" frameWidth="870" frameHeight="124"/>
 </TextureAtlas>
