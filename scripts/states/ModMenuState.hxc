@@ -1,387 +1,312 @@
 import funkin.audio.FunkinSound;
 import funkin.graphics.shaders.AdjustColorShader;
 import funkin.modding.PolymodHandler;
-import funkin.modding.base.ScriptedFlxSpriteGroup;
-import funkin.modding.base.ScriptedMusicBeatState;
-import funkin.modding.base.ScriptedMusicBeatSubState;
-import funkin.ui.mainmenu.MainMenuState;
-import funkin.util.tools.ArrayTools;
-
-import funkin.data.dialogue.conversation.ConversationRegistry;
-import funkin.data.dialogue.dialoguebox.DialogueBoxRegistry;
-import funkin.data.dialogue.speaker.SpeakerRegistry;
-import funkin.data.event.SongEventRegistry;
-import funkin.data.story.level.LevelRegistry;
-import funkin.data.notestyle.NoteStyleRegistry;
-import funkin.play.notes.notekind.NoteKindManager;
-import funkin.data.song.SongRegistry;
-import funkin.data.freeplay.player.PlayerRegistry;
-import funkin.data.stage.StageRegistry;
-import funkin.play.character.CharacterDataParser;
-import funkin.data.freeplay.album.AlbumRegistry;
 import funkin.modding.module.ModuleHandler;
+import funkin.save.Save;
+import funkin.ui.ScriptedMusicBeatState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.util.Constants;
+import funkin.util.HapticUtil;
+import funkin.util.SwipeUtil;
+import funkin.util.TouchUtil;
 
-import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.transition.TransitionData;
-import flixel.math.FlxPoint;
+import flixel.addons.display.FlxTiledSprite;
+import flixel.group.FlxTypedSpriteGroup;
+import flixel.math.FlxMath;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
 
-import haxe.Unserializer;
+class ModMenuState extends ScriptedMusicBeatState
+{
+    var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
 
-class ModMenuState extends ScriptedMusicBeatState {
+    var curSelected = 0;
 
-  var swirlBig:FlxSprite;
-  var swirlMini:FlxSprite;
+    var swirlBig:FlxSprite;
+    var swirlMini:FlxSprite;
+    var modCasesGroup:FlxTypedSpriteGroup;
+    var characterPortrait:FunkinSprite;
+    var poofSprite:FlxSprite;
 
-  var grpModCases:ScriptedFlxSpriteGroup;
-  var curSelected:Int = 0;
+    var scrollingElementsTop:FlxTiledSprite;
+    var scrollingElementsMiddle:FlxTiledSprite;
+    var scrollingElementsBottom:FlxTiledSprite;
 
-  var detectedMods:Array<ModMetadata> = [];
+    var fullModCase:FlxTypedSpriteGroup;
+    var inFullModView = false;
+    var transitioning = false;
+    var disableControls = false;
+    var canFavorite = true;
 
-  var polymod:Dynamic;
-  var fileSystem:Dynamic;
-  var file:Dynamic;
-
-  var funkinModMenuID = "Funkin' Mod Menu";
-  var foundFunkinModMenu = false;
-  var registeredModsPath = "mods/Funkin' Mod Menu/registeredMods/";
-  var registeredModFileExtension = ".fmm";
-
-  var colorShaderBig:AdjustColorShader;
-  var colorShaderMini:AdjustColorShader;
-
-  var charPortrait;
-
-  var backgroundCamera:FlxCamera;
-	var scrollingCamera:FlxCamera;
-  var foregroundCamera:FlxCamera;
-
-  var inFullModView = false;
-  var transitioningFullModView = false;
-  var modCaseFull;
-
-	public function new() {
-		super("ModMenuState");
-	}
-
-	override public function create():Void {
-		super.create();
-    this.persistentUpdate = true;
-    this.persistentDraw = true;
-    MainMenuState.rememberedSelectedIndex = 0;
-    FlxG.sound.cache(Paths.music('exploration/exploration'));
-    FunkinSound.playMusic('exploration',
-      {
-        startingVolume: 0.0,
-        overrideExisting: true,
-        restartTrack: false,
-        // Continue playing this music between states, until a different music track gets played.
-        persist: false
-      });
-    FlxG.sound.music.fadeIn(2, 0, 0.5);
-
-    detectedMods = PolymodHandler.getAllMods();
-    polymod = Unserializer.DEFAULT_RESOLVER.resolveClass('polymod.Polymod');
-    fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
-    file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
-
-    backgroundCamera = new FlxCamera(0,0,FlxG.width,FlxG.height);
-		scrollingCamera = new FlxCamera(0,-300,FlxG.width,FlxG.height*1.5);
-		scrollingCamera.bgColor = 0x00000000;
-    scrollingCamera.angle = -22.5;
-    foregroundCamera = new FlxCamera(0,0,FlxG.width,FlxG.height);
-		foregroundCamera.bgColor = 0x00000000;
-		FlxG.cameras.add(backgroundCamera,true);
-		FlxG.cameras.add(scrollingCamera,false);
-    FlxG.cameras.add(foregroundCamera,false);
-
-    if(!foundFunkinModMenu) {
-      for(mod in 0...detectedMods.length) {
-        //trace(detectedMods[mod].title);
-        if(detectedMods[mod].title == funkinModMenuID) {
-          foundFunkinModMenu = true;
-          funkinModMenuID = detectedMods[mod].id;
-          registeredModsPath = "mods/" + funkinModMenuID + "/registeredMods/";
-          trace(funkinModMenuID);
-          break;
-        }
-     }
-    }
-    if(fileSystem.exists("mods/" + funkinModMenuID + ".zip")) {
-      trace("yeah");
-      var targetState:NextState = ScriptedMusicBeatState.init('UnzipWarningState');
-      FlxG.switchState(targetState);
-      FlxTransitionableState.skipNextTransIn = false;
-      FlxTransitionableState.skipNextTransOut = false;
-    }
-    if(!fileSystem.exists(registeredModsPath)) fileSystem.createDirectory(registeredModsPath);
-
-		var colorBg:FlxSprite = new FlxSprite(0, 0);
-    colorBg.makeGraphic(FlxG.width, FlxG.height, 0xffFFFAE1);
-    //colorBg.makeGraphic(FlxG.width, FlxG.height, 0xff000000);
-    add(colorBg);
-
-    swirlBig = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlBig"));
-    swirlBig.setPosition(FlxG.width - swirlBig.width, (FlxG.height - swirlBig.height)/2);
-    add(swirlBig);
-
-    swirlMini = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlMini"));
-    swirlMini.setPosition(swirlBig.x + (swirlBig.width - swirlMini.width)/2, swirlBig.y + (swirlBig.height - swirlMini.height)/2);
-    add(swirlMini);
-
-    var bgScrollMid = ScriptedFlxSpriteGroup.init("ModMenuScrollingElements", true);
-    bgScrollMid.y = (FlxG.height - bgScrollMid.height)/2 + 300;
-    bgScrollMid.cameras = [scrollingCamera];
-    add(bgScrollMid);
-
-    var bgScrollTop = ScriptedFlxSpriteGroup.init("ModMenuScrollingElements", false);
-    bgScrollTop.y = bgScrollMid.y - 300;
-    bgScrollTop.cameras = [scrollingCamera];
-    add(bgScrollTop);
-
-    var bgScrollBottom = ScriptedFlxSpriteGroup.init("ModMenuScrollingElements", false);
-    bgScrollBottom.y = bgScrollMid.y + 300 ;
-    bgScrollBottom.cameras = [scrollingCamera];
-    add(bgScrollBottom);
-
-    colorShaderBig = new AdjustColorShader();
-    colorShaderMini = new AdjustColorShader();
-    swirlBig.shader = colorShaderBig;
-    swirlMini.shader = colorShaderMini;
-    //swirlBig.blend = 12;
-    //swirlMini.blend = 12;
-
-    charPortrait = ScriptedFlxSpriteGroup.init("ModMenuPortrait", 0, 0);
-    charPortrait.cameras = [foregroundCamera];
-    add(charPortrait);
-
-    grpModCases = new ScriptedFlxSpriteGroup(0,300);
-    grpModCases.cameras = [foregroundCamera];
-    for(mod in 0...detectedMods.length) {
-      //trace(detectedMods[mod].title);
-      var args = [true, detectedMods[mod], true];
-      //   args[0] = save.data.mods[mod][1];
-      var currentModPath = registeredModsPath + detectedMods[mod].id + registeredModFileExtension;
-      if (fileSystem.exists(currentModPath)) {
-        trace("found file!");
-
-        if(file.getContent(currentModPath) == "false") {
-          args[0] = false;
-        }
-        args[2] = false;
-      } else {
-        trace("file not found. writing file");
-        file.write(currentModPath);
-        file.saveContent(currentModPath, "true");
-      }
-
-      modCase = ScriptedFlxSpriteGroup.init("ModCase", 0, 150*mod, args);
-      add(modCase);
-      modCase.cameras = [foregroundCamera];
-      modCase.x -= modCase.width;
-      FlxTween.tween(modCase, {x: modCaseOffsetX(mod)*3 }, 0.5 + 0.1*mod, {ease: FlxEase.cubeOut});
-      grpModCases.add(modCase);
-    }
-
-    modCaseFull = ScriptedFlxSpriteGroup.init("FullModCase", detectedMods[3]);
-    modCaseFull.cameras = [foregroundCamera];
-    modCaseFull.visible = false;
-    add(modCaseFull);
-    modCaseFull.setPosition(0, -FlxG.height);
-
-    var topBar:FlxSprite = new FlxSprite(0,0);
-		topBar.frames = Paths.getSparrowAtlas("modmenu/topBar");
-		topBar.animation.addByPrefix("idle", "bar", 24, true);
-		topBar.animation.play("idle");
-    topBar.cameras = [foregroundCamera];
-		add(topBar);
-
-    var topBarBubbles:FlxSprite = new FlxSprite(0,0);
-		topBarBubbles.frames = Paths.getSparrowAtlas("modmenu/topBar");
-		topBarBubbles.animation.addByPrefix("idle", "bubbles", 24, true);
-		topBarBubbles.animation.play("idle");
-    topBarBubbles.cameras = [foregroundCamera];
-		add(topBarBubbles);
-	}
-
-  override function update(elapsed:Float):Void
-  {
-    super.update(elapsed);
-    swirlBig.angle += 0.25;
-    swirlMini.angle -= 0.5;
-    colorShaderBig.hue += 1;
-    colorShaderMini.hue -= 1;
-		if (controls.BACK)
+	public function new()
     {
-      if (transitioningFullModView) return;
-      if(inFullModView)
-      {
-        transitioningFullModView = true;
-        for(modCase in 0...grpModCases.length) {
-            var modCaseObject = grpModCases.members[modCase];
+		super();
+	}
 
-            if(modCase == curSelected)
+    override public function create():Void
+    {
+        super.create();
+
+        this.persistentUpdate = this.persistentDraw = true;
+        MainMenuState.rememberedSelectedIndex = 0;
+        FlxG.mouse.visible = false;
+
+        FlxG.sound.cache(Paths.music('exploration/exploration'));
+        FunkinSound.playMusic('exploration',
+        {
+            startingVolume: 0.0,
+            overrideExisting: true,
+            restartTrack: false,
+            persist: false
+        });
+        FlxG.sound.music.fadeIn(2, 0, 0.5);
+
+        var colorBg:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, FlxG.height, 0xffFFFAE1);
+        var topBar:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, 48, 0xff000000);
+
+        var topBarEdge:FlxSprite = new FlxSprite(0,0);
+        topBarEdge.frames = Paths.getSparrowAtlas("modmenu/topBar");
+        topBarEdge.animation.addByPrefix("idle", "bar", 24, true);
+        topBarEdge.animation.play("idle");
+        topBarEdge.x = FlxG.width - topBarEdge.width;
+
+        var topBarBubbles:FlxSprite = new FlxSprite(0,0);
+        topBarBubbles.frames = Paths.getSparrowAtlas("modmenu/topBar");
+        topBarBubbles.animation.addByPrefix("idle", "bubbles", 24, true);
+        topBarBubbles.animation.play("idle");
+        topBarBubbles.x = FlxG.width - topBarBubbles.width;
+
+        swirlBig = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlBig"));
+        swirlMini = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlMini"));
+
+        swirlBig.setPosition(FlxG.width - swirlBig.width, (FlxG.height - swirlBig.height)/2);
+        swirlMini.setPosition(swirlBig.x + (swirlBig.width - swirlMini.width)/2, swirlBig.y + (swirlBig.height - swirlMini.height)/2);
+
+        scrollingElementsTop = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+        scrollingElementsMiddle = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+        scrollingElementsBottom = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+
+        for(scrollingElement in [scrollingElementsTop, scrollingElementsMiddle, scrollingElementsBottom])
+        {
+            scrollingElement.screenCenter();
+            scrollingElement.scrollX = 275*FlxG.random.int(0, FlxG.width*5);
+        }
+
+        scrollingElementsTop.y -= 275;
+        scrollingElementsBottom.y += 275;
+
+        characterPortrait = new CharacterPortrait();
+
+        modCasesGroup = new FlxTypedSpriteGroup(0,0,0);
+
+        poofSprite = new FlxSprite(0,0);
+        poofSprite.frames = Paths.getSparrowAtlas("modmenu/smokePuff");
+        poofSprite.animation.addByPrefix("poof", "explosion", 24, false);
+        poofSprite.animation.play("poof");
+        poofSprite.animation.onFinish.add(()->{ poofSprite.visible = false; });
+        poofSprite.animation.onFrameChange.add((name, frame)->{
+            if(frame == 1)
             {
-              FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
-                FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
-                modCaseFull.visible = false;
-                FlxTween.tween(modCaseObject, {y: 300 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
-                  inFullModView = false;
-                  transitioningFullModView = false;
-                }});
-              }});
+                poofSprite.visible = true;
+                characterPortrait.shader.brightness = 100;
+                characterPortrait.shader.contrast = 100;
+                FunkinSound.playOnce(Paths.sound('characterPoof'), 0.5);
+            }
+            if(frame == 3)
+            {
+                characterPortrait.initRandomCharacter();
+                characterPortrait.shader.brightness = 0;
+                characterPortrait.shader.contrast = 0;
+            }
+        });
+        poofSprite.setPosition(FlxG.width - poofSprite.width, FlxG.height - poofSprite.height);
+
+        fullModCase = new FullModCase(0,0);
+        fullModCase.y = -fullModCase.height;
+
+        for(object in [colorBg, swirlBig, swirlMini, scrollingElementsTop, scrollingElementsMiddle, scrollingElementsBottom, characterPortrait, poofSprite, modCasesGroup, fullModCase, topBar, topBarEdge, topBarBubbles])
+        {
+            add(object);
+        }
+
+        for(object in [swirlBig, swirlMini])
+        {
+            object.shader = new AdjustColorShader();
+        }
+
+        for(mod in PolymodHandler.getAllMods())
+        {
+            var modCase = new ModCase(0, 0, mod);
+            modCasesGroup.add(modCase);
+            modCase.y += 150 * modCasesGroup.members.indexOf(modCase);
+        }
+        modCasesGroup.y = (FlxG.height - modCasesGroup.members[0].height)/2;
+
+        if(FlxG.onMobile)
+            addBackButton(0, 0, 0xffFFFFFF, ()->{
+                openSubState(new ModLoadingSubState(new MainMenuState()));
+            }, 0.75);
+
+        scrollMenu(0);
+	}
+
+    override function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        swirlBig.angle += 0.25;
+        swirlMini.angle -= 0.5;
+        swirlBig.shader.hue += 1;
+        swirlMini.shader.hue -= 1;
+
+        scrollingElementsTop.scrollX -= elapsed*150;
+        scrollingElementsMiddle.scrollX += elapsed*150;
+        scrollingElementsBottom.scrollX -= elapsed*150;
+
+        if(disableControls) return;
+
+        if( (controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(characterPortrait)) || (controls.BACK && inFullModView))
+        {
+            // openSubState(new FullModViewSubState());
+            if(transitioning) return;
+            transitioning = true;
+
+            if(inFullModView)
+            {
+                FlxTween.cancelTweensOf(fullModCase);
+                FlxTween.tween(fullModCase, { y: -fullModCase.height }, 1, { ease: FlxEase.cubeInOut });
+                for(modCase in modCasesGroup)
+                {
+                    FlxTween.cancelTweensOf(modCase);
+                    if(modCasesGroup.members.indexOf(modCase) == curSelected)
+                    {
+                        FlxTween.tween(modCase, { y: 300 }, 1, { ease: FlxEase.cubeInOut, onComplete: ()->{ transitioning = false; } });
+                    }
+                    else
+                    {
+                        FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 1, { ease: FlxEase.cubeInOut });
+                    }
+                }
+                FunkinSound.playOnce(Paths.sound('cancelMenu'));
             }
             else
             {
-              FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-              FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 0.5 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
+                FlxTween.cancelTweensOf(fullModCase);
+                FlxTween.tween(fullModCase, { y: 0 }, 1, { ease: FlxEase.cubeInOut });
+                fullModCase.updateModInfo(modCasesGroup.members[curSelected].metadata);
+                for(modCase in modCasesGroup)
+                {
+                    FlxTween.cancelTweensOf(modCase);
+                    if(modCasesGroup.members.indexOf(modCase) == curSelected)
+                    {
+                        FlxTween.tween(modCase, { y: -modCase.height }, 0.75, { ease: FlxEase.backIn, onComplete: ()->{ transitioning = false; } });
+                    }
+                    else
+                    {
+                        FlxTween.tween(modCase, { x: -modCase.width }, 1, { ease: FlxEase.cubeInOut });
+                    }
+                }
             }
-          }
+            inFullModView = !inFullModView;
         }
-      else
-      {
-        var targetState:NextState = ScriptedMusicBeatState.init('ModLoadingState');
-        targetState.scriptSet("transitionToTitleScreen", false);
-        trace(targetState.scriptGet("transitionToTitleScreen"));
-        FlxG.switchState(targetState);
-        FlxTransitionableState.skipNextTransIn = true;
-        FlxTransitionableState.skipNextTransOut = true;
-      }
-    }
-    if (controls.ACCEPT)
-    {
-      if(inFullModView) return;
-      var modCaseObject = grpModCases.members[curSelected];
-      if (modCaseObject.scriptGet("metadata").id == funkinModMenuID)
-      { // dont allow disable to prevent being locked out of the mod menu
-        modCaseObject.x -= 5;
-        FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-        FlxTween.tween(modCaseObject, {x: modCaseOffsetX(curSelected)*3 }, 0.5, {ease: FlxEase.elasticOut});
 
-        FlxG.sound.play(Paths.sound("CS_locked"));
-      }
-      else if (modCaseObject.scriptGet("isMissingDependencies"))
-      {
-        FlxG.sound.play(Paths.sound("cancelMenu"));
-        this.persistentUpdate = false;
-        //this.persistentDraw = true;
-        var substate = ScriptedMusicBeatSubState.init('ModDependencySubState', [modCaseObject.scriptGet("missingDependenciesNames"), modCaseObject.scriptGet("missingDependenciesURLS")]);
-        substate.camera = foregroundCamera;
-        FlxG.state.openSubState(substate);
-      }
-      else
-      {
-        modCaseObject.scriptSet("enabled", !modCaseObject.scriptGet("enabled"));
-        modCaseObject.scriptCall("toggleCaseSpriteAnimation");
-        if(modCaseObject.scriptGet("enabled")) charPortrait.scriptCall("playEnableAnimation");
-        file.saveContent(registeredModsPath + detectedMods[curSelected].id + registeredModFileExtension, modCaseObject.scriptGet("enabled"));
-      }
-    }
-    if (controls.FREEPLAY_CHAR_SELECT)
-    {
-      if (transitioningFullModView) return;
-      modCaseFull.scriptSet("metadata", detectedMods[curSelected]);
-      modCaseFull.scriptCall("updateMetadata");
-      if(!inFullModView)
-      {
-        modCaseFull.visible = true;
-        transitioningFullModView = true;
-        inFullModView = true;
-        for(modCase in 0...grpModCases.length) {
-          var modCaseObject = grpModCases.members[modCase];
+        if(inFullModView || transitioning) return;
 
-          if(modCase == curSelected)
-          {
-            FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
-            FlxTween.tween(modCaseObject, {y: 300 + 10}, 0.2, {ease: FlxEase.linear, onComplete: function():Void {
-              FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-              FlxTween.tween(modCaseObject, {y: -modCaseObject.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
-                FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-                FlxTween.tween(modCaseFull, {y: 0 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
-                  transitioningFullModView = false;
-                }});
-              }});
-            }});
-          }
-          else
-          {
-            FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-            FlxTween.tween(modCaseObject, {x: -modCaseObject.width + modCaseOffsetX(modCase)*3 }, 0.5 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
-          }
-        }
-      }
-      else
-      {
-        transitioningFullModView = true;
-        for(modCase in 0...grpModCases.length) {
-            var modCaseObject = grpModCases.members[modCase];
-
-            if(modCase == curSelected)
+        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
+        {
+            if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
             {
-              FlxTween.globalManager.cancelTweensOf(modCaseFull, "y");
-              FlxTween.tween(modCaseFull, {y: -FlxG.height }, 0.5, {ease: FlxEase.cubeIn, onComplete: function():Void {
-                FlxTween.globalManager.cancelTweensOf(modCaseObject, "y");
-                modCaseFull.visible = false;
-                FlxTween.tween(modCaseObject, {y: 300 }, 0.5, {ease: FlxEase.cubeOut, onComplete: function():Void {
-                  inFullModView = false;
-                  transitioningFullModView = false;
-                }});
-              }});
+                FunkinSound.playOnce(Paths.sound('missnote1'));
+                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                openSubState(new ModDependenciesSubState());
+            }
+            else if(ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata) || modCasesGroup.members[curSelected].metadata.id == ModMenuUtils.modMenuID)
+            {
+                FunkinSound.playOnce(Paths.sound('modFavoriteDisable'), 0.8);
+                characterPortrait.playAnimCallback("locked");
+                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                FlxTween.cancelTweensOf(modCasesGroup.members[curSelected]);
+                modCasesGroup.members[curSelected].x = -60 * Math.sin(curSelected - curSelected - 2) - 55 - 10;
+                FlxTween.tween(modCasesGroup.members[curSelected], { x: -60 * Math.sin(curSelected - curSelected - 2) - 55 }, 0.75, { ease: FlxEase.elasticOut });
             }
             else
             {
-              FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-              FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 0.5 + 0.25*Math.abs(modCase - curSelected), {ease: FlxEase.cubeInOut});
+                modCasesGroup.members[curSelected].toggleMod();
+                characterPortrait.playAnimCallback((ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) ? "enable":"disable");
+                HapticUtil.vibrate();
             }
-          }
         }
-      }
-    if (controls.UI_UP_P)     scrollMenu(false);
-    if (controls.UI_DOWN_P)   scrollMenu(true);
-    if (controls.RESET)       charPortrait.scriptCall("switchCharacterPortrait");
-  }
 
-  function scrollMenu(down:Bool) {
-    if(inFullModView) return;
-		if(down) {
-			curSelected += 1;
-			if (curSelected > detectedMods.length-1) curSelected = 0;
-		}
-		else {
-			curSelected -= 1;
-			if (curSelected < 0) curSelected = detectedMods.length-1;
-		}
-    //trace(curSelected);
+        if(FlxG.onMobile && TouchUtil.justPressed) canFavorite = true;
 
-    for(modCase in 0...grpModCases.length) {
-      var modCaseObject = grpModCases.members[modCase];
+        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
+        {
+            if(canFavorite || !FlxG.onMobile)
+            {
+                if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
+                {
+                    FunkinSound.playOnce(Paths.sound('missnote1'));
+                    HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                    openSubState(new ModDependenciesSubState());
+                }
+                else
+                {
+                    modCasesGroup.members[curSelected].toggleFavorite();
+                    if(!ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) modCasesGroup.members[curSelected].toggleMod();
+                    characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
+                }
+                canFavorite = false;
+            }
+        }
 
-      FlxTween.globalManager.cancelTweensOf(modCaseObject, "x");
-      FlxTween.tween(modCaseObject, {x: modCaseOffsetX(modCase)*3 }, 0.5, {ease: FlxEase.expoOut});
-      if(modCase == curSelected)
-        {  }
-      else if(Math.abs(modCase - curSelected) == 1)
-        {  }
-      else if(Math.abs(modCase - curSelected) == 2)
-        {  }
-      else
-        {  }
-
-      FlxTween.globalManager.cancelTweensOf(grpModCases, "y");
-      FlxTween.tween(grpModCases, {y: 300 -150*curSelected }, 0.5, {ease: FlxEase.expoOut});
+        if(controls.BACK && !inFullModView)
+        {
+            if(!inFullModView) openSubState(new ModLoadingSubState(new MainMenuState()));
+        }
+        if(controls.UI_UP_P || SwipeUtil.swipeUp)
+        {
+            scrollMenu(-1);
+        }
+        if(controls.UI_DOWN_P || SwipeUtil.swipeDown)
+        {
+            scrollMenu(1);
+        }
+        if(FlxG.mouse.wheel != 0)
+        {
+            scrollMenu(-FlxG.mouse.wheel);
+        }
+        if(controls.RESET)
+        {
+            if(FlxG.keys.pressed.SHIFT)
+            {
+                var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+                save.clear();
+                trace(save);
+                FlxG.switchState(new ModMenuState());
+                return;
+            }
+            poofSprite.animation.play("poof");
+        }
     }
 
-    if (grpModCases.length > 0) FlxG.sound.play(Paths.sound('scrollMenu'));
-	}
-
-  function modCaseOffsetX(modCase:Int) {
-    return (-60 * (Math.sin(modCase - curSelected - 2))) - 55;
-  }
+    function scrollMenu(scroll:Int = 0)
+    {
+        modCasesGroup.members[curSelected].caseSprite.animation.play("dim");
+        curSelected = FlxMath.wrap(curSelected + scroll, 0, modCasesGroup.length-1);
+        modCasesGroup.members[curSelected].caseSprite.animation.play("idle");
+        if(scroll != 0)
+        {
+            FunkinSound.playOnce(Paths.sound('scrollMenu'));
+            FlxTween.cancelTweensOf(modCasesGroup);
+            FlxTween.tween(modCasesGroup, { y: 300 - 150*curSelected }, 0.5, { ease: FlxEase.expoOut });
+            for(modCase in modCasesGroup.members)
+            {
+                FlxTween.cancelTweensOf(modCase);
+                FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 0.5, { ease: FlxEase.expoOut });
+            }
+        }
+    }
 }

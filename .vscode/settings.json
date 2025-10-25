@@ -7,7 +7,7 @@
       "source.organizeImports": "never"
     },
     "editor.defaultFormatter": "nadako.vshaxe",
-    "editor.tabSize": 2
+    "editor.tabSize": 4
   },
 
   "[json]": {

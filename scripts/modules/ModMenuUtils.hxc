@@ -1,0 +1,201 @@
+import funkin.modding.PolymodHandler;
+import funkin.modding.module.Module;
+import funkin.save.Save;
+import funkin.util.VersionUtil;
+
+import flixel.graphics.FlxGraphic;
+
+import haxe.ds.StringMap;
+
+import openfl.display.BitmapData;
+import openfl.utils.ByteArrayData;
+
+// IMPORTS FOR ASSET RELOADING
+import funkin.data.dialogue.conversation.ConversationRegistry;
+import funkin.data.dialogue.dialoguebox.DialogueBoxRegistry;
+import funkin.data.dialogue.speaker.SpeakerRegistry;
+import funkin.data.event.SongEventRegistry;
+import funkin.data.story.level.LevelRegistry;
+import funkin.data.notestyle.NoteStyleRegistry;
+import funkin.play.notes.notekind.NoteKindManager;
+import funkin.data.song.SongRegistry;
+import funkin.data.freeplay.player.PlayerRegistry;
+import funkin.data.stage.StageRegistry;
+import funkin.play.character.CharacterDataParser;
+import funkin.data.freeplay.album.AlbumRegistry;
+import funkin.modding.module.ModuleHandler;
+
+class ModMenuUtils extends Module
+{
+    var modMenuID = "Funkin' Mod Menu";
+
+    var defaultModSave = {
+        enabled: true,
+        favorited: false,
+        lastVersion: null
+    };
+
+    public function new()
+    {
+        super('ModMenuUtils');
+
+        trace("Mod Menu Utils Initialized.");
+
+        for(mod in PolymodHandler.getAllMods())
+        {
+            if(mod.title == modMenuID)
+            {
+                modMenuID = mod.id;
+                return;
+            }
+        }
+
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(save == null)
+        {
+            trace("Funkin' Mod Menu Save Data Not Found; Creating New Save.");
+            Save.instance.modOptions.set("Funkin' Mod Menu", new StringMap());
+        }
+        else
+        {
+            trace("Funkin' Mod Menu Save Data Found: " + save);
+        }
+    }
+
+    public function getModIcon(mod:ModMetadata)
+    {
+        if(mod == null || mod.icon == null)
+            return Paths.image("modmenu/no_icon");
+
+        return (FlxGraphic.fromBitmapData(BitmapData.fromBytes(ByteArrayData.fromBytes(mod.icon)), false));
+    }
+
+    public function toggleMod(mod:ModMetadata)
+    {
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
+        {
+            save.set(mod.id, defaultModSave);
+            save.get(mod.id).lastVersion = mod.modVersion;
+        }
+        save.get(mod.id).enabled = !save.get(mod.id).enabled;
+
+        trace("Mod Toggle Status Updated; " + save.get(mod.id).enabled);
+    }
+
+    public function isModEnabled(mod:ModMetadata)
+    {
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
+        {
+            save.set(mod.id, defaultModSave);
+            save.get(mod.id).lastVersion = mod.modVersion;
+        }
+        return save.get(mod.id).enabled;
+    }
+
+    public function toggleFavorite(mod:ModMetadata)
+    {
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
+        {
+            save.set(mod.id, defaultModSave);
+            save.get(mod.id).lastVersion = mod.modVersion;
+        }
+        save.get(mod.id).favorited = !save.get(mod.id).favorited;
+
+        trace("Mod Favorited Status Updated; " + save.get(mod.id).favorited);
+    }
+
+    public function isModFavorited(mod:ModMetadata)
+    {
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
+        {
+            save.set(mod.id, defaultModSave);
+            save.get(mod.id).lastVersion = mod.modVersion;
+        }
+        return save.get(mod.id).favorited;
+    }
+
+    public function isModNew(mod:ModMetadata)
+    {
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public function isModMissingDependencies(mod:ModMetadata)
+    {
+        if(mod.dependencies == null) return false;
+        var missingDependencies = [];
+        for(dependency in mod.dependencies.keys())
+        {
+            if(PolymodHandler.getAllModIds().contains(dependency))
+            {
+                if(!VersionUtil.validateVersion(PolymodHandler.getAllMods()[PolymodHandler.getAllModIds().indexOf(dependency)].modVersion, mod.dependencies.get(dependency)))
+                {
+                    missingDependencies.push(dependency);
+                }
+            }
+            else
+            {
+                missingDependencies.push(dependency);
+            }
+        }
+        if(missingDependencies.length > 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public function loadEnabledMods() // NOTE: NO LONGER ABLE TO 100% REPLICATE RELOAD FUNCTIONALITY. POLYMOD CLASS IS BLACKLISTED.
+    {
+        var modsToLoad = [];
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        for(mod in PolymodHandler.getAllMods())
+        {
+            save.get(mod.id).lastVersion = mod.modVersion;
+            if(isModEnabled(mod))
+                modsToLoad.push(mod.id);
+        }
+
+        if(modsToLoad.length > 0)
+        {
+            trace("Loading Mods: " + modsToLoad.join(", "));
+            PolymodHandler.loadModsById(modsToLoad);
+        }
+        else
+        {
+            trace("No Mods Enabled, Loading All Mods.");
+            PolymodHandler.loadAllMods();
+        }
+
+        ModuleHandler.clearModuleCache();
+
+        // Polymod.clearScripts();
+        // Polymod.registerAllScriptClasses();
+
+        SongEventRegistry.loadEventCache();
+
+        SongRegistry.instance.loadEntries();
+        LevelRegistry.instance.loadEntries();
+        NoteStyleRegistry.instance.loadEntries();
+        PlayerRegistry.instance.loadEntries();
+        ConversationRegistry.instance.loadEntries();
+        DialogueBoxRegistry.instance.loadEntries();
+        SpeakerRegistry.instance.loadEntries();
+        AlbumRegistry.instance.loadEntries();
+        StageRegistry.instance.loadEntries();
+
+        CharacterDataParser.loadCharacterCache();
+        NoteKindManager.loadScripts();
+        ModuleHandler.loadModuleCache();
+
+        trace("Mod Loading Completed.");
+    }
+}

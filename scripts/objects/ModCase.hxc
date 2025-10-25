@@ -1,224 +1,151 @@
-import funkin.modding.PolymodHandler;
+import funkin.audio.FunkinSound;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.tools.ArrayTools;
 
-import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.effects.FlxSkewedSprite;
-import flixel.graphics.FlxGraphic;
-import flixel.math.FlxPoint;
+import flixel.group.FlxTypedSpriteGroup;
 import flixel.text.FlxText;
 import flixel.text.FlxTextBorderStyle;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxTimer;
 
-import haxe.Json;
-import haxe.Unserializer;
-import funkin.util.FileUtil;
+import StringTools;
 
-import hxjsonast.Parser;
-import hxjsonast.Tools;
-
-import openfl.display.BitmapData;
-
-import polymod.Polymod;
-
-class ModCase extends ScriptedFlxSpriteGroup {
+class ModCase extends ScriptedFlxSpriteGroup
+{
+  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
 
   var caseSprite:FlxSprite;
   var buttonSprite:FlxSprite;
   var favSprite:FlxSprite;
-  var grpOffset:ScriptedFlxSpriteGroup;
+
+  var pressOffsetGroup:FlxTypedSpriteGroup;
 
   var metadata:ModMetadata;
-  var enabled:Bool = true;
-  var isNew:Bool = true;
 
-  var dependencies = [];
-  var missingDependencies = [];
-  var missingDependenciesNames = [];
-  var missingDependenciesURLS = [];
-  var isMissingDependencies = false;
-
-  var fileSystem:Dynamic;
-  var file:Dynamic;
-
-	public function new(xPos:Float = 0, yPos:Float = 0, ?args:Array = [])
+  function new(_x, _y, ?_meta:ModMetadata)
   {
-		super("ModCase", xPos, yPos);
-    this.setPosition(xPos, yPos);
-    enabled = args[0];
-    metadata = args[1];
-    isNew = args[2];
-    //trace(args);
+    super(_x, _y);
+    this.setPosition(_x, _y);
+    metadata = _meta;
 
-    // FileSystem workaround! (found from https://github.com/Burgerballs/ModBootstrap/, thank you SO much vro)
-    fileSystem = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.FileSystem');
-    file = Unserializer.DEFAULT_RESOLVER.resolveClass('sys.io.File');
+    ModMenuUtils.isModNew(metadata); // Called up here to initiliaze shit if new
 
-		var colorBg:FlxSkewedSprite = new FlxSkewedSprite(634, 5);
-    colorBg.makeGraphic(109, 107, 0xffFFDFD3);
+    var colorBg:FlxSkewedSprite = new FlxSkewedSprite(633, 7);
+    colorBg.makeGraphic(108, 105, 0xffFFDFD3);
     colorBg.skew.set(22,0);
-    add(colorBg);
+    this.add(colorBg);
 
-    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(634,5).loadGraphic(Paths.image("modmenu/no_icon"));
-    if (metadata != null) {
-      var iconPath = "mods/" + metadata.id + "/_polymod_icon.png";
-      //trace(iconPath);
-      if (fileSystem.exists(iconPath)) {
-        var modIconBitmap:BitmapData = BitmapData.fromFile(iconPath);
-        modIcon.loadGraphic(FlxGraphic.fromBitmapData(modIconBitmap, false, iconPath));
-      }
-    }
-    modIcon.setGraphicSize(109, 107);
+    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(633,7).loadGraphic(ModMenuUtils.getModIcon(metadata));
+    modIcon.setGraphicSize(108, 105);
     modIcon.updateHitbox();
     modIcon.skew.set(22,0);
-    add(modIcon);
+    this.add(modIcon);
 
-    caseSprite = new FlxSprite(1, -2);
-    caseSprite.frames = Paths.getSparrowAtlas("modmenu/modcase");
+    caseSprite = new FlxSprite(0, 0);
+    caseSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
     caseSprite.animation.addByPrefix("press", "casePress", 24, false);
-    caseSprite.animation.addByPrefix("loop", "caseIdle", 24, true);
+    caseSprite.animation.addByPrefix("idle", "caseIdle", 24, true);
     caseSprite.animation.addByPrefix("dim", "caseDimmed", 24, true);
-    caseSprite.animation.play("loop");
-    add(caseSprite);
-    
-    buttonSprite = new FlxSprite(1, -2);
-    buttonSprite.frames = Paths.getSparrowAtlas("modmenu/modcase");
+    caseSprite.animation.onFinish.add((name)-> {
+      if(name == "press") caseSprite.animation.play("idle");
+    });
+    caseSprite.animation.play("dim");
+    this.add(caseSprite);
+
+    buttonSprite = new FlxSprite(0, 0);
+    buttonSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
     buttonSprite.animation.addByPrefix("enabled", "lightEnable0", 24, false);
     buttonSprite.animation.addByPrefix("loopEnabled", "lightEnableLoop", 24, true);
     buttonSprite.animation.addByPrefix("disabled", "lightDisable0", 24, false);
     buttonSprite.animation.addByPrefix("loopDisabled", "lightDisableLoop", 24, true);
     buttonSprite.animation.addByPrefix("missingDependencies", "lightMissingDependancies0", 24, true);
-    if (enabled) { buttonSprite.animation.play("loopEnabled"); }
-    else { buttonSprite.animation.play("loopDisabled"); }
-    add(buttonSprite);
+    buttonSprite.animation.onFinish.add((name)-> {
+      switch(name)
+      {
+        case "enabled":
+            buttonSprite.animation.play("loopEnabled");
+            pressOffsetGroup.y = 0;
+        case "disabled":
+            buttonSprite.animation.play("loopDisabled");
+            pressOffsetGroup.y = 0;
+      }
+    });
+    buttonSprite.animation.play((ModMenuUtils.isModEnabled(metadata)) ? "loopEnabled":"loopDisabled");
+    if(ModMenuUtils.isModMissingDependencies(metadata)) buttonSprite.animation.play("missingDependencies");
+    this.add(buttonSprite);
 
-    var modTitle:FlxText = new FlxText(100 , 61, 590, "Mod Name", 42);
-    if (metadata != null) modTitle.text = " " + metadata.title;
+    favSprite = new FlxSprite(0, 0);
+    favSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
+    favSprite.animation.addByPrefix("favorite", "favourite0", 24, false);
+    favSprite.animation.addByPrefix("unfavorite", "unFavourite0", 24, false);
+    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
+    this.add(favSprite);
+
+    var modTitle:FlxText = new FlxText(100, 63, 590, " " + metadata.title, 42);
     modTitle.font = "Letterstuff Regular";
     modTitle.color = 0xffFFFFFF;
     modTitle.borderColor = 0xff5F91C1;
     modTitle.borderSize = 3;
     modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
     modTitle.bold = true;
-    if (modTitle.text.length > 19)
-      modTitle.text = modTitle.text.substring(0, 18) + "-";
+    if (modTitle.text.length > 17)
+      modTitle.text = modTitle.text.substring(0, 17);
     add(modTitle);
 
-    var modAuthors:FlxText = new FlxText(110 , 9, 590, "Authors", 32);
-    if (metadata != null) {
-      modAuthors.text = "";
-      if(metadata.contributors != null) {
-        for (contributor in 0...metadata.contributors.length) {
-          if (contributor == metadata.contributors.length-1) { modAuthors.text += metadata.contributors[contributor].name; }
-          else { modAuthors.text += metadata.contributors[contributor].name + ", "; }
-        }
-      } else {
-        modAuthors.text = metadata._author;
+    var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);
+    var contributors = [];
+    if(metadata._author != null && metadata._author != "") ArrayTools.pushUnique(contributors, metadata._author);
+    if(metadata.contributors != null)
+    {
+      for(contributor in metadata.contributors)
+      {
+        ArrayTools.pushUnique(contributors, contributor.name);
       }
     }
+    modAuthors.text = contributors.join(", ");
     modAuthors.font = "Tardling Solid Regular";
     modAuthors.borderColor = 0xff3D7DFF;
     modAuthors.borderSize = 2;
     modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
     modAuthors.blend = 0;
-    //modAuthors.bold = true;
     if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
     add(modAuthors);
 
-    if(isNew) {
+    if(ModMenuUtils.isModNew(metadata))
+    {
       newNotifSprite = new FlxSprite(caseSprite.width - 176, -20);
       newNotifSprite.frames = Paths.getSparrowAtlas("freeplay/freeplayCapsule/new");
       newNotifSprite.animation.addByPrefix("idle", "NEW notif", 24, true);
       newNotifSprite.animation.play("idle");
-      add(newNotifSprite);
+      this.add(newNotifSprite);
     }
 
-    grpOffset = new ScriptedFlxSpriteGroup(0, 0);
-    grpOffset.add(colorBg);
-    grpOffset.add(modIcon);
-    grpOffset.add(modTitle);
-    grpOffset.add(modAuthors);
-    if(isNew) grpOffset.add(newNotifSprite);
-
-    var dependenciesPath = "mods/" + metadata.id + "/dependencies.json";
-    if (fileSystem.exists(dependenciesPath)) {
-      var dependencyShit = Tools.getValue(Parser.parse(file.getContent(dependenciesPath)));
-      for(dependency in 0...dependencyShit.dependencies.length) {
-        dependencies.push(dependencyShit.dependencies[dependency].id);
-      }
-
-      var registeredModsPath = FlxG.state.scriptGet("registeredModsPath");
-      var registeredMods = [];
-      for(modFile in 0...fileSystem.readDirectory(registeredModsPath).length)
-      {
-        registeredMods.push(fileSystem.readDirectory(registeredModsPath)[modFile].substring(0, fileSystem.readDirectory(registeredModsPath)[modFile].length - 4));
-      }
-      trace(registeredMods);
-
-      for(dependency in 0...dependencies.length) {
-        for(mod in 0...registeredMods.length) {
-          if(registeredMods[mod] == dependencies[dependency]) {
-            if (missingDependencies.contains(dependencies[dependency]))
-            {
-              missingDependencies.remove(dependencies[dependency]);
-              missingDependenciesNames.remove(dependencyShit.dependencies[dependency].name);
-              missingDependenciesURLS.remove(dependencyShit.dependencies[dependency].downloadLink);
-            }
-            // trace(missingDependencies);
-            break;
-          }
-          else {
-            if (!missingDependencies.contains(dependencies[dependency]))
-            {
-              missingDependencies.push(dependencies[dependency]);
-              missingDependenciesNames.push(dependencyShit.dependencies[dependency].name);
-              missingDependenciesURLS.push(dependencyShit.dependencies[dependency].downloadLink);
-            }
-            // trace(missingDependencies);
-          }
-        }
-      }
-      trace(missingDependencies);
-      trace(missingDependenciesURLS);
-      if(missingDependencies.length > 0)
-      {
-        isMissingDependencies = true;
-        enabled = false;
-        caseSprite.animation.play("loopDisabled");
-        file.saveContent(FlxG.state.scriptGet("registeredModsPath") + metadata.id + FlxG.state.scriptGet("registeredModFileExtension"), enabled);
-      }
+    pressOffsetGroup = new FlxTypedSpriteGroup(0,0,0);
+    for(object in [colorBg, modIcon, favSprite, modTitle, modAuthors])
+    {
+        pressOffsetGroup.add(object);
     }
-	}
+  }
 
   override function update(elapsed:Float):Void
   {
     super.update(elapsed);
-    if (caseSprite.animation.finished) {
-      caseSprite.animation.play("loop");
-      if(enabled) {
-        buttonSprite.animation.play("loopEnabled");
-      } else {
-        buttonSprite.animation.play("loopDisabled");
-      }
-      grpOffset.y = 0;
-    }
-
   }
 
-  public function toggleCaseSpriteAnimation() {
-    var soundToPlay = '';
+  function toggleMod()
+  {
+    ModMenuUtils.toggleMod(metadata);
     caseSprite.animation.play("press");
-    if(enabled) {
-      buttonSprite.animation.play("enabled");
-      soundToPlay = 'modEnable';
-      grpOffset.y = 4;
-    } else {
-      buttonSprite.animation.play("disabled");
-      soundToPlay = 'modDisabled';
-      grpOffset.y = 4;
-    }
-    FlxG.sound.play(Paths.sound(soundToPlay));
+    buttonSprite.animation.play((ModMenuUtils.isModEnabled(metadata)) ? "enabled":"disabled");
+    pressOffsetGroup.y = 4;
+    FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModEnabled(metadata)) ? "modEnable":"modDisabled")));
+  }
+
+  function toggleFavorite()
+  {
+    ModMenuUtils.toggleFavorite(metadata);
+    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
+    FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModFavorited(metadata)) ? "fav":"unfav")));
   }
 }

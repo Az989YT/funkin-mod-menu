@@ -3,13 +3,13 @@
     {
       "name": "idle",
       "prefix": "idle",
-      "offsets": [0, 0],
+      "offsets": [5, 5],
       "fps": 24
     },
     {
       "name": "enable",
       "prefix": "enable",
-      "offsets": [0, 0],
+      "offsets": [5, 5],
       "fps": 24
     }
   ],

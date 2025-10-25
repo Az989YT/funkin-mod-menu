@@ -1,0 +1,94 @@
+import funkin.modding.module.ModuleHandler;
+import funkin.ui.ScriptedMusicBeatState;
+import funkin.ui.ScriptedMusicBeatSubState;
+import funkin.util.ReflectUtil;
+import funkin.util.WindowUtil;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+
+class ModDependenciesSubState extends ScriptedMusicBeatSubState
+{
+    var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
+    var curMod = FlxG.state.modCasesGroup.members[FlxG.state.curSelected].metadata;
+    var timesPressed = 0;
+    var dependencies = [];
+
+    public function new()
+    {
+        super();
+    }
+
+    override public function create():Void
+    {
+        super.create();
+        if(!Std.isOfType(FlxG.state, ScriptedMusicBeatState) || ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name") != "ModMenuState")
+        {
+            close();
+            return;
+        }
+        FlxG.state.disableControls = true;
+
+        for(dependency in curMod.dependencies.keys())
+        {
+            dependencies.push(dependency);
+        }
+        var black:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+
+        var text:FlxText = new FlxText(0, 0, 960, curMod.title + " is missing dependencies:\n" + dependencies.join(", "), 16);
+        text.text += (curMod.metadata.exists(dependencies[0]))? "\n Press ENTER to open the link for the dependencies, or BACK to close this warning.":"\n Press BACK to close this warning.";
+        text.alignment = "center";
+        FlxTween.tween(text, {alpha: 0.75}, 3, {type: 4, ease: FlxEase.sineInOut});
+
+        var textUnderlay:FlxSprite = new FlxSprite(text.x - 25, text.y - 25).makeGraphic(text.width + 25, text.height + 25, 0xff000000);
+        textUnderlay.alpha = 0.75;
+
+        for(object in [black])
+        {
+            add(object);
+            object.alpha = 0;
+        }
+        for(object in [textUnderlay, text])
+        {
+            object.screenCenter();
+            add(object);
+        }
+        FlxTween.tween(black, { alpha: 0.5 }, 1, { ease: FlxEase.cubeOut });
+
+
+    }
+
+    override function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        if(controls.BACK || controls.FREEPLAY_CHAR_SELECT)
+        {
+            {
+                FlxG.state.disableControls = false;
+                for(object in this.members)
+                {
+                    FlxTween.cancelTweensOf(object);
+                    FlxTween.tween(object, { alpha: 0 }, 0.5, { ease: FlxEase.cubeOut });
+                }
+                new FlxTimer().start(0.75, ()->{ close(); });
+            }
+        }
+        if(controls.ACCEPT)
+        {
+            timesPressed++;
+            if(timesPressed > 1)
+            {
+                for(dependency in dependencies)
+                {
+                    if(curMod.metadata.exists(dependency))
+                        WindowUtil.openURL(curMod.metadata.get(dependency));
+                }
+            }
+        }
+    }
+}

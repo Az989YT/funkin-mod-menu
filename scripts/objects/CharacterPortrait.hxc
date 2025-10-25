@@ -1,0 +1,99 @@
+import funkin.graphics.FunkinSprite;
+import funkin.graphics.ScriptedFunkinSprite;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.util.assets.DataAssets;
+import funkin.modding.module.ModuleHandler;
+
+import flixel.FlxG;
+import flixel.util.FlxTimer;
+
+import hxjsonast.Parser;
+import hxjsonast.Tools;
+
+import StringTools;
+
+class CharacterPortrait extends ScriptedFunkinSprite
+{
+    var curCharacter = "bf";
+    var characterData;
+    var characterList = DataAssets.listDataFilesInPath("portraits/");
+
+    var allowedToPlayAnim = true;
+    var totalWaitingAnims = 0;
+
+    var lastCallback = "";
+    var portraitScript = ModuleHandler.getModule(curCharacter + "-portrait");
+
+    public function new()
+    {
+        super(0, 0);
+
+        for(character in characterList)
+            FunkinSprite.cacheSparrow("modmenu/portraits/" + character);
+
+        initRandomCharacter();
+        shader = new AdjustColorShader();
+    }
+
+    override function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        if(characterData.waiting.canWait && allowedToPlayAnim)
+        {
+            if(FlxG.random.int(0,characterData.waiting.waitChance) && animation.name == "idle")
+            {
+                playAnimCallback("waiting" + FlxG.random.int(1, totalWaitingAnims));
+                allowedToPlayAnim = false;
+                new FlxTimer().start(characterData.waiting.waitDelay, ()->
+                {
+                    allowedToPlayAnim = true;
+                });
+            }
+        }
+    }
+
+    function initRandomCharacter()
+    {
+        var lastCharacter = curCharacter;
+        var randomCharacter = curCharacter;
+        while(randomCharacter == lastCharacter) randomCharacter = characterList[FlxG.random.int(0, characterList.length-1)];
+        initCharacter(randomCharacter);
+    }
+
+    function initCharacter(character:String = "bf")
+    {
+        curCharacter = character;
+        loadSparrow("modmenu/portraits/" + curCharacter);
+        animation.destroyAnimations();
+        totalWaitingAnims = 0;
+        updateHitbox();
+        portraitScript = ModuleHandler.getModule(curCharacter + "-portrait");
+        var filePath = Paths.json('portraits/' + curCharacter);
+        characterData = Tools.getValue(Parser.parse(Assets.getText(filePath), filePath));
+        for(anim in characterData.animations)
+        {
+            animation.addByPrefix(anim.name, anim.prefix, anim.fps, (anim.name == "idle") ? true:false);
+            if(StringTools.startsWith(anim.name, "waiting")) totalWaitingAnims++;
+            animation.onFrameChange.add((name, frame)->{
+                if(name == anim.name)
+                    offset.set(-anim.offsets[0], -anim.offsets[1]);
+            });
+        }
+        animation.onFinish.add((name)->{
+            if(name != "idle") playAnimCallback("idle");
+        });
+        playAnimCallback("idle");
+        setPosition(FlxG.width - width, FlxG.height - height);
+    }
+
+    function playAnimCallback(name)
+    {
+        lastCallback = animation.name;
+        animation.play(name);
+        if(name != lastCallback)
+        {
+            if(portraitScript != null) portraitScript.onAnimPlay(name);
+        }
+    }
+}

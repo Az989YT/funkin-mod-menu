@@ -1,0 +1,29 @@
+import funkin.modding.module.Module;
+
+import flixel.FlxG;
+
+class MonsterPortrait extends Module
+{
+	public function new()
+	{
+		super('monster-portrait');
+	}
+
+    public function onAnimPlay(name)
+    {
+        var portrait = FlxG.state.characterPortrait;
+        switch(name)
+        {
+            case "waiting1":
+                // run left logic
+            case "waiting2":
+                // run right logic
+            case "waiting3":
+                //jumpscare logic
+            case "waiting4":
+                // corner peek logic
+            case "waiting5":
+                //fall logic
+        }
+    }
+}
