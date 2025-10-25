@@ -1,6 +1,8 @@
 import funkin.audio.FunkinSound;
 import funkin.graphics.shaders.AdjustColorShader;
+import funkin.modding.PolymodHandler;
 import funkin.modding.module.ModuleHandler;
+import funkin.save.Save;
 import funkin.ui.ScriptedMusicBeatState;
 import funkin.ui.mainmenu.MainMenuState;
 import funkin.util.Constants;
@@ -134,10 +136,11 @@ class ModMenuState extends ScriptedMusicBeatState
             object.shader = new AdjustColorShader();
         }
 
-        for(mod in ModMenuUtils.detectedMods)
+        for(mod in PolymodHandler.getAllMods())
         {
-            var modCase = new ModCase(0, 150*ModMenuUtils.detectedMods.indexOf(mod), mod);
+            var modCase = new ModCase(0, 0, mod);
             modCasesGroup.add(modCase);
+            modCase.y += 150 * modCasesGroup.members.indexOf(modCase);
         }
         modCasesGroup.y = (FlxG.height - modCasesGroup.members[0].height)/2;
 
@@ -270,8 +273,9 @@ class ModMenuState extends ScriptedMusicBeatState
         {
             if(FlxG.keys.pressed.SHIFT)
             {
-                ModMenuUtils.modMenuSaveInstance.clear();
-                trace(ModMenuUtils.modMenuSaveInstance);
+                var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+                save.clear();
+                trace(save);
                 FlxG.switchState(new ModMenuState());
                 return;
             }

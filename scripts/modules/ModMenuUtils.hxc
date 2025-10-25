@@ -5,6 +5,8 @@ import funkin.util.VersionUtil;
 
 import flixel.graphics.FlxGraphic;
 
+import haxe.ds.StringMap;
+
 import openfl.display.BitmapData;
 import openfl.utils.ByteArrayData;
 
@@ -26,16 +28,12 @@ import funkin.modding.module.ModuleHandler;
 class ModMenuUtils extends Module
 {
     var modMenuID = "Funkin' Mod Menu";
-    var modMenuSaveInstance = Save.instance.modOptions.get("Funkin' Mod Menu");
-    var modMenuSaveData = [
-        "mod-id" => {
-        enabled: true,
-        favorited: false
-        }
-    ];
 
-    var detectedMods = PolymodHandler.getAllMods();
-    var detectedModIds = PolymodHandler.getAllModIds();
+    var defaultModSave = {
+        enabled: true,
+        favorited: false,
+        lastVersion: null
+    };
 
     public function new()
     {
@@ -43,39 +41,25 @@ class ModMenuUtils extends Module
 
         trace("Mod Menu Utils Initialized.");
 
-        for(mod in detectedMods)
+        for(mod in PolymodHandler.getAllMods())
         {
             if(mod.title == modMenuID)
             {
                 modMenuID = mod.id;
-                break;
+                return;
             }
         }
 
-        modMenuSaveData.clear();
-        if(modMenuSaveInstance == null)
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(save == null)
         {
-            trace("No Funkin' Mod Menu Save Data; Generating Save Data.");
-            for(mod in detectedMods)
-            {
-                modMenuSaveData.set(mod.id, { enabled: true, favorited: false });
-            }
+            trace("Funkin' Mod Menu Save Data Not Found; Creating New Save.");
+            Save.instance.modOptions.set("Funkin' Mod Menu", new StringMap());
         }
         else
         {
-            trace("Funkin' Mod Menu Save Data Found; Appending New Mods.");
-            modMenuSaveData = modMenuSaveInstance;
-            for(mod in detectedMods)
-            {
-                if(!modMenuSaveData.exists(mod.id))
-                {
-                    trace("Appending Mod ID: " + mod.id);
-                    modMenuSaveData.set(mod.id, { enabled: true, favorited: false });
-                }
-            }
+            trace("Funkin' Mod Menu Save Data Found: " + save);
         }
-        Save.instance.modOptions.set("Funkin' Mod Menu", modMenuSaveData);
-        trace(modMenuSaveInstance);
     }
 
     public function getModIcon(mod:ModMetadata)
@@ -88,45 +72,52 @@ class ModMenuUtils extends Module
 
     public function toggleMod(mod:ModMetadata)
     {
-        if(modMenuSaveInstance.exists(mod.id))
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
         {
-            modMenuSaveInstance.get(mod.id).enabled = !modMenuSaveInstance.get(mod.id).enabled;
-            trace("Mod Toggle Status Updated; " + modMenuSaveInstance.get(mod.id).enabled);
+            save.set(mod.id, defaultModSave);
         }
+        save.get(mod.id).enabled = !save.get(mod.id).enabled;
+
+        trace("Mod Toggle Status Updated; " + save.get(mod.id).enabled);
     }
 
     public function isModEnabled(mod:ModMetadata)
     {
-        if(modMenuSaveInstance.exists(mod.id))
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
         {
-            // trace("Mod Toggle Status Found; " + modMenuSaveInstance.get(mod.id).enabled);
-            return modMenuSaveInstance.get(mod.id).enabled;
+            save.set(mod.id, defaultModSave);
         }
-        return true;
+        return save.get(mod.id).enabled;
     }
 
     public function toggleFavorite(mod:ModMetadata)
     {
-        if(modMenuSaveInstance.exists(mod.id))
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
         {
-            modMenuSaveInstance.get(mod.id).favorited = !modMenuSaveInstance.get(mod.id).favorited;
-            trace("Mod Favorite Status Updated; " + modMenuSaveInstance.get(mod.id).favorited);
+            save.set(mod.id, defaultModSave);
         }
+        save.get(mod.id).favorited = !save.get(mod.id).favorited;
+
+        trace("Mod Favorited Status Updated; " + save.get(mod.id).favorited);
     }
 
     public function isModFavorited(mod:ModMetadata)
     {
-        if(modMenuSaveInstance.exists(mod.id))
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
         {
-            // trace("Mod Favorite Status Found; " + modMenuSaveInstance.get(mod.id).favorited);
-            return modMenuSaveInstance.get(mod.id).favorited;
+            save.set(mod.id, defaultModSave);
         }
-        return true;
+        return save.get(mod.id).favorited;
     }
 
     public function isModNew(mod:ModMetadata)
     {
-        if(!modMenuSaveInstance.exists(mod.id))
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+        if(!save.exists(mod.id))
         {
             return true;
         }
@@ -139,9 +130,9 @@ class ModMenuUtils extends Module
         var missingDependencies = [];
         for(dependency in mod.dependencies.keys())
         {
-            if(detectedModIds.contains(dependency))
+            if(PolymodHandler.getAllModIds().contains(dependency))
             {
-                if(!VersionUtil.validateVersion(detectedMods[detectedModIds.indexOf(dependency)].modVersion, mod.dependencies.get(dependency)))
+                if(!VersionUtil.validateVersion(PolymodHandler.getAllMods()[PolymodHandler.getAllModIds().indexOf(dependency)].modVersion, mod.dependencies.get(dependency)))
                 {
                     missingDependencies.push(dependency);
                 }
@@ -161,7 +152,7 @@ class ModMenuUtils extends Module
     public function loadEnabledMods() // NOTE: NO LONGER ABLE TO 100% REPLICATE RELOAD FUNCTIONALITY. POLYMOD CLASS IS BLACKLISTED.
     {
         var modsToLoad = [];
-        for(mod in detectedMods)
+        for(mod in PolymodHandler.getAllMods())
         {
             if(isModEnabled(mod))
                 modsToLoad.push(mod.id);

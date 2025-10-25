@@ -1,3 +1,4 @@
+import funkin.modding.PolymodHandler;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.ModuleHandler;
 import funkin.util.tools.ArrayTools;
@@ -22,7 +23,7 @@ class FullModCase extends ScriptedFlxSpriteGroup
         super(_x, _y);
         this.setPosition(_x, _y);
 
-        var defaultMod = ModMenuUtils.detectedMods[0];
+        var defaultMod = PolymodHandler.getAllMods()[0];
 
         var caseSprite:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image("modmenu/modCaseFull"));
         this.add(caseSprite);
