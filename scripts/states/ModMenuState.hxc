@@ -1,5 +1,6 @@
 import funkin.audio.FunkinSound;
 import funkin.graphics.shaders.AdjustColorShader;
+import funkin.input.Cursor;
 import funkin.modding.PolymodHandler;
 import funkin.modding.module.ModuleHandler;
 import funkin.save.Save;
@@ -39,6 +40,7 @@ class ModMenuState extends ScriptedMusicBeatState
     var inFullModView = false;
     var transitioning = false;
     var disableControls = false;
+    var canFavorite = true;
 
 	public function new()
     {
@@ -48,6 +50,8 @@ class ModMenuState extends ScriptedMusicBeatState
     override public function create():Void
     {
         super.create();
+
+        Cursor.show();
 
         this.persistentUpdate = this.persistentDraw = true;
         MainMenuState.rememberedSelectedIndex = 0;
@@ -167,7 +171,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(disableControls) return;
 
-        if( (controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(characterPortrait)) || (controls.BACK && inFullModView))
+        if( (controls.FREEPLAY_CHAR_SELECT) || (TouchUtil.pressAction(characterPortrait)) || (controls.BACK && inFullModView))
         {
             // openSubState(new FullModViewSubState());
             if(transitioning) return;
@@ -214,7 +218,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(inFullModView || transitioning) return;
 
-        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
+        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
         {
             if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
             {
@@ -238,30 +242,38 @@ class ModMenuState extends ScriptedMusicBeatState
                 HapticUtil.vibrate();
             }
         }
-        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.touch.ticksDeltaSincePress >= 500))
+
+        if(TouchUtil.justPressed) canFavorite = true;
+
+        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
         {
-            if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
+            if(canFavorite)
             {
-                FunkinSound.playOnce(Paths.sound('missnote1'));
-                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
-                openSubState(new ModDependenciesSubState());
-            }
-            else
-            {
-                modCasesGroup.members[curSelected].toggleFavorite();
-                if(!ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) modCasesGroup.members[curSelected].toggleMod();
-                characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
+                if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
+                {
+                    FunkinSound.playOnce(Paths.sound('missnote1'));
+                    HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                    openSubState(new ModDependenciesSubState());
+                }
+                else
+                {
+                    modCasesGroup.members[curSelected].toggleFavorite();
+                    if(!ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) modCasesGroup.members[curSelected].toggleMod();
+                    characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
+                }
+                canFavorite = false;
             }
         }
+
         if(controls.BACK && !inFullModView)
         {
             if(!inFullModView) openSubState(new ModLoadingSubState(new MainMenuState()));
         }
-        if(controls.UI_UP_P)
+        if(controls.UI_UP_P || SwipeUtil.swipeUp)
         {
             scrollMenu(-1);
         }
-        if(controls.UI_DOWN_P)
+        if(controls.UI_DOWN_P || SwipeUtil.swipeDown)
         {
             scrollMenu(1);
         }

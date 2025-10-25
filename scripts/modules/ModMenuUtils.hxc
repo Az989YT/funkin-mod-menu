@@ -76,6 +76,7 @@ class ModMenuUtils extends Module
         if(!save.exists(mod.id))
         {
             save.set(mod.id, defaultModSave);
+            save.get(mod.id).lastVersion = mod.modVersion;
         }
         save.get(mod.id).enabled = !save.get(mod.id).enabled;
 
@@ -88,6 +89,7 @@ class ModMenuUtils extends Module
         if(!save.exists(mod.id))
         {
             save.set(mod.id, defaultModSave);
+            save.get(mod.id).lastVersion = mod.modVersion;
         }
         return save.get(mod.id).enabled;
     }
@@ -98,6 +100,7 @@ class ModMenuUtils extends Module
         if(!save.exists(mod.id))
         {
             save.set(mod.id, defaultModSave);
+            save.get(mod.id).lastVersion = mod.modVersion;
         }
         save.get(mod.id).favorited = !save.get(mod.id).favorited;
 
@@ -110,6 +113,7 @@ class ModMenuUtils extends Module
         if(!save.exists(mod.id))
         {
             save.set(mod.id, defaultModSave);
+            save.get(mod.id).lastVersion = mod.modVersion;
         }
         return save.get(mod.id).favorited;
     }
@@ -152,8 +156,10 @@ class ModMenuUtils extends Module
     public function loadEnabledMods() // NOTE: NO LONGER ABLE TO 100% REPLICATE RELOAD FUNCTIONALITY. POLYMOD CLASS IS BLACKLISTED.
     {
         var modsToLoad = [];
+        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
         for(mod in PolymodHandler.getAllMods())
         {
+            save.get(mod.id).lastVersion = mod.modVersion;
             if(isModEnabled(mod))
                 modsToLoad.push(mod.id);
         }
