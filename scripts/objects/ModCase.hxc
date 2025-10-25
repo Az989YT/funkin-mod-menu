@@ -89,8 +89,8 @@ class ModCase extends ScriptedFlxSpriteGroup
     modTitle.borderSize = 3;
     modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
     modTitle.bold = true;
-    if (modTitle.text.length > 18)
-      modTitle.text = modTitle.text.substring(0, 18) + "-";
+    if (modTitle.text.length > 17)
+      modTitle.text = modTitle.text.substring(0, 17);
     add(modTitle);
 
     var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);

@@ -1,6 +1,5 @@
 import funkin.audio.FunkinSound;
 import funkin.graphics.shaders.AdjustColorShader;
-import funkin.input.Cursor;
 import funkin.modding.PolymodHandler;
 import funkin.modding.module.ModuleHandler;
 import funkin.save.Save;
@@ -50,8 +49,6 @@ class ModMenuState extends ScriptedMusicBeatState
     override public function create():Void
     {
         super.create();
-
-        Cursor.show();
 
         this.persistentUpdate = this.persistentDraw = true;
         MainMenuState.rememberedSelectedIndex = 0;
@@ -171,7 +168,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(disableControls) return;
 
-        if( (controls.FREEPLAY_CHAR_SELECT) || (TouchUtil.pressAction(characterPortrait)) || (controls.BACK && inFullModView))
+        if( (controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(characterPortrait)) || (controls.BACK && inFullModView))
         {
             // openSubState(new FullModViewSubState());
             if(transitioning) return;
@@ -218,7 +215,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(inFullModView || transitioning) return;
 
-        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
+        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
         {
             if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
             {
@@ -243,11 +240,11 @@ class ModMenuState extends ScriptedMusicBeatState
             }
         }
 
-        if(TouchUtil.justPressed) canFavorite = true;
+        if(FlxG.onMobile && TouchUtil.justPressed) canFavorite = true;
 
-        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
+        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
         {
-            if(canFavorite)
+            if(canFavorite || !FlxG.onMobile)
             {
                 if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
                 {
