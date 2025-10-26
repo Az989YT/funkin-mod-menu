@@ -30,6 +30,7 @@ class ModMenuState extends ScriptedMusicBeatState
     var modCasesGroup:FlxTypedSpriteGroup;
     var characterPortrait:FunkinSprite;
     var poofSprite:FlxSprite;
+    var topBarEdge:FlxSprite
 
     var scrollingElementsTop:FlxTiledSprite;
     var scrollingElementsMiddle:FlxTiledSprite;
@@ -67,7 +68,7 @@ class ModMenuState extends ScriptedMusicBeatState
         var colorBg:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, FlxG.height, 0xffFFFAE1);
         var topBar:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, 48, 0xff000000);
 
-        var topBarEdge:FlxSprite = new FlxSprite(0,0);
+        topBarEdge = new FlxSprite(0,0);
         topBarEdge.frames = Paths.getSparrowAtlas("modmenu/topBar");
         topBarEdge.animation.addByPrefix("idle", "bar", 24, true);
         topBarEdge.animation.play("idle");
@@ -168,7 +169,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(disableControls) return;
 
-        if( (controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(characterPortrait)) || (controls.BACK && inFullModView))
+        if( (controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(topBarEdge)) || (controls.BACK && inFullModView))
         {
             // openSubState(new FullModViewSubState());
             if(transitioning) return;
