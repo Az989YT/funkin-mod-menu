@@ -30,7 +30,7 @@ class ModMenuState extends ScriptedMusicBeatState
     var modCasesGroup:FlxTypedSpriteGroup;
     var characterPortrait:FunkinSprite;
     var poofSprite:FlxSprite;
-    var topBarEdge:FlxSprite
+    var topBarEdge:FlxSprite;
 
     var scrollingElementsTop:FlxTiledSprite;
     var scrollingElementsMiddle:FlxTiledSprite;
