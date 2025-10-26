@@ -147,9 +147,9 @@ class ModMenuState extends ScriptedMusicBeatState
         modCasesGroup.y = (FlxG.height - modCasesGroup.members[0].height)/2;
 
         if(FlxG.onMobile)
-            addBackButton(0, 0, 0xffFFFFFF, ()->{
+            addBackButton(FlxG.width - 230, FlxG.height - 200, 0xffFFFFFF, ()->{
                 openSubState(new ModLoadingSubState(new MainMenuState()));
-            }, 0.75);
+            }, 0.75, true);
 
         scrollMenu(0);
 	}
