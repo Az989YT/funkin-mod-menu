@@ -1,6 +1,7 @@
 import funkin.modding.PolymodHandler;
 import funkin.modding.module.Module;
 import funkin.save.Save;
+import funkin.util.ReflectUtil;
 import funkin.util.VersionUtil;
 
 import flixel.graphics.FlxGraphic;
@@ -46,7 +47,7 @@ class ModMenuUtils extends Module
             if(mod.title == modMenuID)
             {
                 modMenuID = mod.id;
-                return;
+                break;
             }
         }
 
@@ -75,7 +76,7 @@ class ModMenuUtils extends Module
         var save = Save.instance.modOptions.get("Funkin' Mod Menu");
         if(!save.exists(mod.id))
         {
-            save.set(mod.id, defaultModSave);
+            save.set(mod.id, ReflectUtil.copy(defaultModSave));
             save.get(mod.id).lastVersion = mod.modVersion;
         }
         save.get(mod.id).enabled = !save.get(mod.id).enabled;
@@ -88,7 +89,7 @@ class ModMenuUtils extends Module
         var save = Save.instance.modOptions.get("Funkin' Mod Menu");
         if(!save.exists(mod.id))
         {
-            save.set(mod.id, defaultModSave);
+            save.set(mod.id, ReflectUtil.copy(defaultModSave));
             save.get(mod.id).lastVersion = mod.modVersion;
         }
         return save.get(mod.id).enabled;
@@ -99,7 +100,7 @@ class ModMenuUtils extends Module
         var save = Save.instance.modOptions.get("Funkin' Mod Menu");
         if(!save.exists(mod.id))
         {
-            save.set(mod.id, defaultModSave);
+            save.set(mod.id, ReflectUtil.copy(defaultModSave));
             save.get(mod.id).lastVersion = mod.modVersion;
         }
         save.get(mod.id).favorited = !save.get(mod.id).favorited;
@@ -112,7 +113,7 @@ class ModMenuUtils extends Module
         var save = Save.instance.modOptions.get("Funkin' Mod Menu");
         if(!save.exists(mod.id))
         {
-            save.set(mod.id, defaultModSave);
+            save.set(mod.id, ReflectUtil.copy(defaultModSave));
             save.get(mod.id).lastVersion = mod.modVersion;
         }
         return save.get(mod.id).favorited;
@@ -159,6 +160,8 @@ class ModMenuUtils extends Module
         var save = Save.instance.modOptions.get("Funkin' Mod Menu");
         for(mod in PolymodHandler.getAllMods())
         {
+            if(!save.exists(mod.id)) continue;
+
             save.get(mod.id).lastVersion = mod.modVersion;
             if(isModEnabled(mod))
                 modsToLoad.push(mod.id);
