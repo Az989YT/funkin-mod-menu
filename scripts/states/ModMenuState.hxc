@@ -192,7 +192,7 @@ class ModMenuState extends ScriptedMusicBeatState
                     }
                 }
                 FunkinSound.playOnce(Paths.sound('cancelMenu'));
-                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                HapticUtil.vibrate(0 , 0.01, 0.5, 0.1);
             }
             else
             {
@@ -211,6 +211,7 @@ class ModMenuState extends ScriptedMusicBeatState
                         FlxTween.tween(modCase, { x: -modCase.width }, 1, { ease: FlxEase.cubeInOut });
                     }
                 }
+                FunkinSound.playOnce(Paths.sound('openExpandedView'));
                 HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
             }
             inFullModView = !inFullModView;
@@ -223,7 +224,7 @@ class ModMenuState extends ScriptedMusicBeatState
             if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
             {
                 FunkinSound.playOnce(Paths.sound('missnote1'));
-                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                HapticUtil.vibrate();
                 openSubState(new ModDependenciesSubState());
             }
             else if(ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata) || modCasesGroup.members[curSelected].metadata.id == ModMenuUtils.modMenuID)
@@ -239,7 +240,7 @@ class ModMenuState extends ScriptedMusicBeatState
             {
                 modCasesGroup.members[curSelected].toggleMod();
                 characterPortrait.playAnimCallback((ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) ? "enable":"disable");
-                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+                HapticUtil.vibrate(0 , 0.01, 0.5, 0.1);
             }
         }
 
@@ -313,6 +314,6 @@ class ModMenuState extends ScriptedMusicBeatState
                 FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 0.5, { ease: FlxEase.expoOut });
             }
         }
-        HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+        HapticUtil.vibrate(0, 0.01, 0.5);
     }
 }
