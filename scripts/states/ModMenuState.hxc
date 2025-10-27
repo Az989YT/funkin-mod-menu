@@ -192,6 +192,7 @@ class ModMenuState extends ScriptedMusicBeatState
                     }
                 }
                 FunkinSound.playOnce(Paths.sound('cancelMenu'));
+                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
             }
             else
             {
@@ -210,6 +211,7 @@ class ModMenuState extends ScriptedMusicBeatState
                         FlxTween.tween(modCase, { x: -modCase.width }, 1, { ease: FlxEase.cubeInOut });
                     }
                 }
+                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
             }
             inFullModView = !inFullModView;
         }
@@ -237,7 +239,7 @@ class ModMenuState extends ScriptedMusicBeatState
             {
                 modCasesGroup.members[curSelected].toggleMod();
                 characterPortrait.playAnimCallback((ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) ? "enable":"disable");
-                HapticUtil.vibrate();
+                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
             }
         }
 
@@ -257,6 +259,7 @@ class ModMenuState extends ScriptedMusicBeatState
                 {
                     modCasesGroup.members[curSelected].toggleFavorite();
                     if(!ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) modCasesGroup.members[curSelected].toggleMod();
+                    HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
                     characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
                 }
                 canFavorite = false;
@@ -290,6 +293,7 @@ class ModMenuState extends ScriptedMusicBeatState
                 return;
             }
             poofSprite.animation.play("poof");
+            HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
         }
     }
 
@@ -309,5 +313,6 @@ class ModMenuState extends ScriptedMusicBeatState
                 FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 0.5, { ease: FlxEase.expoOut });
             }
         }
+        HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
     }
 }
