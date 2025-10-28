@@ -36,7 +36,7 @@ class ModMenuUtils extends Module
         lastVersion: null
     };
 
-    final SAVE_KEY = "funkin-mod-menu";
+    final SAVE_KEY = "Funkin' Mod Menu";
 
     function getSaveData()
     {
