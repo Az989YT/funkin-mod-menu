@@ -30,11 +30,48 @@ class ModMenuUtils extends Module
 {
     var modMenuID = "Funkin' Mod Menu";
 
-    var defaultModSave = {
+    final defaultModSave = {
         enabled: true,
         favorited: false,
         lastVersion: null
     };
+
+    final SAVE_KEY = "funkin-mod-menu";
+
+    function getSaveData()
+    {
+        // Access/Modify save data in a safe way
+
+        var modSave = Save.instance.modOptions;
+        var save = modSave.get(SAVE_KEY);
+
+        if (save == null)
+        {
+            trace("Funkin' Mod Menu Save Data Not Found; Creating New Save.");
+            save = new StringMap();
+            modSave.set(SAVE_KEY, save);
+        }
+
+        return save;
+    }
+
+    function getModData(mod:ModMetadata)
+    {
+        // Access/Modify mod data in a safe way
+
+        var save = getSaveData();
+        var modData = save.get(mod.id);
+
+        if(modData == null)
+        {
+            // Creates new saved data
+            modData = ReflectUtil.copy(defaultModSave);
+            modData.lastVersion = mod.modVersion;
+            save.set(mod.id, modData);
+        }
+
+        return modData;
+    }
 
     public function new()
     {
@@ -51,16 +88,7 @@ class ModMenuUtils extends Module
             }
         }
 
-        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
-        if(save == null)
-        {
-            trace("Funkin' Mod Menu Save Data Not Found; Creating New Save.");
-            Save.instance.modOptions.set("Funkin' Mod Menu", new StringMap());
-        }
-        else
-        {
-            trace("Funkin' Mod Menu Save Data Found: " + save);
-        }
+        trace("Funkin' Mod Menu Save Data Found: " + getSaveData());
     }
 
     public function getModIcon(mod:ModMetadata)
@@ -73,60 +101,31 @@ class ModMenuUtils extends Module
 
     public function toggleMod(mod:ModMetadata)
     {
-        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
-        if(!save.exists(mod.id))
-        {
-            save.set(mod.id, ReflectUtil.copy(defaultModSave));
-            save.get(mod.id).lastVersion = mod.modVersion;
-        }
-        save.get(mod.id).enabled = !save.get(mod.id).enabled;
-
-        trace("Mod Toggle Status Updated; " + save.get(mod.id).enabled);
+        var modData = getModData(mod);
+        modData.enabled = !modData.enabled;
+        trace("Mod Toggle Status Updated; " + modData.enabled);
     }
 
     public function isModEnabled(mod:ModMetadata)
     {
-        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
-        if(!save.exists(mod.id))
-        {
-            save.set(mod.id, ReflectUtil.copy(defaultModSave));
-            save.get(mod.id).lastVersion = mod.modVersion;
-        }
-        return save.get(mod.id).enabled;
+        return getModData(mod).enabled;
     }
 
     public function toggleFavorite(mod:ModMetadata)
     {
-        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
-        if(!save.exists(mod.id))
-        {
-            save.set(mod.id, ReflectUtil.copy(defaultModSave));
-            save.get(mod.id).lastVersion = mod.modVersion;
-        }
-        save.get(mod.id).favorited = !save.get(mod.id).favorited;
-
-        trace("Mod Favorited Status Updated; " + save.get(mod.id).favorited);
+        var modData = getModData(mod);
+        modData.favorited = !modData.favorited;
+        trace("Mod Favorited Status Updated; " + modData.favorited);
     }
 
     public function isModFavorited(mod:ModMetadata)
     {
-        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
-        if(!save.exists(mod.id))
-        {
-            save.set(mod.id, ReflectUtil.copy(defaultModSave));
-            save.get(mod.id).lastVersion = mod.modVersion;
-        }
-        return save.get(mod.id).favorited;
+        return getModData(mod).favorited;
     }
 
     public function isModNew(mod:ModMetadata)
     {
-        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
-        if(!save.exists(mod.id))
-        {
-            return true;
-        }
-        return false;
+        return !getSaveData().exists(mod.id);
     }
 
     public function isModMissingDependencies(mod:ModMetadata)
@@ -157,18 +156,21 @@ class ModMenuUtils extends Module
     public function loadEnabledMods() // NOTE: NO LONGER ABLE TO 100% REPLICATE RELOAD FUNCTIONALITY. POLYMOD CLASS IS BLACKLISTED.
     {
         var modsToLoad = [];
-        var save = Save.instance.modOptions.get("Funkin' Mod Menu");
+
         for(mod in PolymodHandler.getAllMods())
         {
-            if(!save.exists(mod.id)) continue;
+            var modData = getModData(mod); // getModData saves new data for the mod if no mod data exists
+            modData.lastVersion = mod.modVersion;
 
-            save.get(mod.id).lastVersion = mod.modVersion;
             if(isModEnabled(mod))
                 modsToLoad.push(mod.id);
         }
 
         if(modsToLoad.length > 0)
         {
+            if (!modsToLoad.contains(modMenuID)) // Ensures Mod Menu loads itself in case of a save bug
+                modsToLoad.insert(0, modMenuID);
+
             trace("Loading Mods: " + modsToLoad.join(", "));
             PolymodHandler.loadModsById(modsToLoad);
         }
