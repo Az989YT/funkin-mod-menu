@@ -19,6 +19,8 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
+import funkin.api.discord.DiscordClient;
+
 class ModMenuState extends ScriptedMusicBeatState
 {
     var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
@@ -50,6 +52,10 @@ class ModMenuState extends ScriptedMusicBeatState
     override public function create():Void
     {
         super.create();
+
+        DiscordClient.setPresence({
+            details: "Browsing Mods"
+        });
 
         this.persistentUpdate = this.persistentDraw = true;
         MainMenuState.rememberedSelectedIndex = 0;
