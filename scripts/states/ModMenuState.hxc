@@ -144,7 +144,14 @@ class ModMenuState extends ScriptedMusicBeatState
             object.shader = new AdjustColorShader();
         }
 
-        for(mod in PolymodHandler.getAllMods())
+        var modList = PolymodHandler.getAllMods();
+        for (i in modList) {
+            if (i.title == "Funkin' Mod Menu") {
+                modList.remove(i);
+                modList.insert(0, i);
+            }
+        }
+        for(mod in modList)
         {
             var modCase = new ModCase(0, 0, mod);
             modCasesGroup.add(modCase);
@@ -314,10 +321,13 @@ class ModMenuState extends ScriptedMusicBeatState
             FunkinSound.playOnce(Paths.sound('scrollMenu'));
             FlxTween.cancelTweensOf(modCasesGroup);
             FlxTween.tween(modCasesGroup, { y: 300 - 150*curSelected }, 0.5, { ease: FlxEase.expoOut });
+            var index = 0;
             for(modCase in modCasesGroup.members)
             {
+                index == curSelected ? modCase.onSelect() : modCase.onDeSelect();
                 FlxTween.cancelTweensOf(modCase);
                 FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 0.5, { ease: FlxEase.expoOut });
+                index++;
             }
         }
         HapticUtil.vibrate(0, 0.01, 0.5);

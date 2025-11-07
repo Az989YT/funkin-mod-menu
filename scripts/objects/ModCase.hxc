@@ -3,18 +3,28 @@ import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.ModuleHandler;
 import funkin.util.tools.ArrayTools;
 
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxTimer;
+
 import flixel.FlxSprite;
 import flixel.addons.effects.FlxSkewedSprite;
 import flixel.group.FlxTypedSpriteGroup;
 import flixel.text.FlxText;
 import flixel.text.FlxTextBorderStyle;
 
+import flixel.math.FlxRect;
+
 import StringTools;
 
 class ModCase extends ScriptedFlxSpriteGroup
 {
+  public var doScrolling:Bool = false;
+
   var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
 
+  var modTitle:FlxText;
+  
   var caseSprite:FlxSprite;
   var buttonSprite:FlxSprite;
   var favSprite:FlxSprite;
@@ -22,6 +32,8 @@ class ModCase extends ScriptedFlxSpriteGroup
   var pressOffsetGroup:FlxTypedSpriteGroup;
 
   var metadata:ModMetadata;
+
+  var clipWidth:Int = 500;
 
   function new(_x, _y, ?_meta:ModMetadata)
   {
@@ -82,15 +94,16 @@ class ModCase extends ScriptedFlxSpriteGroup
     favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
     this.add(favSprite);
 
-    var modTitle:FlxText = new FlxText(100, 63, 590, " " + metadata.title, 42);
+    modTitle = new FlxText(120, 63, null, metadata.title, 42);
     modTitle.font = "Letterstuff Regular";
     modTitle.color = 0xffFFFFFF;
     modTitle.borderColor = 0xff5F91C1;
     modTitle.borderSize = 3;
     modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
     modTitle.bold = true;
-    if (modTitle.text.length > 17)
-      modTitle.text = modTitle.text.substring(0, 17);
+    modTitle.clipRect = new FlxRect(0, 0, clipWidth, modTitle.height);
+    /* if (modTitle.text.length > 17)
+      modTitle.text = modTitle.text.substring(0, 17); */
     add(modTitle);
 
     var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);
@@ -126,11 +139,27 @@ class ModCase extends ScriptedFlxSpriteGroup
     {
         pressOffsetGroup.add(object);
     }
+
+    
   }
 
   override function update(elapsed:Float):Void
   {
     super.update(elapsed);
+  }
+
+  public function onSelect() {
+    doScrolling = true;
+    if (modTitle.width > clipWidth) {
+      moveTextRight();
+    }
+  }
+
+  public function onDeSelect() {
+    doScrolling = false;
+    if (moveTween != null)
+      moveTween.cancel();
+    moveTextLeft(true);
   }
 
   function toggleMod()
@@ -147,5 +176,49 @@ class ModCase extends ScriptedFlxSpriteGroup
     ModMenuUtils.toggleFavorite(metadata);
     favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
     FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModFavorited(metadata)) ? "fav":"unfav")));
+  }
+
+  var moveTimer:FlxTimer = new FlxTimer();
+  var moveTween:Null<FlxTween>;
+
+  function moveTextRight():Void
+  { 
+    if (!doScrolling) return;
+    var distToMove:Float = modTitle.width - clipWidth;
+    moveTween = FlxTween.tween(modTitle.offset, {x: distToMove}, 2,
+      {
+        onUpdate: function(_) {
+          modTitle.clipRect = new FlxRect(modTitle.offset.x, 0, clipWidth, modTitle.height);
+        },
+        onComplete: function(_) {
+          moveTimer.start(0.3, (timer) -> {
+            moveTextLeft(false);
+          });
+        },
+        ease: FlxEase.quadInOut
+      });
+  }
+
+  function moveTextLeft(snap):Void
+  {
+    if (!doScrolling && !snap) return;
+    var updateCallback = function(_) {
+      modTitle.clipRect = new FlxRect(modTitle.offset.x, 0, clipWidth, modTitle.height);
+    }
+    if (snap) {
+      modTitle.offset.x = 0;
+      updateCallback(null);
+      return;
+    }
+    moveTween = FlxTween.tween(modTitle.offset, {x: 0}, !snap ? 2 : 0.01,
+      {
+        onUpdate: updateCallback,
+        onComplete: function(_) {
+          moveTimer.start(0.3, (timer) -> {
+            moveTextRight();
+          });
+        },
+        ease: FlxEase.quadInOut
+      });
   }
 }
