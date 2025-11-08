@@ -151,11 +151,14 @@ class ModMenuState extends ScriptedMusicBeatState
                 modList.insert(0, i);
             }
         }
+        var index = 0;
         for(mod in modList)
         {
             var modCase = new ModCase(0, 0, mod);
             modCasesGroup.add(modCase);
             modCase.y += 150 * modCasesGroup.members.indexOf(modCase);
+            index == 0 ? modCase.onSelect() : modCase.onDeSelect();
+            index++;
         }
         modCasesGroup.y = (FlxG.height - modCasesGroup.members[0].height)/2;
 

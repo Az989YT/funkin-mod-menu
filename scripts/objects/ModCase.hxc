@@ -23,11 +23,17 @@ class ModCase extends ScriptedFlxSpriteGroup
 
   var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
 
+
   var modTitle:FlxText;
   
   var caseSprite:FlxSprite;
   var buttonSprite:FlxSprite;
   var favSprite:FlxSprite;
+  var caseLeftCornerSprite:FlxSprite;
+  var caseRightCornerSprite:FlxSprite;
+
+  var caseLeftCornerSpriteB:FlxSprite;
+  var caseRightCornerSpriteB:FlxSprite;
 
   var pressOffsetGroup:FlxTypedSpriteGroup;
 
@@ -38,6 +44,7 @@ class ModCase extends ScriptedFlxSpriteGroup
   function new(_x, _y, ?_meta:ModMetadata)
   {
     super(_x, _y);
+
     this.setPosition(_x, _y);
     metadata = _meta;
 
@@ -94,7 +101,7 @@ class ModCase extends ScriptedFlxSpriteGroup
     favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
     this.add(favSprite);
 
-    modTitle = new FlxText(120, 63, null, metadata.title, 42);
+    modTitle = new FlxText(120, 63, null, "  " + metadata.title + "  ", 42);
     modTitle.font = "Letterstuff Regular";
     modTitle.color = 0xffFFFFFF;
     modTitle.borderColor = 0xff5F91C1;
@@ -105,6 +112,21 @@ class ModCase extends ScriptedFlxSpriteGroup
     /* if (modTitle.text.length > 17)
       modTitle.text = modTitle.text.substring(0, 17); */
     add(modTitle);
+
+    caseLeftCornerSprite = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
+    add(caseLeftCornerSprite);
+
+    caseRightCornerSprite = new FlxSprite(590, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
+    add(caseRightCornerSprite);
+    
+    caseLeftCornerSpriteB = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
+    caseLeftCornerSpriteB.color = 0xFF000000;
+    add(caseLeftCornerSpriteB);
+
+    caseRightCornerSpriteB = new FlxSprite(590, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
+    caseRightCornerSpriteB.color = 0xFF000000;
+    add(caseRightCornerSpriteB);
+
 
     var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);
     var contributors = [];
@@ -140,7 +162,6 @@ class ModCase extends ScriptedFlxSpriteGroup
         pressOffsetGroup.add(object);
     }
 
-    
   }
 
   override function update(elapsed:Float):Void
@@ -150,9 +171,11 @@ class ModCase extends ScriptedFlxSpriteGroup
 
   public function onSelect() {
     doScrolling = true;
-    if (modTitle.width > clipWidth) {
+    if (modTitle.width > clipWidth ) {
       moveTextRight();
     }
+    caseLeftCornerSpriteB.alpha = 0;
+    caseRightCornerSpriteB.alpha = 0;
   }
 
   public function onDeSelect() {
@@ -160,6 +183,8 @@ class ModCase extends ScriptedFlxSpriteGroup
     if (moveTween != null)
       moveTween.cancel();
     moveTextLeft(true);
+    caseLeftCornerSpriteB.alpha = 0.2;
+    caseRightCornerSpriteB.alpha = 0.2;
   }
 
   function toggleMod()
@@ -185,7 +210,7 @@ class ModCase extends ScriptedFlxSpriteGroup
   { 
     if (!doScrolling) return;
     var distToMove:Float = modTitle.width - clipWidth;
-    moveTween = FlxTween.tween(modTitle.offset, {x: distToMove}, 2,
+    moveTween = FlxTween.tween(modTitle.offset, {x: distToMove}, 1 / (clipWidth / modTitle.width),
       {
         onUpdate: function(_) {
           modTitle.clipRect = new FlxRect(modTitle.offset.x, 0, clipWidth, modTitle.height);
@@ -210,7 +235,7 @@ class ModCase extends ScriptedFlxSpriteGroup
       updateCallback(null);
       return;
     }
-    moveTween = FlxTween.tween(modTitle.offset, {x: 0}, !snap ? 2 : 0.01,
+    moveTween = FlxTween.tween(modTitle.offset, {x: 0}, !snap ? (1 / (clipWidth / modTitle.width)) : 0.01,
       {
         onUpdate: updateCallback,
         onComplete: function(_) {
