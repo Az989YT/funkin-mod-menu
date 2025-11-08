@@ -116,14 +116,14 @@ class ModCase extends ScriptedFlxSpriteGroup
     caseLeftCornerSprite = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
     add(caseLeftCornerSprite);
 
-    caseRightCornerSprite = new FlxSprite(590, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
+    caseRightCornerSprite = new FlxSprite(589, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
     add(caseRightCornerSprite);
     
     caseLeftCornerSpriteB = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
     caseLeftCornerSpriteB.color = 0xFF000000;
     add(caseLeftCornerSpriteB);
 
-    caseRightCornerSpriteB = new FlxSprite(590, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
+    caseRightCornerSpriteB = new FlxSprite(589, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
     caseRightCornerSpriteB.color = 0xFF000000;
     add(caseRightCornerSpriteB);
 
@@ -157,7 +157,7 @@ class ModCase extends ScriptedFlxSpriteGroup
     }
 
     pressOffsetGroup = new FlxTypedSpriteGroup(0,0,0);
-    for(object in [colorBg, modIcon, favSprite, modTitle, modAuthors])
+    for(object in [colorBg, modIcon, favSprite, modTitle, modAuthors, caseLeftCornerSprite, caseLeftCornerSpriteB, caseRightCornerSprite, caseRightCornerSpriteB])
     {
         pressOffsetGroup.add(object);
     }
