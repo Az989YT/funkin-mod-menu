@@ -198,7 +198,7 @@ class ModMenuUtils extends Module
         StageRegistry.instance.loadEntries();
 
         CharacterDataParser.loadCharacterCache();
-        NoteKindManager.loadScripts();
+        // NoteKindManager.loadScripts(); // Removed for 0.7.6;
         ModuleHandler.loadModuleCache();
 
         trace("Mod Loading Completed.");
