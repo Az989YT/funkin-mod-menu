@@ -3,6 +3,7 @@ import funkin.graphics.ScriptedFunkinSprite;
 import funkin.graphics.shaders.AdjustColorShader;
 import funkin.util.assets.DataAssets;
 import funkin.modding.module.ModuleHandler;
+import funkin.FunkinMemory;
 
 import flixel.FlxG;
 import flixel.util.FlxTimer;
@@ -29,7 +30,7 @@ class CharacterPortrait extends ScriptedFunkinSprite
         super(0, 0);
 
         for(character in characterList)
-            FunkinSprite.cacheSparrow("modmenu/portraits/" + character);
+            FunkinMemory.cacheTexture(Paths.image("modmenu/portraits/" + character));
 
         initRandomCharacter();
         shader = new AdjustColorShader();
