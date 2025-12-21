@@ -12,11 +12,13 @@ class AddModsMenuButton extends Module
 		super('AddModsMenuButton', 2147483648);
 	}
 
+	var rememberedSelectedIndex:Int;
+
 	public function onStateChangeEnd(event:StateChangeScriptEvent)
 	{
 		if (Std.isOfType(event.targetState, MainMenuState))
 		{
-			var modsButton = createMenuItem('mods', 'mainmenu/mods', event.targetState.menuItems.length,
+			var modsButton = createMenuItem('mods', 'mainmenu/mods', 2,
 			function() {
 				trace('Transitioning to Mod Menu.');
 				var currentState = FlxG.state;
@@ -25,7 +27,15 @@ class AddModsMenuButton extends Module
 				currentState.startExitState(targetState);
 			}, false);
 			event.targetState.menuItems.addItem('mods', modsButton);
+			var item = event.targetState.menuItems.getItem('mods');
+			event.targetState.menuItems.members.remove(item);
+			event.targetState.menuItems.members.insert(item.ID, item);
 			repositionMenuItems(event.targetState.menuItems);
+		
+			var setIndex = rememberedSelectedIndex ?? MainMenuState.rememberedSelectedIndex;
+			if (event.targetState?.menuItems?.members[setIndex] != null) event.targetState?.menuItems?.selectItem(setIndex);
+			event.targetState.resetCamStuff();
+			rememberedSelectedIndex = null;
 		}
 	}
 
@@ -52,6 +62,17 @@ class AddModsMenuButton extends Module
 			var menuItem = menuItems.members[i];
 			menuItem.x = FlxG.width / 2;
 			menuItem.y = top + spacing * i;
+		  	menuItem.ID = i;
+		  	if (menuItem.ID != FlxG.state.menuItems.selectedIndex) menuItem.idle();
+		  	if (menuItem.ID > 4)
+			{ // Reset rememberedSelectedIndex to prevent a crash
+			  	var oldConfirm = menuItem.callback;
+			  	menuItem.callback = () -> {
+					rememberedSelectedIndex = FlxG.state.menuItems.selectedIndex;
+					oldConfirm();
+					MainMenuState.rememberedSelectedIndex = 0;
+			  	}	
+		  	}
 		}
 	}
 }
