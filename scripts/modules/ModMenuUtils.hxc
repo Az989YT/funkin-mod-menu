@@ -22,6 +22,7 @@ import funkin.play.notes.notekind.NoteKindManager;
 import funkin.data.song.SongRegistry;
 import funkin.data.freeplay.player.PlayerRegistry;
 import funkin.data.stage.StageRegistry;
+import funkin.data.stickers.StickerRegistry;
 import funkin.play.character.CharacterDataParser;
 import funkin.data.freeplay.album.AlbumRegistry;
 import funkin.modding.module.ModuleHandler;
@@ -196,6 +197,7 @@ class ModMenuUtils extends Module
         SpeakerRegistry.instance.loadEntries();
         AlbumRegistry.instance.loadEntries();
         StageRegistry.instance.loadEntries();
+        StickerRegistry.instance.loadEntries();
 
         CharacterDataParser.loadCharacterCache();
         // NoteKindManager.loadScripts(); // Removed for 0.7.6;
