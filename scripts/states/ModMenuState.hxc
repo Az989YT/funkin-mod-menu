@@ -2,6 +2,7 @@ import funkin.audio.FunkinSound;
 import funkin.graphics.shaders.AdjustColorShader;
 import funkin.modding.PolymodHandler;
 import funkin.modding.module.ModuleHandler;
+import funkin.modding.events.ScriptEventDispatcher;
 import funkin.save.Save;
 import funkin.ui.ScriptedMusicBeatState;
 import funkin.ui.mainmenu.MainMenuState;
@@ -9,6 +10,7 @@ import funkin.util.Constants;
 import funkin.util.HapticUtil;
 import funkin.util.SwipeUtil;
 import funkin.util.TouchUtil;
+import funkin.Conductor;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -21,11 +23,19 @@ import flixel.util.FlxTimer;
 
 import funkin.api.discord.DiscordClient;
 
+using funkin.util.tools.IteratorTools;
+
 class ModMenuState extends ScriptedMusicBeatState
 {
     var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
+    var CharacterPortraitRegistry = ModuleHandler.getModule("CharacterPortraitRegistry");
 
+    var allPortraits:Array<String> = [];
+    var curPortrait:String = "bf";
     var curSelected = 0;
+
+    var isPortraitWaiting:Bool = false;
+    var portraitWaitTimer:FlxTimer = new FlxTimer();
 
     var swirlBig:FlxSprite;
     var swirlMini:FlxSprite;
@@ -47,6 +57,7 @@ class ModMenuState extends ScriptedMusicBeatState
 	public function new()
     {
 		super();
+        allPortraits = CharacterPortraitRegistry.entries.keys().array();
 	}
 
     override public function create():Void
@@ -72,29 +83,52 @@ class ModMenuState extends ScriptedMusicBeatState
         FlxG.sound.music.fadeIn(2, 0, 0.5);
 
         var colorBg:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, FlxG.height, 0xffFFFAE1);
+        colorBg.zIndex = 10;
+        add(colorBg);
+
         var topBar:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, 48, 0xff000000);
+        topBar.zIndex = 110;
+        add(topBar);
 
         topBarEdge = new FlxSprite(0,0);
         topBarEdge.frames = Paths.getSparrowAtlas("modmenu/topBar");
         topBarEdge.animation.addByPrefix("idle", "bar", 24, true);
         topBarEdge.animation.play("idle");
         topBarEdge.x = FlxG.width - topBarEdge.width;
+        topBarEdge.zIndex = 120;
+        add(topBarEdge);
 
         var topBarBubbles:FlxSprite = new FlxSprite(0,0);
         topBarBubbles.frames = Paths.getSparrowAtlas("modmenu/topBar");
         topBarBubbles.animation.addByPrefix("idle", "bubbles", 24, true);
         topBarBubbles.animation.play("idle");
         topBarBubbles.x = FlxG.width - topBarBubbles.width;
+        topBarBubbles.zIndex = 130;
+        add(topBarBubbles);
 
         swirlBig = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlBig"));
-        swirlMini = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlMini"));
-
         swirlBig.setPosition(FlxG.width - swirlBig.width, (FlxG.height - swirlBig.height)/2);
+        swirlBig.shader = new AdjustColorShader();
+        swirlBig.zIndex = 20;
+        add(swirlBig);
+
+        swirlMini = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlMini"));
         swirlMini.setPosition(swirlBig.x + (swirlBig.width - swirlMini.width)/2, swirlBig.y + (swirlBig.height - swirlMini.height)/2);
+        swirlMini.shader = new AdjustColorShader();
+        swirlMini.zIndex = 30;
+        add(swirlMini);
 
         scrollingElementsTop = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+        scrollingElementsTop.zIndex = 40;
+        add(scrollingElementsTop);
+
         scrollingElementsMiddle = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+        scrollingElementsMiddle.zIndex = 50;
+        add(scrollingElementsMiddle);
+
         scrollingElementsBottom = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+        scrollingElementsBottom.zIndex = 60;
+        add(scrollingElementsBottom);
 
         for(scrollingElement in [scrollingElementsTop, scrollingElementsMiddle, scrollingElementsBottom])
         {
@@ -105,9 +139,11 @@ class ModMenuState extends ScriptedMusicBeatState
         scrollingElementsTop.y -= 275;
         scrollingElementsBottom.y += 275;
 
-        characterPortrait = new CharacterPortrait();
+        refreshPortrait();
 
         modCasesGroup = new FlxTypedSpriteGroup(0,0,0);
+        modCasesGroup.zIndex = 90;
+        add(modCasesGroup);
 
         poofSprite = new FlxSprite(0,0);
         poofSprite.frames = Paths.getSparrowAtlas("modmenu/smokePuff");
@@ -118,31 +154,37 @@ class ModMenuState extends ScriptedMusicBeatState
             if(frame == 1)
             {
                 poofSprite.visible = true;
-                characterPortrait.shader.brightness = 100;
-                characterPortrait.shader.contrast = 100;
+
+                portraitWaitTimer.cancel();
+                isPortraitWaiting = false;
+
+                if (characterPortrait != null)
+                {
+                    characterPortrait.shader.brightness = 100;
+                    characterPortrait.shader.contrast = 100;
+                }
+
                 FunkinSound.playOnce(Paths.sound('characterPoof'), 0.5);
             }
             if(frame == 3)
             {
-                characterPortrait.initRandomCharacter();
-                characterPortrait.shader.brightness = 0;
-                characterPortrait.shader.contrast = 0;
+                if (characterPortrait != null)
+                {
+                    characterPortrait.shader.brightness = 0;
+                    characterPortrait.shader.contrast = 0;
+                }
+
+                refreshPortrait();
             }
         });
         poofSprite.setPosition(FlxG.width - poofSprite.width, FlxG.height - poofSprite.height);
+        poofSprite.zIndex = 80;
+        add(poofSprite);
 
         fullModCase = new FullModCase(0,0);
         fullModCase.y = -fullModCase.height;
-
-        for(object in [colorBg, swirlBig, swirlMini, scrollingElementsTop, scrollingElementsMiddle, scrollingElementsBottom, characterPortrait, poofSprite, modCasesGroup, fullModCase, topBar, topBarEdge, topBarBubbles])
-        {
-            add(object);
-        }
-
-        for(object in [swirlBig, swirlMini])
-        {
-            object.shader = new AdjustColorShader();
-        }
+        fullModCase.zIndex = 100;
+        add(fullModCase);
 
         var modList = PolymodHandler.getAllMods();
         for (i in modList) {
@@ -168,11 +210,13 @@ class ModMenuState extends ScriptedMusicBeatState
             }, 0.75);
 
         scrollMenu(0);
+        refresh();
 	}
 
     override function update(elapsed:Float):Void
     {
         super.update(elapsed);
+        Conductor.instance.update();
 
         swirlBig.angle += 0.25;
         swirlMini.angle -= 0.5;
@@ -182,6 +226,30 @@ class ModMenuState extends ScriptedMusicBeatState
         scrollingElementsTop.scrollX -= elapsed*150;
         scrollingElementsMiddle.scrollX += elapsed*150;
         scrollingElementsBottom.scrollX -= elapsed*150;
+
+        if (characterPortrait != null)
+        {
+            var charData:CharacterPortraitData = CharacterPortraitRegistry.fetchEntryData(curPortrait);
+
+            // Apply the waiting logic here.
+            var waitingAnims:Array<String> = [];
+            for (anim in characterPortrait.animation.getNameList())
+            {
+                if (anim.indexOf("waiting") == 0) waitingAnims.push(anim);
+            }
+
+            var isIdling:Bool = ["danceLeft", "danceRight", "idle"].contains(characterPortrait.getCurrentAnimation());
+            if (!isPortraitWaiting && (charData.waiting?.canWait ?? false) && isIdling)
+            {
+                var randomAnim:String = waitingAnims[FlxG.random.int(0, waitingAnims.length - 1)];
+                characterPortrait.playAnimation(randomAnim, true, true);
+
+                isPortraitWaiting = true;
+                portraitWaitTimer.start(charData.waiting?.waitDelay ?? 10, () -> {
+                    isPortraitWaiting = false;
+                });
+            }
+        }
 
         if(disableControls) return;
 
@@ -246,7 +314,7 @@ class ModMenuState extends ScriptedMusicBeatState
             else if(ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata) || modCasesGroup.members[curSelected].metadata.id == ModMenuUtils.modMenuID)
             {
                 FunkinSound.playOnce(Paths.sound('modFavoriteDisable'), 0.8);
-                characterPortrait.playAnimCallback("locked");
+                characterPortrait.playAnimation("locked", true, true);
                 HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
                 FlxTween.cancelTweensOf(modCasesGroup.members[curSelected]);
                 modCasesGroup.members[curSelected].x = -60 * Math.sin(curSelected - curSelected - 2) - 55 - 10;
@@ -255,7 +323,10 @@ class ModMenuState extends ScriptedMusicBeatState
             else
             {
                 modCasesGroup.members[curSelected].toggleMod();
-                characterPortrait.playAnimCallback((ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) ? "enable":"disable");
+
+                var isEnabled:Bool = ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata);
+                characterPortrait.playAnimation(isEnabled ? "enable" : "disable", true, true);
+
                 HapticUtil.vibrate(0 , 0.01, 0.5, 0.1);
             }
         }
@@ -277,7 +348,9 @@ class ModMenuState extends ScriptedMusicBeatState
                     modCasesGroup.members[curSelected].toggleFavorite();
                     if(!ModMenuUtils.isModEnabled(modCasesGroup.members[curSelected].metadata)) modCasesGroup.members[curSelected].toggleMod();
                     HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
-                    characterPortrait.playAnimCallback((ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata)) ? "favorite":"unfavorite");
+
+                    var isFavorited:Bool = ModMenuUtils.isModFavorited(modCasesGroup.members[curSelected].metadata);
+                    characterPortrait.playAnimation(isFavorited ? "favorite" : "unfavorite", true, true);
                 }
                 canFavorite = false;
             }
@@ -334,5 +407,45 @@ class ModMenuState extends ScriptedMusicBeatState
             }
         }
         HapticUtil.vibrate(0, 0.01, 0.5);
+    }
+
+    function refreshPortrait()
+    {
+        if (characterPortrait != null)
+        {
+            characterPortrait.kill();
+            this.remove(characterPortrait);
+        }
+
+        curPortrait = allPortraits[FlxG.random.int(0, allPortraits.length - 1)];
+
+        characterPortrait = CharacterPortraitRegistry.fetchEntry(curPortrait);
+        characterPortrait.revive();
+        characterPortrait.zIndex = 70;
+        add(characterPortrait);
+
+        characterPortrait.dance(true);
+        characterPortrait.setPosition(FlxG.width - characterPortrait.width, FlxG.height - characterPortrait.height);
+
+        this.refresh();
+    }
+
+    override function dispatchEvent(event:ScriptEvent):Void
+    {
+        super.dispatchEvent(event);
+
+        // Dispatch the events to character portraits.
+        if (characterPortrait != null) ScriptEventDispatcher.callEvent(characterPortrait, event);
+    }
+
+    override function destroy():Void
+    {
+        // Remove the character portrait so that we dont destroy them.
+        if (characterPortrait != null) this.remove(characterPortrait);
+
+        // Cancel the timer so that it doesn't cause errors.
+        portraitWaitTimer.cancel();
+
+        super.destroy();
     }
 }

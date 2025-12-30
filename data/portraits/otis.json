@@ -3,26 +3,23 @@
     {
       "name": "idle",
       "prefix": "idle",
-      "offsets": [0, 0],
-      "fps": 24
+      "offsets": [0, 0]
     },
     {
       "name": "enable",
       "prefix": "enable",
       "offsets": [0, 0],
-      "fps": 24
+      "flipX": true
     },
     {
       "name": "waiting1",
       "prefix": "waiting1",
-      "offsets": [0, 0],
-      "fps": 24
+      "offsets": [0, 0]
     },
     {
       "name": "waiting2",
       "prefix": "waiting2",
-      "offsets": [0, 0],
-      "fps": 24
+      "offsets": [0, 0]
     }
   ],
   "waiting": {
