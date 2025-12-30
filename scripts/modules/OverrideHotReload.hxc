@@ -20,16 +20,15 @@ class OverrideHotReload extends Module
 	public function new()
 	{
 		super('OverrideHotReload');
-	}
 
-    public function onCreate(event:ScriptEvent)
-    {
-        for(plugin in FlxG.plugins.list)
-        {
-            if(Std.isOfType(plugin, ReloadAssetsDebugPlugin))
-                FlxG.plugins.remove(plugin);
-        }
-    }
+        FlxG.signals.postGameStart.addOnce(() -> {
+            for(plugin in FlxG.plugins.list)
+            {
+                if(Std.isOfType(plugin, ReloadAssetsDebugPlugin))
+                    FlxG.plugins.remove(plugin);
+            }
+        });
+	}
 
     public function onUpdate(event:UpdateScriptEvent)
     {
@@ -38,7 +37,7 @@ class OverrideHotReload extends Module
             if(Std.isOfType(FlxG.state, ScriptedMusicBeatState))
             {
                 isScriptedState = true;
-                scriptedStateName = ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name");
+                scriptedStateName = ReflectUtil.getAnonymousField(FlxG.state._asc, "fullyQualifiedName");
                 trace(scriptedStateName);
             }
             ModMenuUtils.loadEnabledMods();

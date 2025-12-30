@@ -9,15 +9,12 @@ class LoadEnabledModsBeforeTitle extends Module
     public function new()
     {
         super('LoadEnabledModsBeforeTitle', 0);
-    }
 
-    public function onCreate(event:ScriptEvent)
-    {
-        super.onCreate(event);
-        hasMoved = false;
         this.active = false;
-
-        FlxG.signals.preStateSwitch.add(start);
+        FlxG.signals.postGameStart.addOnce(() -> {
+            hasMoved = false;
+            FlxG.signals.preStateSwitch.add(start);
+        });
     }
 
     function start()

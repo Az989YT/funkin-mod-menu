@@ -89,6 +89,8 @@ class ModMenuUtils extends Module
         }
 
         trace("Funkin' Mod Menu Save Data Found: " + getSaveData());
+
+        this.active = false;
     }
 
     public function getModIcon(mod:ModMetadata)
@@ -200,6 +202,7 @@ class ModMenuUtils extends Module
         CharacterDataParser.loadCharacterCache();
         // NoteKindManager.loadScripts(); // Removed for 0.7.6;
         ModuleHandler.loadModuleCache();
+        ModuleHandler.callOnCreate();
 
         trace("Mod Loading Completed.");
     }
