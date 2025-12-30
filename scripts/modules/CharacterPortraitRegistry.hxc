@@ -1,0 +1,151 @@
+
+
+import flixel.graphics.frames.FlxFrameCollectionType;
+import flixel.graphics.frames.FlxFramesCollection;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.modding.module.Module;
+import funkin.play.stage.Bopper;
+import funkin.play.stage.ScriptedBopper;
+import funkin.util.assets.DataAssets;
+import funkin.util.assets.FlxAnimationUtil;
+import haxe.ds.StringMap;
+import haxe.Json;
+
+class CharacterPortraitRegistry extends Module
+{
+  final DEFAULT_DANCEEVERY:Float = 2;
+
+  var entries:StringMap = new StringMap();
+  var entryDatas:StringMap = new StringMap();
+
+  public function new()
+  {
+    super("CharacterPortraitRegistry");
+    this.active = false;
+
+    for (portrait in DataAssets.listDataFilesInPath("portraits/"))
+    {
+      var parserData:Dynamic = Json.parse(Assets.getText(Paths.json("portraits/" + portrait)));
+      if (parserData == null) continue;
+
+      // Set the asset path to the default one if it doesn't exist, specifically for backwards compatibility.
+      parserData.assetPath = parserData.assetPath ?? "modmenu/portraits/" + portrait;
+
+      var entry:Bopper = createEntryFromData(parserData);
+      entries.set(portrait, entry);
+      entryDatas.set(portrait, parserData);
+    }
+  }
+
+  public function fetchEntry(id:String):Bopper
+  {
+    return entries.get(id);
+  }
+
+  public function fetchEntryData(id:String):CharacterPortraitData
+  {
+    return entryDatas.get(id);
+  }
+
+  function createEntryFromData(data:CharacterPortraitData):Bopper
+  {
+    // Create a bopper based on the provided data and store it in the entries map.
+    var portraitSprite:Bopper = null;
+    if (data.scriptClass != null) portraitSprite = ScriptedBopper.init(data.scriptClass, data.danceEvery ?? DEFAULT_DANCEEVERY);
+    if (portraitSprite == null) portraitSprite = new Bopper(data.danceEvery ?? DEFAULT_DANCEEVERY);
+
+    portraitSprite.globalOffsets = data.offsets ?? [0, 0];
+    portraitSprite.shader = new AdjustColorShader();
+
+    // Fetch all asset paths that will be used for animations.
+    var allAssetPaths:Array<String> = [data.assetPath];
+    for (anim in (data.animations ?? []))
+    {
+      if (anim.assetPath != null && !allAssetPaths.contains(anim.assetPath)) allAssetPaths.push(anim.assetPath);
+    }
+
+    switch (data.renderType ?? "sparrow")
+    {
+      case "sparrow":
+        portraitSprite.loadSparrow(allAssetPaths[0]);
+
+      case "packer":
+        portraitSprite.loadPacker(allAssetPaths[0]);
+
+      case "animateatlas":
+        var assetLibrary:String = Paths.getLibrary(allAssetPaths[0]);
+        var assetPath:String = Paths.stripLibrary(allAssetPaths[0]);
+
+        portraitSprite.loadTextureAtlas(assetPath, assetLibrary);
+
+      case "multisparrow":
+        // For the multisparrow render type, we create a new frame collection instance and add all the frames from the asset path array.
+        // This makes the base asset path's frame collection not receive any unnecessary frames from the other frame collections.
+        var framesCollection:FlxFramesCollection = new FlxFramesCollection(null, FlxFrameCollectionType.ATLAS, null);
+
+        for (assetPath in allAssetPaths)
+        {
+          var assetFrames:FlxFramesCollection = Paths.getSparrowAtlas(assetPath);
+          for (frame in assetFrames.frames) framesCollection.pushFrame(frame.copyTo());
+        }
+
+        portraitSprite.frames = framesCollection;
+    }
+
+    // Add the animations based on the render type.
+    if (portraitSprite.isAnimate)
+    {
+      FlxAnimationUtil.addTextureAtlasAnimations(portraitSprite, data.animations ?? []);
+    }
+    else
+    {
+      FlxAnimationUtil.addAtlasAnimations(portraitSprite, data.animations ?? []);
+    }
+
+    for (anim in (data.animations ?? []))
+    {
+      portraitSprite.setAnimationOffsets(anim.name, anim.offsets[0], anim.offsets[1]);
+    }
+
+    return portraitSprite;
+  }
+}
+
+typedef CharacterPortraitData =
+{
+  /**
+   * The asset path for the portrait.
+   */
+  var assetPath:String;
+
+  /**
+   * The global offsets for the character.
+   */
+  var offsets:Array<Float>;
+
+  /**
+   * The optional render type for the portrait. Defaults to sparrow.
+   */
+  var renderType:String;
+
+  /**
+   * On which beat (or quarter of a beat) the portrait dances to.
+   */
+  var danceEvery:Float;
+
+  /**
+   * The animations for this portrait.
+   */
+  var animations:Array<AnimationData>;
+
+  /**
+   * Waiting data for the portrait.
+   */
+  var waiting:CharacterPortraitWaitingData;
+}
+
+typedef CharacterPortraitWaitingData =
+{
+  var canWait:Bool;
+  var waitDelay:Float;
+}
