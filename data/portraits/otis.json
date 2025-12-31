@@ -8,8 +8,7 @@
     {
       "name": "enable",
       "prefix": "enable",
-      "offsets": [0, 0],
-      "flipX": true
+      "offsets": [0, 0]
     },
     {
       "name": "waiting1",
