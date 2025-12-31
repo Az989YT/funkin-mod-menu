@@ -417,7 +417,9 @@ class ModMenuState extends ScriptedMusicBeatState
             this.remove(characterPortrait);
         }
 
+        var oldPortrait:String = curPortrait;
         curPortrait = allPortraits[FlxG.random.int(0, allPortraits.length - 1)];
+        while (curPortrait == oldPortrait) curPortrait = allPortraits[FlxG.random.int(0, allPortraits.length - 1)];
 
         characterPortrait = CharacterPortraitRegistry.fetchEntry(curPortrait);
         characterPortrait.revive();

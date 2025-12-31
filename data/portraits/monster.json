@@ -1,4 +1,5 @@
 {
+  "scriptClass": "MonsterPortrait",
   "animations": [
     {
       "name": "idle",
@@ -13,7 +14,7 @@
     {
       "name": "waiting2",
       "prefix": "waiting2",
-      "offsets": [0, 0]
+      "offsets": [-80, 0]
     },
     {
       "name": "waiting3",

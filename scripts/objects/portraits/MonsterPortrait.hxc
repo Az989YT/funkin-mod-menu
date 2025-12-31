@@ -1,0 +1,23 @@
+import funkin.play.stage.Bopper;
+
+class MonsterPortrait extends Bopper
+{
+  override function playAnimation(name:String, restart:Bool = false, ignoreOther:Bool = false, reversed:Bool = false)
+  {
+    super.playAnimation(name, restart, ignoreOther, reversed);
+
+    switch(name)
+    {
+      case "waiting1":
+        // run left logic
+      case "waiting2":
+        // run right logic
+      case "waiting3":
+        //jumpscare logic
+      case "waiting4":
+        // corner peek logic
+      case "waiting5":
+        //fall logic
+    }
+  }
+}
