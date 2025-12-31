@@ -30,6 +30,7 @@ import funkin.modding.module.ModuleHandler;
 class ModMenuUtils extends Module
 {
     var modMenuID = "Funkin' Mod Menu";
+    var modsOrdered = [];
 
     final defaultModSave = {
         enabled: true,
@@ -69,6 +70,22 @@ class ModMenuUtils extends Module
             modData = ReflectUtil.copy(defaultModSave);
             modData.lastVersion = mod.modVersion;
             save.set(mod.id, modData);
+        }
+
+        // Apply the order if not given, with new mods coming last
+        if (modData.order == null)
+        {
+            var allModOrders:Array<Int> = [];
+            for (id => data in save)
+            {
+                if (data.order != null) allModOrders.push(data.order);
+            }
+
+            if (allModOrders.length == 0) allModOrders.push(-1);
+
+            allModOrders.sort((a, b) -> a - b);
+
+            modData.order = allModOrders[allModOrders.length - 1] + 1;
         }
 
         return modData;
@@ -131,6 +148,11 @@ class ModMenuUtils extends Module
         return !getSaveData().exists(mod.id);
     }
 
+    public function getModOrder(mod:ModMetadata)
+    {
+        return getModData(mod).order;
+    }
+
     public function isModMissingDependencies(mod:ModMetadata)
     {
         if(mod.dependencies == null) return false;
@@ -166,7 +188,7 @@ class ModMenuUtils extends Module
             modData.lastVersion = mod.modVersion;
 
             if(isModEnabled(mod))
-                modsToLoad.push(mod.id);
+                modsToLoad.insert(modData.order, mod.id);
         }
 
         if(modsToLoad.length > 0)

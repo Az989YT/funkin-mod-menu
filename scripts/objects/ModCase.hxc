@@ -25,7 +25,7 @@ class ModCase extends ScriptedFlxSpriteGroup
 
 
   var modTitle:FlxText;
-  
+
   var caseSprite:FlxSprite;
   var buttonSprite:FlxSprite;
   var favSprite:FlxSprite;
@@ -118,7 +118,7 @@ class ModCase extends ScriptedFlxSpriteGroup
 
     caseRightCornerSprite = new FlxSprite(589, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
     add(caseRightCornerSprite);
-    
+
     caseLeftCornerSpriteB = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
     caseLeftCornerSpriteB.color = 0xFF000000;
     add(caseLeftCornerSpriteB);
@@ -169,6 +169,16 @@ class ModCase extends ScriptedFlxSpriteGroup
     super.update(elapsed);
   }
 
+  public function getIntendedX(curSelected:Int = 0):Float
+  {
+    return -60 * Math.sin(this.ID - (curSelected ?? 0) - 2) - 55;
+  }
+
+  public function getIntendedY(curSelected:Int = 0):Float
+  {
+    return 300 - 150 * ((curSelected ?? 0) - this.ID);
+  }
+
   public function onSelect() {
     doScrolling = true;
     if (modTitle.width > clipWidth ) {
@@ -207,7 +217,7 @@ class ModCase extends ScriptedFlxSpriteGroup
   var moveTween:Null<FlxTween>;
 
   function moveTextRight():Void
-  { 
+  {
     if (!doScrolling) return;
     var distToMove:Float = modTitle.width - clipWidth;
     moveTween = FlxTween.tween(modTitle.offset, {x: distToMove}, 1 / (clipWidth / modTitle.width),

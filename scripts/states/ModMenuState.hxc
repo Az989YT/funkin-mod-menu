@@ -53,6 +53,7 @@ class ModMenuState extends ScriptedMusicBeatState
     var transitioning = false;
     var disableControls = false;
     var canFavorite = true;
+    var isReordering:Bool = false;
 
 	public function new()
     {
@@ -187,22 +188,25 @@ class ModMenuState extends ScriptedMusicBeatState
         add(fullModCase);
 
         var modList = PolymodHandler.getAllMods();
+        modList.sort((a, b) -> ModMenuUtils.getModOrder(a) - ModMenuUtils.getModOrder(b));
+
         for (i in modList) {
             if (i.title == "Funkin' Mod Menu") {
                 modList.remove(i);
                 modList.insert(0, i);
+                break;
             }
         }
-        var index = 0;
-        for(mod in modList)
+
+        for (i in 0...modList.length)
         {
-            var modCase = new ModCase(0, 0, mod);
+            var modCase = new ModCase(0, 0, modList[i]);
+            modCase.y = (FlxG.height - modCase.height) / 2 + 150 * i;
+            modCase.ID = i;
+            (i == 0 ? modCase.onSelect : modCase.onDeSelect)();
+
             modCasesGroup.add(modCase);
-            modCase.y += 150 * modCasesGroup.members.indexOf(modCase);
-            index == 0 ? modCase.onSelect() : modCase.onDeSelect();
-            index++;
         }
-        modCasesGroup.y = (FlxG.height - modCasesGroup.members[0].height)/2;
 
         if(FlxG.onMobile)
             addBackButton(0, 0, 0xffFFFFFF, ()->{
@@ -251,12 +255,10 @@ class ModMenuState extends ScriptedMusicBeatState
             }
         }
 
-        if(disableControls) return;
+        if(disableControls || transitioning) return;
 
-        if( (controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(topBarEdge)) || (controls.BACK && inFullModView))
+        if( ((controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(topBarEdge)) || (controls.BACK && inFullModView)) && !isReordering)
         {
-            // openSubState(new FullModViewSubState());
-            if(transitioning) return;
             transitioning = true;
 
             if(inFullModView)
@@ -268,11 +270,11 @@ class ModMenuState extends ScriptedMusicBeatState
                     FlxTween.cancelTweensOf(modCase);
                     if(modCasesGroup.members.indexOf(modCase) == curSelected)
                     {
-                        FlxTween.tween(modCase, { y: 300 }, 1, { ease: FlxEase.cubeInOut, onComplete: ()->{ transitioning = false; } });
+                        FlxTween.tween(modCase, { y: modCase.getIntendedY(curSelected) }, 1, { ease: FlxEase.cubeInOut, onComplete: ()->{ transitioning = false; } });
                     }
                     else
                     {
-                        FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 1, { ease: FlxEase.cubeInOut });
+                        FlxTween.tween(modCase, { x: modCase.getIntendedX(curSelected) }, 1, { ease: FlxEase.cubeInOut });
                     }
                 }
                 FunkinSound.playOnce(Paths.sound('cancelMenu'));
@@ -303,7 +305,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(inFullModView || transitioning) return;
 
-        if( (controls.ACCEPT_P && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
+        if( ((controls.ACCEPT_P && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected]))) && !isReordering )
         {
             if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
             {
@@ -317,8 +319,8 @@ class ModMenuState extends ScriptedMusicBeatState
                 characterPortrait.playAnimation("locked", true, true);
                 HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
                 FlxTween.cancelTweensOf(modCasesGroup.members[curSelected]);
-                modCasesGroup.members[curSelected].x = -60 * Math.sin(curSelected - curSelected - 2) - 55 - 10;
-                FlxTween.tween(modCasesGroup.members[curSelected], { x: -60 * Math.sin(curSelected - curSelected - 2) - 55 }, 0.75, { ease: FlxEase.elasticOut });
+                modCasesGroup.members[curSelected].x = modCasesGroup.members[curSelected].getIntendedX(curSelected) - 10;
+                FlxTween.tween(modCasesGroup.members[curSelected], { x: modCasesGroup.members[curSelected].getIntendedX(curSelected) }, 0.75, { ease: FlxEase.elasticOut });
             }
             else
             {
@@ -335,7 +337,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
         {
-            if(canFavorite || !FlxG.onMobile)
+            if((canFavorite || !FlxG.onMobile) && !isReordering)
             {
                 if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
                 {
@@ -356,7 +358,7 @@ class ModMenuState extends ScriptedMusicBeatState
             }
         }
 
-        if(controls.BACK && !inFullModView)
+        if(controls.BACK && !inFullModView && !isReordering)
         {
             if(!inFullModView) openSubState(new ModLoadingSubState(new MainMenuState()));
         }
@@ -372,9 +374,13 @@ class ModMenuState extends ScriptedMusicBeatState
         {
             scrollMenu(-FlxG.mouse.wheel);
         }
+
+        if (controls.UI_RIGHT_P) startModReorder();
+        if (controls.UI_LEFT_P) endModReorder();
+
         if(controls.RESET)
         {
-            if(FlxG.keys.pressed.SHIFT)
+            if(FlxG.keys.pressed.SHIFT && !isReordering)
             {
                 var save = Save.instance.modOptions.get("Funkin' Mod Menu");
                 save.clear();
@@ -387,26 +393,90 @@ class ModMenuState extends ScriptedMusicBeatState
         }
     }
 
+    function startModReorder()
+    {
+        if (isReordering) return;
+
+        var modCase = modCasesGroup.members[curSelected];
+
+        // Don't rearrange the current mod if the mod selected is the mod menu.
+        if (modCase.metadata.id == ModMenuUtils.modMenuID)
+        {
+            FunkinSound.playOnce(Paths.sound('modFavoriteDisable'), 0.8);
+            characterPortrait.playAnimation("locked", true, true);
+
+            HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+
+            FlxTween.cancelTweensOf(modCasesGroup.members[curSelected]);
+
+            modCase.x = modCase.getIntendedX(curSelected) - 10;
+            FlxTween.tween(modCasesGroup.members[curSelected], {x: modCase.getIntendedX(curSelected)}, 0.75, {ease: FlxEase.elasticOut});
+            return;
+        }
+
+        isReordering = true;
+        scrollMenu(0);
+
+        FunkinSound.playOnce(Paths.sound('scrollMenu'));
+        HapticUtil.vibrate(0, 0.01, 0.5);
+    }
+
+    function endModReorder()
+    {
+        if (!isReordering) return;
+
+        isReordering = false;
+        scrollMenu(0);
+
+        FunkinSound.playOnce(Paths.sound('scrollMenu'));
+        HapticUtil.vibrate(0, 0.01, 0.5);
+
+        modCasesGroup.members.sort((a,b) -> a.ID - b.ID);
+        modCasesGroup.forEach(function(modCase:ModCase)
+        {
+            modCase.caseSprite.animation.play(modCase.ID == curSelected ? "idle" : "dim", true);
+        });
+
+        for (modCase in modCasesGroup.members)
+        {
+            ModMenuUtils.getModData(modCase.metadata).order = modCase.ID;
+        }
+    }
+
     function scrollMenu(scroll:Int = 0)
     {
-        modCasesGroup.members[curSelected].caseSprite.animation.play("dim");
-        curSelected = FlxMath.wrap(curSelected + scroll, 0, modCasesGroup.length-1);
-        modCasesGroup.members[curSelected].caseSprite.animation.play("idle");
+        var prevSelected:Int = curSelected;
+        curSelected = FlxMath.wrap(curSelected + scroll, (isReordering ? 1 : 0), modCasesGroup.length-1);
+
+        if (!isReordering)
+        {
+            modCasesGroup.members[prevSelected].caseSprite.animation.play("dim");
+            modCasesGroup.members[curSelected].caseSprite.animation.play("idle");
+        }
+
         if(scroll != 0)
         {
             FunkinSound.playOnce(Paths.sound('scrollMenu'));
-            FlxTween.cancelTweensOf(modCasesGroup);
-            FlxTween.tween(modCasesGroup, { y: 300 - 150*curSelected }, 0.5, { ease: FlxEase.expoOut });
-            var index = 0;
-            for(modCase in modCasesGroup.members)
-            {
-                index == curSelected ? modCase.onSelect() : modCase.onDeSelect();
-                FlxTween.cancelTweensOf(modCase);
-                FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 0.5, { ease: FlxEase.expoOut });
-                index++;
-            }
+            HapticUtil.vibrate(0, 0.01, 0.5);
         }
-        HapticUtil.vibrate(0, 0.01, 0.5);
+
+        modCasesGroup.forEach(function(modCase:ModCase)
+        {
+            if (isReordering)
+            {
+                if (modCase.ID == prevSelected) modCase.ID = curSelected;
+                else if (modCase.ID == curSelected) modCase.ID = prevSelected;
+            }
+            else
+            {
+                (modCase.ID == curSelected ? modCase.onSelect : modCase.onDeSelect)();
+            }
+
+            var xOffset:Float = (modCase.ID != curSelected && isReordering ? -100 : 0);
+
+            FlxTween.cancelTweensOf(modCase);
+            FlxTween.tween(modCase, { x: modCase.getIntendedX(curSelected) + xOffset, y: modCase.getIntendedY(curSelected) }, 0.5, { ease: FlxEase.expoOut });
+        });
     }
 
     function refreshPortrait()
