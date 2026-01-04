@@ -23,7 +23,7 @@ import flixel.util.FlxTimer;
 
 import funkin.api.discord.DiscordClient;
 
-using funkin.util.tools.IteratorTools;
+import funkin.util.tools.IteratorTools;
 
 class ModMenuState extends ScriptedMusicBeatState
 {
@@ -59,7 +59,7 @@ class ModMenuState extends ScriptedMusicBeatState
 	public function new()
     {
 		super();
-        allPortraits = CharacterPortraitRegistry.entries.keys().array();
+        allPortraits = IteratorTools.array(CharacterPortraitRegistry.entries.keys());
 	}
 
     override public function create():Void
@@ -403,6 +403,10 @@ class ModMenuState extends ScriptedMusicBeatState
 
         var modCase = modCasesGroup.members[curSelected];
 
+        modCase.doScrolling = false;
+        if (modCase.moveTween != null) modCase.moveTween.cancel();
+        modCase.moveTextLeft(true);
+
         // Don't rearrange the current mod if the mod selected is the mod menu.
         if (modCase.metadata.id == ModMenuUtils.modMenuID)
         {
@@ -428,6 +432,12 @@ class ModMenuState extends ScriptedMusicBeatState
     function endModReorder()
     {
         if (!isReordering) return;
+
+        var modCase = modCasesGroup.members[curSelected];
+
+        modCase.doScrolling = true;
+        if (modCase.moveTween != null) modCase.moveTween.cancel();
+        modCase.moveTextLeft(true);
 
         isReordering = false;
         scrollMenu(0);
