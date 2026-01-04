@@ -148,6 +148,7 @@ class ModMenuState extends ScriptedMusicBeatState
         add(modCasesGroup);
 
         var test:FlxTypedSpriteGroup = BackgroundRegistry.fetchEntry('default');
+        test.zIndex = 12;
         add(test);
 
         poofSprite = new FlxSprite(0,0);

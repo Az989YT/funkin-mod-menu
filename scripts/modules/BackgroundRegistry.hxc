@@ -15,6 +15,8 @@ import flixel.group.FlxTypedSpriteGroup;
 import funkin.data.stage.StageData;
 import flixel.util.FlxColor;
 import funkin.play.character.BaseCharacter;
+import flixel.util.FlxSort;
+import funkin.util.SortUtil;
 
 using StringTools;
 
@@ -58,6 +60,8 @@ class BackgroundRegistry extends Module
     var background:FlxTypedSpriteGroup = null;
     if (data.scriptClass != null) background = ScriptedFlxSpriteGroup.init(data.scriptClass, 0, 0);
     if (background == null) background = new FlxTypedSpriteGroup(0, 0);
+
+    // Paths.setCurrentLevel(data.directory);
 
     for (dataProp in data.props)
     {
@@ -135,10 +139,10 @@ class BackgroundRegistry extends Module
       }
       propSprite.updateHitbox();
 
-      propSprite.x = dataProp.position[0];
-      propSprite.y = dataProp.position[1];
+      propSprite.x = dataProp.position[0] ?? 0;
+      propSprite.y = dataProp.position[1] ?? 0;
 
-      propSprite.alpha = dataProp.alpha;
+      propSprite.alpha = dataProp.alpha ?? 1;
 
       // If pixel, disable antialiasing.
       propSprite.antialiasing = !dataProp.isPixel;
@@ -151,7 +155,7 @@ class BackgroundRegistry extends Module
       propSprite.scrollFactor.y = dataProp.scroll[1];
 
       propSprite.angle = dataProp.angle;
-      if (!isSolidColor) propSprite.color = FlxColor.fromString(dataProp.color);
+      if (!isSolidColor) propSprite.color = FlxColor.fromString(dataProp.color) ?? 0xFFFFFFFF;
       // propSprite.blend = BlendMode.fromString(dataProp.blend);
 
       propSprite.zIndex = dataProp.zIndex;
@@ -168,7 +172,7 @@ class BackgroundRegistry extends Module
 
             if (Std.isOfType(propSprite, Bopper))
             {
-              cast(propSprite, Bopper).setAnimationOffsets(propAnim.name, propAnim.offsets[0], propAnim.offsets[1]);
+              propSprite.setAnimationOffsets(propAnim.name, propAnim.offsets[0], propAnim.offsets[1]);
             }
           }
         case 'animateatlas':
@@ -179,7 +183,7 @@ class BackgroundRegistry extends Module
           {
             for (propAnim in dataProp.animations)
             {
-              cast(propSprite, Bopper).setAnimationOffsets(propAnim.name, propAnim.offsets[0], propAnim.offsets[1]);
+              propSprite.setAnimationOffsets(propAnim.name, propAnim.offsets[0], propAnim.offsets[1]);
             }
           }
       }
@@ -188,24 +192,26 @@ class BackgroundRegistry extends Module
       {
         for (propAnim in dataProp.animations)
         {
-          cast(propSprite, Bopper).setAnimationOffsets(propAnim.name, propAnim.offsets[0], propAnim.offsets[1]);
+          propSprite.setAnimationOffsets(propAnim.name, propAnim.offsets[0], propAnim.offsets[1]);
         }
 
         if (!Std.isOfType(propSprite, BaseCharacter))
         {
-          cast(propSprite, Bopper).originalPosition.x = dataProp.position[0];
-          cast(propSprite, Bopper).originalPosition.y = dataProp.position[1];
+          propSprite.originalPosition.x = dataProp.position[0];
+          propSprite.originalPosition.y = dataProp.position[1];
         }
       }
 
       if (dataProp.startingAnimation != null && propSprite is Bopper)
       {
-        cast(propSprite, Bopper).playAnimation(dataProp.startingAnimation);
+        propSprite.playAnimation(dataProp.startingAnimation);
       }
 
       if(dataProp.name != null) propSprite.name = dataProp.name;
       background.add(propSprite);
     }
+
+    background.sort(SortUtil.byZIndex, FlxSort.ASCENDING);
 
     return background;
   }
