@@ -29,6 +29,7 @@ class ModMenuState extends ScriptedMusicBeatState
 {
     var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
     var CharacterPortraitRegistry = ModuleHandler.getModule("CharacterPortraitRegistry");
+    var BackgroundRegistry = ModuleHandler.getModule("BackgroundRegistry");
 
     var allPortraits:Array<String> = [];
     var curPortrait:String = "bf";
@@ -145,6 +146,9 @@ class ModMenuState extends ScriptedMusicBeatState
         modCasesGroup = new FlxTypedSpriteGroup(0,0,0);
         modCasesGroup.zIndex = 90;
         add(modCasesGroup);
+
+        var test:FlxTypedSpriteGroup = BackgroundRegistry.fetchEntry('default');
+        add(test);
 
         poofSprite = new FlxSprite(0,0);
         poofSprite.frames = Paths.getSparrowAtlas("modmenu/smokePuff");

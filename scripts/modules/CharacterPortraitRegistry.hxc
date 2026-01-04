@@ -23,9 +23,9 @@ class CharacterPortraitRegistry extends Module
     super("CharacterPortraitRegistry");
     this.active = false;
 
-    for (portrait in DataAssets.listDataFilesInPath("portraits/"))
+    for (portrait in DataAssets.listDataFilesInPath("mod-menu/portraits/"))
     {
-      var parserData:Dynamic = Json.parse(Assets.getText(Paths.json("portraits/" + portrait)));
+      var parserData:Dynamic = Json.parse(Assets.getText(Paths.json("mod-menu/portraits/" + portrait)));
       if (parserData == null) continue;
 
       // Set the asset path to the default one if it doesn't exist, specifically for backwards compatibility.
