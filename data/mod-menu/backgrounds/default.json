@@ -1,44 +1,23 @@
 {
+  "name": "Default Background",
+  "scriptClass": "DefaultModMenuBg",
   "props": [
     {
-      "danceEvery": 0,
-      "zIndex": 70,
-      "position": [-600, -200],
-      "scale": [1, 1],
-      "animType": "sparrow",
-      "name": "stageBack",
-      "isPixel": false,
-      "assetPath": "stageback",
-      "scroll": [0.9, 0.9],
-      "animations": []
+      "zIndex": 10,
+      "assetPath": "#FFFAE1",
+      "scale": [1680, 720]
     },
     {
-      "danceEvery": 0,
-      "zIndex": 71,
-      "position": [-650, 600],
-      "scale": [1.1, 1.1],
-      "animType": "sparrow",
-      "name": "stageFront",
-      "isPixel": false,
-      "assetPath": "stagefront",
-      "scroll": [0.9, 0.9],
-      "animations": []
+      "zIndex": 20,
+      "name": "swirlBig",
+      "assetPath": "modmenu/swirlBig",
+      "position": [515, -67.5]
     },
     {
-      "danceEvery": 0,
-      "zIndex": 72,
-      "position": [-500, -300],
-      "scale": [0.9, 0.9],
-      "animType": "sparrow",
-      "name": "stageCurtains",
-      "isPixel": false,
-      "assetPath": "stagecurtains",
-      "scroll": [1.3, 1.3],
-      "animations": []
+      "zIndex": 30,
+      "name": "swirlMini",
+      "assetPath": "modmenu/swirlMini",
+      "position": [545.5, 94.5]
     }
-  ],
-  "cameraZoom": 1.1,
-  "version": "1.0.0",
-  "name": "Main Stage",
-  "directory": "week1"
+  ]
 }

@@ -1,5 +1,4 @@
 import funkin.audio.FunkinSound;
-import funkin.graphics.shaders.AdjustColorShader;
 import funkin.modding.PolymodHandler;
 import funkin.modding.module.ModuleHandler;
 import funkin.modding.events.ScriptEventDispatcher;
@@ -14,7 +13,6 @@ import funkin.Conductor;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxTiledSprite;
 import flixel.group.FlxTypedSpriteGroup;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxEase;
@@ -38,16 +36,12 @@ class ModMenuState extends ScriptedMusicBeatState
     var isPortraitWaiting:Bool = false;
     var portraitWaitTimer:FlxTimer = new FlxTimer();
 
-    var swirlBig:FlxSprite;
-    var swirlMini:FlxSprite;
+    var curBackground:FlxTypedSpriteGroup;
+
     var modCasesGroup:FlxTypedSpriteGroup;
     var characterPortrait:FunkinSprite;
     var poofSprite:FlxSprite;
     var topBarEdge:FlxSprite;
-
-    var scrollingElementsTop:FlxTiledSprite;
-    var scrollingElementsMiddle:FlxTiledSprite;
-    var scrollingElementsBottom:FlxTiledSprite;
 
     var fullModCase:FlxTypedSpriteGroup;
     var inFullModView = false;
@@ -84,9 +78,9 @@ class ModMenuState extends ScriptedMusicBeatState
         });
         FlxG.sound.music.fadeIn(2, 0, 0.5);
 
-        var colorBg:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, FlxG.height, 0xffFFFAE1);
-        colorBg.zIndex = 10;
-        add(colorBg);
+        curBackground = BackgroundRegistry.fetchEntry('default');
+        curBackground.zIndex = 10;
+        add(curBackground);
 
         var topBar:FlxSprite = new FlxSprite(0,0).makeGraphic(FlxG.width, 48, 0xff000000);
         topBar.zIndex = 110;
@@ -108,48 +102,11 @@ class ModMenuState extends ScriptedMusicBeatState
         topBarBubbles.zIndex = 130;
         add(topBarBubbles);
 
-        swirlBig = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlBig"));
-        swirlBig.setPosition(FlxG.width - swirlBig.width, (FlxG.height - swirlBig.height)/2);
-        swirlBig.shader = new AdjustColorShader();
-        swirlBig.zIndex = 20;
-        add(swirlBig);
-
-        swirlMini = new FlxSprite(0,0).loadGraphic(Paths.image("modmenu/swirlMini"));
-        swirlMini.setPosition(swirlBig.x + (swirlBig.width - swirlMini.width)/2, swirlBig.y + (swirlBig.height - swirlMini.height)/2);
-        swirlMini.shader = new AdjustColorShader();
-        swirlMini.zIndex = 30;
-        add(swirlMini);
-
-        scrollingElementsTop = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
-        scrollingElementsTop.zIndex = 40;
-        add(scrollingElementsTop);
-
-        scrollingElementsMiddle = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
-        scrollingElementsMiddle.zIndex = 50;
-        add(scrollingElementsMiddle);
-
-        scrollingElementsBottom = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
-        scrollingElementsBottom.zIndex = 60;
-        add(scrollingElementsBottom);
-
-        for(scrollingElement in [scrollingElementsTop, scrollingElementsMiddle, scrollingElementsBottom])
-        {
-            scrollingElement.screenCenter();
-            scrollingElement.scrollX = 275*FlxG.random.int(0, FlxG.width*5);
-        }
-
-        scrollingElementsTop.y -= 275;
-        scrollingElementsBottom.y += 275;
-
         refreshPortrait();
 
         modCasesGroup = new FlxTypedSpriteGroup(0,0,0);
         modCasesGroup.zIndex = 90;
         add(modCasesGroup);
-
-        var test:FlxTypedSpriteGroup = BackgroundRegistry.fetchEntry('default');
-        test.zIndex = 12;
-        add(test);
 
         poofSprite = new FlxSprite(0,0);
         poofSprite.frames = Paths.getSparrowAtlas("modmenu/smokePuff");
@@ -226,15 +183,6 @@ class ModMenuState extends ScriptedMusicBeatState
     {
         super.update(elapsed);
         Conductor.instance.update();
-
-        swirlBig.angle += 0.25;
-        swirlMini.angle -= 0.5;
-        swirlBig.shader.hue += 1;
-        swirlMini.shader.hue -= 1;
-
-        scrollingElementsTop.scrollX -= elapsed*150;
-        scrollingElementsMiddle.scrollX += elapsed*150;
-        scrollingElementsBottom.scrollX -= elapsed*150;
 
         if (characterPortrait != null)
         {
