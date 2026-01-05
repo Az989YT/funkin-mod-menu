@@ -1,0 +1,161 @@
+{
+  "name": "Lab",
+  "scriptClass": "LabModMenuBg",
+  "props": [
+    {
+      "zIndex": 10,
+      "assetPath": "modmenu/skins/lab/background",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 20,
+      "name": "henchman",
+      "assetPath": "modmenu/skins/lab/henchman",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "idle",
+          "offsets": [0, 0],
+          "frameRate": 6,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 30,
+      "name": "table",
+      "assetPath": "modmenu/skins/lab/table",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "idle",
+          "offsets": [0, 0],
+          "frameRate": 6,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 40,
+      "name": "brew",
+      "assetPath": "modmenu/skins/lab/potion",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "brew0",
+          "offsets": [0, 0],
+          "frameRate": 24,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 50,
+      "name": "backBubbles",
+      "assetPath": "modmenu/skins/lab/potion",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "backBubbles0",
+          "offsets": [0, 0],
+          "frameRate": 24,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 60,
+      "name": "darkBrew",
+      "assetPath": "modmenu/skins/lab/potion",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "darkBrew0",
+          "offsets": [0, 0],
+          "frameRate": 24,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 70,
+      "name": "frontBubbles",
+      "assetPath": "modmenu/skins/lab/potion",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "frontBubbles0",
+          "offsets": [0, 0],
+          "frameRate": 24,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 80,
+      "name": "brewOutline",
+      "assetPath": "modmenu/skins/lab/potion",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "brewOutline0",
+          "offsets": [0, 0],
+          "frameRate": 24,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 90,
+      "name": "bottle",
+      "assetPath": "modmenu/skins/lab/potion",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "bottle0",
+          "offsets": [0, 0],
+          "frameRate": 24,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 140,
+      "name": "rack",
+      "assetPath": "modmenu/skins/lab/tubeRack",
+      "animations": [
+        {
+          "name": "idle",
+          "prefix": "rack0",
+          "offsets": [0, 0],
+          "frameRate": 24,
+          "looped": true
+        }
+      ],
+      "startingAnimation": "idle",
+      "position": [0, 0]
+    },
+    {
+      "zIndex": 150,
+      "name": "overlay",
+      "assetPath": "modmenu/skins/lab/overlay",
+      "position": [0, 0]
+    }
+  ]
+}

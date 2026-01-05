@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="tubeRack.png">
+	<!-- Created using the Spritesheet and XML generator -->
+	<!-- https://uncertainprod.github.io/FNF-Spritesheet-XML-generator-Web -->
+	<SubTexture name="rack0000" x="0" y="0" width="439" height="234" frameX="-609" frameY="-412" frameWidth="1280" frameHeight="720"/>
+	<SubTexture name="tube0000" x="439" y="0" width="76" height="221" frameX="-900" frameY="-370" frameWidth="1280" frameHeight="720"/>
+	<SubTexture name="liquid0000" x="0" y="234" width="25" height="85" frameX="-926" frameY="-492" frameWidth="1280" frameHeight="720"/>
+</TextureAtlas>

@@ -78,7 +78,7 @@ class ModMenuState extends ScriptedMusicBeatState
         });
         FlxG.sound.music.fadeIn(2, 0, 0.5);
 
-        curBackground = BackgroundRegistry.fetchEntry('default');
+        curBackground = BackgroundRegistry.fetchEntry('lab');
         curBackground.zIndex = 10;
         add(curBackground);
 
@@ -186,6 +186,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if (characterPortrait != null)
         {
+            characterPortrait.visible = false;
             var charData:CharacterPortraitData = CharacterPortraitRegistry.fetchEntryData(curPortrait);
 
             // Apply the waiting logic here.

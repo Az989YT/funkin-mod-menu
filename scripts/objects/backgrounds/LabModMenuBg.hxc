@@ -1,0 +1,104 @@
+
+import flixel.addons.display.FlxTiledSprite;
+import flixel.group.FlxTypedSpriteGroup;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.play.stage.StageProp;
+
+class LabModMenuBg extends FlxTypedSpriteGroup
+{
+  var henchman:FlxSprite;
+  var table:FlxSprite;
+  var overlay:FlxSprite;
+
+  // potion color thingies :P
+  var brew:FlxSprite;
+  var backBubbles:FlxSprite;
+  var darkBrew:FlxSprite;
+  var frontBubbles:FlxSprite;
+  var brewOutline:FlxSprite;
+
+  public function new()
+  {
+    super();
+
+    for(i in 0...3)
+    {
+      var potion = new FlxSprite();
+      potion.frames = Paths.getSparrowAtlas('modmenu/skins/lab/tubeRack');
+      potion.animation.addByPrefix('idle', 'liquid', 24, true);
+      potion.animation.play('idle');
+      potion.zIndex = 140 - ((i + 1) * 10);
+      potion.shader = new AdjustColorShader();
+      potion.shader.hue = 40 * i;
+      potion.shader.contrast = -10 * i;
+      potion.shader.saturation = 10 * i;
+      add(potion);
+
+      var tube = new FlxSprite();
+      tube.frames = Paths.getSparrowAtlas('modmenu/skins/lab/tubeRack');
+      tube.animation.addByPrefix('idle', 'tube', 24, true);
+      tube.animation.play('idle');
+      tube.zIndex = potion.zIndex + 5;
+      add(tube);
+
+      potion.x = tube.x = -95 * i;
+    }
+  }
+
+  override function preAdd(obj:FlxSprite)
+  {
+    super.preAdd(obj);
+
+    // var widescreenOffset:Float = (FlxG.width - FlxG.initialWidth) / 2;
+
+    // Apply the AdjustColor shader to the swirls.
+    if (Std.isOfType(obj, StageProp))
+    {
+      switch (obj.name)
+      {
+        case "henchman":
+          henchman = obj;
+          henchman.x = FlxG.width - henchman.width;
+
+        case "table":
+          table = obj;
+          table.y = FlxG.height - table.height;
+
+        case "overlay":
+          overlay = obj;
+          overlay.blend = 0;
+          henchman.animation.onFrameChange.add((name, frame) -> {
+            if(frame == 0) overlay.alpha = 0.5;
+            else overlay.alpha = 0.525;
+          });
+
+        case "brew":
+          brew = obj;
+          brew.color = 0xFF5dc728;
+
+        case "backBubbles":
+          backBubbles = obj;
+          backBubbles.color = 0xFF31a26b;
+
+        case "darkBrew":
+          darkBrew = obj;
+          darkBrew.color = 0xFF107b92;
+
+        case "frontBubbles":
+          frontBubbles = obj;
+          frontBubbles.color = 0xFFfff147;
+
+        case "brewOutline":
+          brewOutline = obj;
+          brewOutline.color = 0xFFfff147;
+      }
+    }
+  }
+
+  public function update(elapsed:Float)
+  {
+    super.update(elapsed);
+  }
+}
