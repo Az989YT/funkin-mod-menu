@@ -31,9 +31,8 @@ class LabModMenuBg extends FlxTypedSpriteGroup
       potion.animation.play('idle');
       potion.zIndex = 140 - ((i + 1) * 10);
       potion.shader = new AdjustColorShader();
-      potion.shader.hue = 40 * i;
-      potion.shader.contrast = -10 * i;
-      potion.shader.saturation = 10 * i;
+      potion.shader.hue = i * 20;
+      potion.shader.saturation = i * 20;
       add(potion);
 
       var tube = new FlxSprite();
@@ -70,8 +69,8 @@ class LabModMenuBg extends FlxTypedSpriteGroup
           overlay = obj;
           overlay.blend = 0;
           henchman.animation.onFrameChange.add((name, frame) -> {
-            if(frame == 0) overlay.alpha = 0.5;
-            else overlay.alpha = 0.525;
+            if(frame == 0) overlay.alpha = 0.2;
+            else overlay.alpha = 0.25;
           });
 
         case "brew":
