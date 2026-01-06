@@ -329,8 +329,8 @@ class ModMenuState extends ScriptedMusicBeatState
             scrollMenu(-FlxG.mouse.wheel);
         }
 
-        if (controls.UI_RIGHT_P) startModReorder();
-        if (controls.UI_LEFT_P) endModReorder();
+        if (controls.UI_RIGHT_P || (FlxG.onMobile && SwipeUtil.justSwipedRight)) startModReorder();
+        if (controls.UI_LEFT_P || (FlxG.onMobile && SwipeUtil.justSwipedLeft)) endModReorder();
 
         if(controls.RESET)
         {
