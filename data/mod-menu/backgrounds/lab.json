@@ -26,12 +26,12 @@
           "name": "idle",
           "prefix": "idle",
           "offsets": [0, 0],
-          "frameRate": 6,
+          "frameRate": 4,
           "looped": true
         }
       ],
       "startingAnimation": "idle",
-      "position": [0, 0]
+      "position": [0, 50]
     },
     {
       "zIndex": 40,
@@ -42,7 +42,7 @@
           "name": "idle",
           "prefix": "idle",
           "offsets": [0, 0],
-          "frameRate": 6,
+          "frameRate": 4,
           "looped": true
         }
       ],
@@ -58,7 +58,7 @@
           "name": "idle",
           "prefix": "brew0",
           "offsets": [0, 0],
-          "frameRate": 24,
+          "frameRate": 20,
           "looped": true
         }
       ],
@@ -90,7 +90,7 @@
           "name": "idle",
           "prefix": "darkBrew0",
           "offsets": [0, 0],
-          "frameRate": 24,
+          "frameRate": 20,
           "looped": true
         }
       ],
@@ -122,7 +122,7 @@
           "name": "idle",
           "prefix": "brewOutline0",
           "offsets": [0, 0],
-          "frameRate": 24,
+          "frameRate": 20,
           "looped": true
         }
       ],
