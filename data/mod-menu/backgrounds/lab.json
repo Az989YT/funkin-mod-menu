@@ -3,12 +3,22 @@
   "scriptClass": "LabModMenuBg",
   "props": [
     {
+      "zIndex": 0,
+      "assetPath": "#222129 ",
+      "scale": [1680, 720]
+    },
+    {
       "zIndex": 10,
-      "assetPath": "modmenu/skins/lab/background",
+      "assetPath": "modmenu/skins/lab/wires",
       "position": [0, 0]
     },
     {
       "zIndex": 20,
+      "assetPath": "modmenu/skins/lab/gradient",
+      "scale": [1, 720]
+    },
+    {
+      "zIndex": 30,
       "name": "henchman",
       "assetPath": "modmenu/skins/lab/henchman",
       "animations": [
@@ -24,7 +34,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 30,
+      "zIndex": 40,
       "name": "table",
       "assetPath": "modmenu/skins/lab/table",
       "animations": [
@@ -40,7 +50,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 40,
+      "zIndex": 50,
       "name": "brew",
       "assetPath": "modmenu/skins/lab/potion",
       "animations": [
@@ -56,7 +66,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 50,
+      "zIndex": 60,
       "name": "backBubbles",
       "assetPath": "modmenu/skins/lab/potion",
       "animations": [
@@ -72,7 +82,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 60,
+      "zIndex": 70,
       "name": "darkBrew",
       "assetPath": "modmenu/skins/lab/potion",
       "animations": [
@@ -88,7 +98,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 70,
+      "zIndex": 80,
       "name": "frontBubbles",
       "assetPath": "modmenu/skins/lab/potion",
       "animations": [
@@ -104,7 +114,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 80,
+      "zIndex": 90,
       "name": "brewOutline",
       "assetPath": "modmenu/skins/lab/potion",
       "animations": [
@@ -120,7 +130,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 90,
+      "zIndex": 100,
       "name": "bottle",
       "assetPath": "modmenu/skins/lab/potion",
       "animations": [
@@ -136,7 +146,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 140,
+      "zIndex": 150,
       "name": "rack",
       "assetPath": "modmenu/skins/lab/tubeRack",
       "animations": [
@@ -152,7 +162,7 @@
       "position": [0, 0]
     },
     {
-      "zIndex": 150,
+      "zIndex": 160,
       "name": "overlay",
       "assetPath": "modmenu/skins/lab/overlay",
       "position": [0, 0]
