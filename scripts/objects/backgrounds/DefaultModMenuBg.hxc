@@ -18,15 +18,15 @@ class DefaultModMenuBg extends FlxTypedSpriteGroup
   {
     super();
 
-    scrollingElementsTop = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+    scrollingElementsTop = new FlxTiledSprite(Paths.image("modmenu/skins/default/scrollingElementsMerged"), FlxG.width, 275, true, false);
     scrollingElementsTop.zIndex = 40;
     add(scrollingElementsTop);
 
-    scrollingElementsMiddle = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+    scrollingElementsMiddle = new FlxTiledSprite(Paths.image("modmenu/skins/default/scrollingElementsMerged"), FlxG.width, 275, true, false);
     scrollingElementsMiddle.zIndex = 50;
     add(scrollingElementsMiddle);
 
-    scrollingElementsBottom = new FlxTiledSprite(Paths.image("modmenu/scrollingElementsMerged"), FlxG.width, 275, true, false);
+    scrollingElementsBottom = new FlxTiledSprite(Paths.image("modmenu/skins/default/scrollingElementsMerged"), FlxG.width, 275, true, false);
     scrollingElementsBottom.zIndex = 60;
     add(scrollingElementsBottom);
 

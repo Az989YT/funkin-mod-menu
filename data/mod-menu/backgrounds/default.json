@@ -10,13 +10,13 @@
     {
       "zIndex": 20,
       "name": "swirlBig",
-      "assetPath": "modmenu/swirlBig",
+      "assetPath": "modmenu/skins/default/swirlBig",
       "position": [515, -67.5]
     },
     {
       "zIndex": 30,
       "name": "swirlMini",
-      "assetPath": "modmenu/swirlMini",
+      "assetPath": "modmenu/skins/default/swirlMini",
       "position": [545.5, 94.5]
     }
   ]

@@ -1,0 +1,259 @@
+import funkin.audio.FunkinSound;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.tools.ArrayTools;
+
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxTimer;
+
+import flixel.FlxSprite;
+import flixel.addons.effects.FlxSkewedSprite;
+import flixel.group.FlxTypedSpriteGroup;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+
+import flixel.math.FlxRect;
+
+import StringTools;
+
+class LabModCase extends ScriptedFlxSpriteGroup
+{
+  public var doScrolling:Bool = false;
+
+  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
+
+
+  var modTitle:FlxText;
+
+  var caseSprite:FlxSprite;
+  var buttonSprite:FlxSprite;
+  var favSprite:FlxSprite;
+  var caseLeftCornerSprite:FlxSprite;
+  var caseRightCornerSprite:FlxSprite;
+
+  var caseLeftCornerSpriteB:FlxSprite;
+  var caseRightCornerSpriteB:FlxSprite;
+
+  var pressOffsetGroup:FlxTypedSpriteGroup;
+
+  var metadata:ModMetadata;
+
+  var clipWidth:Int = 500;
+
+  function new(_x, _y, ?_meta:ModMetadata)
+  {
+    super(_x, _y);
+
+    this.setPosition(_x, _y);
+    metadata = _meta;
+
+    ModMenuUtils.isModNew(metadata); // Called up here to initiliaze shit if new
+
+    var colorBg:FlxSkewedSprite = new FlxSkewedSprite(633, 7);
+    colorBg.makeGraphic(108, 105, 0xffFFDFD3);
+    colorBg.skew.set(22,0);
+    this.add(colorBg);
+
+    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(633,7).loadGraphic(ModMenuUtils.getModIcon(metadata));
+    modIcon.setGraphicSize(108, 105);
+    modIcon.updateHitbox();
+    modIcon.skew.set(22,0);
+    this.add(modIcon);
+
+    caseSprite = new FlxSprite(0, 0);
+    caseSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
+    caseSprite.animation.addByPrefix("press", "casePress", 24, false);
+    caseSprite.animation.addByPrefix("idle", "caseIdle", 24, true);
+    caseSprite.animation.addByPrefix("dim", "caseDimmed", 24, true);
+    caseSprite.animation.onFinish.add((name)-> {
+      if(name == "press") caseSprite.animation.play("idle");
+    });
+    caseSprite.animation.play("dim");
+    this.add(caseSprite);
+
+    buttonSprite = new FlxSprite(0, 0);
+    buttonSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
+    buttonSprite.animation.addByPrefix("enabled", "lightEnable0", 24, false);
+    buttonSprite.animation.addByPrefix("loopEnabled", "lightEnableLoop", 24, true);
+    buttonSprite.animation.addByPrefix("disabled", "lightDisable0", 24, false);
+    buttonSprite.animation.addByPrefix("loopDisabled", "lightDisableLoop", 24, true);
+    buttonSprite.animation.addByPrefix("missingDependencies", "lightMissingDependancies0", 24, true);
+    buttonSprite.animation.onFinish.add((name)-> {
+      switch(name)
+      {
+        case "enabled":
+            buttonSprite.animation.play("loopEnabled");
+            pressOffsetGroup.y = 0;
+        case "disabled":
+            buttonSprite.animation.play("loopDisabled");
+            pressOffsetGroup.y = 0;
+      }
+    });
+    buttonSprite.animation.play((ModMenuUtils.isModEnabled(metadata)) ? "loopEnabled":"loopDisabled");
+    if(ModMenuUtils.isModMissingDependencies(metadata)) buttonSprite.animation.play("missingDependencies");
+    this.add(buttonSprite);
+
+    favSprite = new FlxSprite(0, 0);
+    favSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
+    favSprite.animation.addByPrefix("favorite", "favourite0", 24, false);
+    favSprite.animation.addByPrefix("unfavorite", "unFavourite0", 24, false);
+    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
+    this.add(favSprite);
+
+    modTitle = new FlxText(120, 63, null, "  " + metadata.title + "  ", 42);
+    modTitle.font = "Letterstuff Regular";
+    modTitle.color = 0xffFFFFFF;
+    modTitle.borderColor = 0xff5F91C1;
+    modTitle.borderSize = 3;
+    modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modTitle.bold = true;
+    modTitle.clipRect = new FlxRect(0, 0, clipWidth, modTitle.height);
+    /* if (modTitle.text.length > 17)
+      modTitle.text = modTitle.text.substring(0, 17); */
+    add(modTitle);
+
+    caseLeftCornerSprite = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
+    add(caseLeftCornerSprite);
+
+    caseRightCornerSprite = new FlxSprite(589, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
+    add(caseRightCornerSprite);
+
+    caseLeftCornerSpriteB = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
+    caseLeftCornerSpriteB.color = 0xFF000000;
+    add(caseLeftCornerSpriteB);
+
+    caseRightCornerSpriteB = new FlxSprite(589, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
+    caseRightCornerSpriteB.color = 0xFF000000;
+    add(caseRightCornerSpriteB);
+
+
+    var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);
+    var contributors = [];
+    if(metadata._author != null && metadata._author != "") ArrayTools.pushUnique(contributors, metadata._author);
+    if(metadata.contributors != null)
+    {
+      for(contributor in metadata.contributors)
+      {
+        ArrayTools.pushUnique(contributors, contributor.name);
+      }
+    }
+    modAuthors.text = contributors.join(", ");
+    modAuthors.font = "Tardling Solid Regular";
+    modAuthors.borderColor = 0xff3D7DFF;
+    modAuthors.borderSize = 2;
+    modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
+    modAuthors.blend = 0;
+    if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
+    add(modAuthors);
+
+    if(ModMenuUtils.isModNew(metadata))
+    {
+      newNotifSprite = new FlxSprite(caseSprite.width - 176, -20);
+      newNotifSprite.frames = Paths.getSparrowAtlas("freeplay/freeplayCapsule/new");
+      newNotifSprite.animation.addByPrefix("idle", "NEW notif", 24, true);
+      newNotifSprite.animation.play("idle");
+      this.add(newNotifSprite);
+    }
+
+    pressOffsetGroup = new FlxTypedSpriteGroup(0,0,0);
+    for(object in [colorBg, modIcon, favSprite, modTitle, modAuthors, caseLeftCornerSprite, caseLeftCornerSpriteB, caseRightCornerSprite, caseRightCornerSpriteB])
+    {
+        pressOffsetGroup.add(object);
+    }
+
+  }
+
+  override function update(elapsed:Float):Void
+  {
+    super.update(elapsed);
+  }
+
+  public function getIntendedX(curSelected:Int = 0):Float
+  {
+    return -60 * Math.sin(this.ID - (curSelected ?? 0) - 2) - 55;
+  }
+
+  public function getIntendedY(curSelected:Int = 0):Float
+  {
+    return 300 - 150 * ((curSelected ?? 0) - this.ID);
+  }
+
+  public function onSelect() {
+    doScrolling = true;
+    if (modTitle.width > clipWidth ) {
+      moveTextRight();
+    }
+    caseLeftCornerSpriteB.alpha = 0;
+    caseRightCornerSpriteB.alpha = 0;
+  }
+
+  public function onDeSelect() {
+    doScrolling = false;
+    if (moveTween != null)
+      moveTween.cancel();
+    moveTextLeft(true);
+    caseLeftCornerSpriteB.alpha = 0.2;
+    caseRightCornerSpriteB.alpha = 0.2;
+  }
+
+  function toggleMod()
+  {
+    ModMenuUtils.toggleMod(metadata);
+    caseSprite.animation.play("press");
+    buttonSprite.animation.play((ModMenuUtils.isModEnabled(metadata)) ? "enabled":"disabled");
+    pressOffsetGroup.y = 4;
+    FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModEnabled(metadata)) ? "modEnable":"modDisabled")));
+  }
+
+  function toggleFavorite()
+  {
+    ModMenuUtils.toggleFavorite(metadata);
+    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
+    FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModFavorited(metadata)) ? "fav":"unfav")));
+  }
+
+  var moveTimer:FlxTimer = new FlxTimer();
+  var moveTween:Null<FlxTween>;
+
+  function moveTextRight():Void
+  {
+    if (!doScrolling) return;
+    var distToMove:Float = modTitle.width - clipWidth;
+    moveTween = FlxTween.tween(modTitle.offset, {x: distToMove}, 1 / (clipWidth / modTitle.width),
+      {
+        onUpdate: function(_) {
+          modTitle.clipRect = new FlxRect(modTitle.offset.x, 0, clipWidth, modTitle.height);
+        },
+        onComplete: function(_) {
+          moveTimer.start(0.3, (timer) -> {
+            moveTextLeft(false);
+          });
+        },
+        ease: FlxEase.quadInOut
+      });
+  }
+
+  function moveTextLeft(snap):Void
+  {
+    if (!doScrolling && !snap) return;
+    var updateCallback = function(_) {
+      modTitle.clipRect = new FlxRect(modTitle.offset.x, 0, clipWidth, modTitle.height);
+    }
+    if (snap) {
+      modTitle.offset.x = 0;
+      updateCallback(null);
+      return;
+    }
+    moveTween = FlxTween.tween(modTitle.offset, {x: 0}, !snap ? (1 / (clipWidth / modTitle.width)) : 0.01,
+      {
+        onUpdate: updateCallback,
+        onComplete: function(_) {
+          moveTimer.start(0.3, (timer) -> {
+            moveTextRight();
+          });
+        },
+        ease: FlxEase.quadInOut
+      });
+  }
+}

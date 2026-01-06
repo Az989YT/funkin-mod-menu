@@ -15,7 +15,7 @@
     {
       "zIndex": 20,
       "assetPath": "modmenu/skins/lab/gradient",
-      "scale": [1, 720]
+      "position": [1, 720]
     },
     {
       "zIndex": 30,
@@ -37,17 +37,8 @@
       "zIndex": 40,
       "name": "table",
       "assetPath": "modmenu/skins/lab/table",
-      "animations": [
-        {
-          "name": "idle",
-          "prefix": "idle",
-          "offsets": [0, 0],
-          "frameRate": 4,
-          "looped": true
-        }
-      ],
-      "startingAnimation": "idle",
-      "position": [0, 0]
+      "position": [0, 137],
+      "scale": [1680, 1]
     },
     {
       "zIndex": 50,
@@ -163,9 +154,16 @@
     },
     {
       "zIndex": 160,
-      "name": "overlay",
-      "assetPath": "modmenu/skins/lab/overlay",
+      "name": "tubeOverlay",
+      "assetPath": "modmenu/skins/lab/tubeOverlay",
+      "position": [200, 0]
+    },
+    {
+      "zIndex": 170,
+      "name": "potionOverlay",
+      "assetPath": "modmenu/skins/lab/potionOverlay",
       "position": [0, 0]
     }
-  ]
+  ],
+  "caseScriptClass": "LabModCase"
 }

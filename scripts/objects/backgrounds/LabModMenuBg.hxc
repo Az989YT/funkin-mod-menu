@@ -10,7 +10,6 @@ class LabModMenuBg extends FlxTypedSpriteGroup
 {
   var henchman:FlxSprite;
   var table:FlxSprite;
-  var overlay:FlxSprite;
 
   // potion color thingies :P
   var brew:FlxSprite;
@@ -18,6 +17,16 @@ class LabModMenuBg extends FlxTypedSpriteGroup
   var darkBrew:FlxSprite;
   var frontBubbles:FlxSprite;
   var brewOutline:FlxSprite;
+  var potionOverlay:FlxSprite;
+
+  var defaultPotionColors = [
+    0xFF5dc728, // brew
+    0xFF31a26b, // back bubbles
+    0xFF107b92, // dark brew
+    0xFFfff147, // front bubbles
+    0xFFfff147, // brew outline
+    0xFF5dc728, // potion overlay
+  ];
 
   public function new()
   {
@@ -50,11 +59,15 @@ class LabModMenuBg extends FlxTypedSpriteGroup
   {
     super.preAdd(obj);
 
-    // var widescreenOffset:Float = (FlxG.width - FlxG.initialWidth) / 2;
+    var widescreenOffset:Float = FlxG.width - FlxG.initialWidth;
 
-    // Apply the AdjustColor shader to the swirls.
     if (Std.isOfType(obj, StageProp))
     {
+      if(['brew', 'backBubbles', 'darkBrew', 'frontBubbles', 'brewOutline', 'bottle'].contains(obj.name))
+      {
+        obj.x += widescreenOffset;
+      }
+
       switch (obj.name)
       {
         case "henchman":
@@ -65,34 +78,42 @@ class LabModMenuBg extends FlxTypedSpriteGroup
           table = obj;
           table.y = FlxG.height - table.height;
 
-        case "overlay":
-          overlay = obj;
-          overlay.blend = 0;
-          henchman.animation.onFrameChange.add((name, frame) -> {
-            if(frame == 0) overlay.alpha = 0.2;
-            else overlay.alpha = 0.25;
+        case 'tubeOverlay':
+          obj.blend = 0;
+          obj.alpha = 0.25;
+
+        case "potionOverlay":
+          potionOverlay = obj;
+          potionOverlay.x = FlxG.width - potionOverlay.width;
+          potionOverlay.blend = 0;
+          potionOverlay.animation.onFrameChange.add((name, frame) -> {
+            if(frame == 0) potionOverlay.alpha = 0.1;
+            else potionOverlay.alpha = 0.175;
           });
 
         case "brew":
           brew = obj;
-          brew.color = 0xFF5dc728;
-
         case "backBubbles":
           backBubbles = obj;
-          backBubbles.color = 0xFF31a26b;
-
         case "darkBrew":
           darkBrew = obj;
-          darkBrew.color = 0xFF107b92;
-
         case "frontBubbles":
           frontBubbles = obj;
-          frontBubbles.color = 0xFFfff147;
-
         case "brewOutline":
           brewOutline = obj;
-          brewOutline.color = 0xFFfff147;
       }
+    }
+    setPotionColors(defaultPotionColors);
+  }
+
+  function setPotionColors(colorArray:Array)
+  {
+    var i = 0;
+    for(obj in [brew, backBubbles, darkBrew, frontBubbles, brewOutline, potionOverlay])
+    {
+      if(obj == null) continue;
+      obj.color = colorArray[i];
+      i++;
     }
   }
 

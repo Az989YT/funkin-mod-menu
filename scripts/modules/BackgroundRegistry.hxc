@@ -196,4 +196,5 @@ typedef BackgroundData =
   var scriptClass:Null<String>;
   var props:Array<StageDataProp>;
   var directory:Null<String>;
+  var caseScriptClass:Null<String>;
 }
