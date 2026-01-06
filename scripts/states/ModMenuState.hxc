@@ -289,7 +289,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(FlxG.onMobile && TouchUtil.justPressed) canFavorite = true;
 
-        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
+        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT_P && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
         {
             if((canFavorite || !FlxG.onMobile) && !isReordering)
             {
