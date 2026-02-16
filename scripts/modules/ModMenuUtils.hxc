@@ -29,7 +29,7 @@ import funkin.modding.module.ModuleHandler;
 
 class ModMenuUtils extends Module
 {
-    var modMenuID = "Funkin' Mod Menu";
+    var modMenuID;
     var modsOrdered = [];
 
     final defaultModSave = {
@@ -99,8 +99,12 @@ class ModMenuUtils extends Module
 
         for(mod in PolymodHandler.getAllMods())
         {
-            if(mod.title == modMenuID)
+            // If we don't have an internal ID, that mod clearly isn't this one.
+            if (!mod.metadata.exists('funkinModMenuInternalId')) continue;
+
+            if(mod.metadata.get('funkinModMenuInternalId') == "funkinModMenu")
             {
+                // This sets `modMenuID` to the mod's folder name.
                 modMenuID = mod.id;
                 break;
             }
