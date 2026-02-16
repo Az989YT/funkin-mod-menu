@@ -36,7 +36,6 @@ class OverrideHotReload extends Module
     {
         if (FlxG.keys.justPressed.F5)
         {
-            PolymodHandler.forceReloadAssets();
             if(Std.isOfType(FlxG.state, ScriptedMusicBeatState))
             {
                 isScriptedState = true;
