@@ -10,6 +10,8 @@ import funkin.ui.transition.LoadingState;
 import funkin.util.ReflectUtil;
 import funkin.util.plugins.ReloadAssetsDebugPlugin;
 
+import funkin.modding.PolymodHandler;
+
 class OverrideHotReload extends Module
 {
     var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
@@ -19,7 +21,7 @@ class OverrideHotReload extends Module
 
 	public function new()
 	{
-		super('OverrideHotReload');
+		super('OverrideHotReload', 1);
 
         FlxG.signals.postGameStart.addOnce(() -> {
             for(plugin in FlxG.plugins.list)

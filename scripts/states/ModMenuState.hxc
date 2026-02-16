@@ -410,7 +410,7 @@ class ModMenuState extends ScriptedMusicBeatState
         {
             if(FlxG.keys.pressed.SHIFT && !isReordering)
             {
-                var save = Save.instance.modOptions.get(ModMenuUtils.modMenuID);
+                var save = Save.instance.modOptions.get(ModMenuUtils.SAVE_KEY);
                 save.clear();
                 trace(save);
                 FlxG.switchState(new ModMenuState());
