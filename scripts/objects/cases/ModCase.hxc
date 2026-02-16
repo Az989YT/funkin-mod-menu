@@ -23,7 +23,6 @@ class ModCase extends ScriptedFlxSpriteGroup
 
   var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
 
-
   var modTitle:FlxText;
 
   var caseSprite:FlxSprite;

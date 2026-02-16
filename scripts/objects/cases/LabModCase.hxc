@@ -23,7 +23,6 @@ class LabModCase extends ScriptedFlxSpriteGroup
 
   var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
 
-
   var modTitle:FlxText;
 
   var caseSprite:FlxSprite;
@@ -126,7 +125,6 @@ class LabModCase extends ScriptedFlxSpriteGroup
     caseRightCornerSpriteB = new FlxSprite(589, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
     caseRightCornerSpriteB.color = 0xFF000000;
     add(caseRightCornerSpriteB);
-
 
     var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);
     var contributors = [];

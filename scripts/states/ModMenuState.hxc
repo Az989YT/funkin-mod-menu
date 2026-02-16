@@ -1,10 +1,15 @@
 import funkin.audio.FunkinSound;
+
 import funkin.modding.PolymodHandler;
 import funkin.modding.module.ModuleHandler;
 import funkin.modding.events.ScriptEventDispatcher;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
+
 import funkin.save.Save;
+
 import funkin.ui.ScriptedMusicBeatState;
 import funkin.ui.mainmenu.MainMenuState;
+
 import funkin.util.Constants;
 import funkin.util.HapticUtil;
 import funkin.util.SwipeUtil;
@@ -22,6 +27,8 @@ import flixel.util.FlxTimer;
 import funkin.api.discord.DiscordClient;
 
 import funkin.util.tools.IteratorTools;
+
+using StringTools;
 
 class ModMenuState extends ScriptedMusicBeatState
 {
@@ -44,11 +51,15 @@ class ModMenuState extends ScriptedMusicBeatState
     var topBarEdge:FlxSprite;
 
     var fullModCase:FlxTypedSpriteGroup;
-    var inFullModView = false;
+    var creditsMenuIsOpen = false;
     var transitioning = false;
     var disableControls = false;
     var canFavorite = true;
     var isReordering:Bool = false;
+
+    var textScrollProgress:Float = 0;
+
+    var currentSkin:String = "lab";
 
 	public function new()
     {
@@ -78,7 +89,7 @@ class ModMenuState extends ScriptedMusicBeatState
         });
         FlxG.sound.music.fadeIn(2, 0, 0.5);
 
-        curBackground = BackgroundRegistry.fetchEntry('lab');
+        curBackground = BackgroundRegistry.fetchEntry(currentSkin);
         curBackground.zIndex = 10;
         add(curBackground);
 
@@ -145,7 +156,7 @@ class ModMenuState extends ScriptedMusicBeatState
         add(poofSprite);
 
         fullModCase = new FullModCase(0,0);
-        fullModCase.y = -fullModCase.height;
+        fullModCase.y = fullModCase.height;
         fullModCase.zIndex = 100;
         add(fullModCase);
 
@@ -162,7 +173,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         for (i in 0...modList.length)
         {
-            var modCase = new ModCase(0, 0, modList[i]);
+            var modCase = ScriptedFlxSpriteGroup.init((currentSkin.charAt(0).toUpperCase() + currentSkin.substr(1)) + 'ModCase', 0, 0, modList[i]);
             modCase.y = (FlxG.height - modCase.height) / 2 + 150 * i;
             modCase.ID = i;
             (i == 0 ? modCase.onSelect : modCase.onDeSelect)();
@@ -172,12 +183,89 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(FlxG.onMobile)
             addBackButton(0, 0, 0xffFFFFFF, ()->{
-                openSubState(new ModLoadingSubState(new MainMenuState()));
+                pressBack();
             }, 0.75);
 
         scrollMenu(0);
         refresh();
 	}
+
+    function pressBack() {
+        if (isReordering) return;
+
+        if(creditsMenuIsOpen) handleExpandedView();
+        else openSubState(new ModLoadingSubState(new MainMenuState()));
+    }
+
+    function openExpandedView() {
+        FlxTween.cancelTweensOf(fullModCase);
+        FlxTween.tween(fullModCase, { y: 0 }, 1, { ease: FlxEase.cubeInOut });
+        fullModCase.updateModInfo(modCasesGroup.members[curSelected].metadata);
+        for(modCase in modCasesGroup)
+        {
+            FlxTween.cancelTweensOf(modCase);
+            if(modCasesGroup.members.indexOf(modCase) == curSelected)
+            {
+                FlxTween.tween(modCase, { y: -modCase.height }, 0.75, { ease: FlxEase.backIn, onComplete: ()->{ transitioning = false; } });
+            }
+            else
+            {
+                FlxTween.tween(modCase, { x: -modCase.width }, 1, { ease: FlxEase.cubeInOut });
+            }
+        }
+        FunkinSound.playOnce(Paths.sound('openExpandedView'));
+        HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+    }
+
+    function closeExpandedView() {
+        FlxTween.cancelTweensOf(fullModCase);
+        FlxTween.tween(fullModCase, { y: FlxG.height }, 1, { ease: FlxEase.cubeInOut });
+        fullModCase.updateModInfo(modCasesGroup.members[curSelected].metadata);
+        for(modCase in modCasesGroup)
+        {
+            FlxTween.cancelTweensOf(modCase);
+            if(modCasesGroup.members.indexOf(modCase) == curSelected)
+            {
+                FlxTween.tween(modCase, { y: modCase.getIntendedY(curSelected) }, 0.75, { ease: FlxEase.backIn, onComplete: ()->{ transitioning = false; } });
+            }
+            else
+            {
+                FlxTween.tween(modCase, { x: modCase.getIntendedX(curSelected), y: modCase.getIntendedY(curSelected) }, 1, { ease: FlxEase.cubeInOut });
+            }
+        }
+        FunkinSound.playOnce(Paths.sound('openExpandedView'));
+        HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
+    }
+
+    function handleExpandedView() {
+        if (isReordering) return;
+
+        transitioning = true;
+        creditsMenuIsOpen = !creditsMenuIsOpen;
+
+        if(creditsMenuIsOpen)
+        {
+            openExpandedView();
+        }
+        else
+        {
+            closeExpandedView();
+        }
+
+        transitioning = false;
+    }
+
+    function scrollModDesc(change:Int, daValue:Int = 3) {
+        if (fullModCase.modAuthors.height < fullModCase.clipHeight) return;
+        
+        fullModCase.modAuthors.offset.y += (daValue * change);
+
+        if (fullModCase.modAuthors.offset.y < 0)
+            fullModCase.modAuthors.offset.y = 0;
+
+        if (fullModCase.modAuthors.offset.y > fullModCase.modAuthors.height - fullModCase.clipHeight)
+            fullModCase.modAuthors.offset.y = fullModCase.modAuthors.height - fullModCase.clipHeight;
+    }
 
     override function update(elapsed:Float):Void
     {
@@ -211,53 +299,35 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(disableControls || transitioning) return;
 
-        if( ((controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(topBarEdge)) || (controls.BACK && inFullModView)) && !isReordering)
+        if((controls.FREEPLAY_CHAR_SELECT) || (FlxG.onMobile && TouchUtil.pressAction(topBarEdge)))
         {
-            transitioning = true;
-
-            if(inFullModView)
-            {
-                FlxTween.cancelTweensOf(fullModCase);
-                FlxTween.tween(fullModCase, { y: -fullModCase.height }, 1, { ease: FlxEase.cubeInOut });
-                for(modCase in modCasesGroup)
-                {
-                    FlxTween.cancelTweensOf(modCase);
-                    if(modCasesGroup.members.indexOf(modCase) == curSelected)
-                    {
-                        FlxTween.tween(modCase, { y: modCase.getIntendedY(curSelected) }, 1, { ease: FlxEase.cubeInOut, onComplete: ()->{ transitioning = false; } });
-                    }
-                    else
-                    {
-                        FlxTween.tween(modCase, { x: modCase.getIntendedX(curSelected) }, 1, { ease: FlxEase.cubeInOut });
-                    }
-                }
-                FunkinSound.playOnce(Paths.sound('cancelMenu'));
-                HapticUtil.vibrate(0 , 0.01, 0.5, 0.1);
-            }
-            else
-            {
-                FlxTween.cancelTweensOf(fullModCase);
-                FlxTween.tween(fullModCase, { y: 0 }, 1, { ease: FlxEase.cubeInOut });
-                fullModCase.updateModInfo(modCasesGroup.members[curSelected].metadata);
-                for(modCase in modCasesGroup)
-                {
-                    FlxTween.cancelTweensOf(modCase);
-                    if(modCasesGroup.members.indexOf(modCase) == curSelected)
-                    {
-                        FlxTween.tween(modCase, { y: -modCase.height }, 0.75, { ease: FlxEase.backIn, onComplete: ()->{ transitioning = false; } });
-                    }
-                    else
-                    {
-                        FlxTween.tween(modCase, { x: -modCase.width }, 1, { ease: FlxEase.cubeInOut });
-                    }
-                }
-                FunkinSound.playOnce(Paths.sound('openExpandedView'));
-                HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
-            }
-            inFullModView = !inFullModView;
+            handleExpandedView();
         }
 
-        if(inFullModView || transitioning) return;
+        if (creditsMenuIsOpen && !transitioning) {
+            // These are flipped for a design decision
+            if (SwipeUtil.swipeUp) {
+                scrollModDesc(1, 36);
+            }
+            if (SwipeUtil.swipeDown) {
+                scrollModDesc(-1, 36);
+            }
+
+            if(controls.UI_UP)
+            {
+                scrollModDesc(-1, 3);
+            }
+            if(controls.UI_DOWN)
+            {
+                scrollModDesc(1, 3);
+            }
+            if(FlxG.mouse.wheel != 0)
+            {
+                scrollModDesc(FlxG.mouse.wheel, -24);
+            }
+        }
+
+        if(creditsMenuIsOpen || transitioning) return;
 
         if( ((controls.ACCEPT_P && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected]))) && !isReordering )
         {
@@ -312,18 +382,21 @@ class ModMenuState extends ScriptedMusicBeatState
             }
         }
 
-        if(controls.BACK && !inFullModView && !isReordering)
+        if(controls.BACK)
         {
-            if(!inFullModView) openSubState(new ModLoadingSubState(new MainMenuState()));
+            pressBack();
         }
-        if(controls.UI_UP_P || SwipeUtil.swipeUp)
+
+        // The swipe directions are flipped for a design decision
+        if(controls.UI_UP_P || SwipeUtil.swipeDown)
         {
             scrollMenu(-1);
         }
-        if(controls.UI_DOWN_P || SwipeUtil.swipeDown)
+        if(controls.UI_DOWN_P || SwipeUtil.swipeUp)
         {
             scrollMenu(1);
         }
+
         if(FlxG.mouse.wheel != 0)
         {
             scrollMenu(-FlxG.mouse.wheel);
@@ -396,7 +469,7 @@ class ModMenuState extends ScriptedMusicBeatState
         HapticUtil.vibrate(0, 0.01, 0.5);
 
         modCasesGroup.members.sort((a,b) -> a.ID - b.ID);
-        modCasesGroup.forEach(function(modCase:ModCase)
+        modCasesGroup.forEach(function(modCase)
         {
             modCase.caseSprite.animation.play(modCase.ID == curSelected ? "idle" : "dim", true);
         });
@@ -424,7 +497,7 @@ class ModMenuState extends ScriptedMusicBeatState
             HapticUtil.vibrate(0, 0.01, 0.5);
         }
 
-        modCasesGroup.forEach(function(modCase:ModCase)
+        modCasesGroup.forEach(function(modCase)
         {
             if (isReordering)
             {
