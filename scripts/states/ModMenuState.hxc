@@ -19,6 +19,8 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
+import funkin.api.discord.DiscordClient;
+
 class ModMenuState extends ScriptedMusicBeatState
 {
     var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
@@ -50,6 +52,10 @@ class ModMenuState extends ScriptedMusicBeatState
     override public function create():Void
     {
         super.create();
+
+        DiscordClient.setPresence({
+            details: "Browsing Mods"
+        });
 
         this.persistentUpdate = this.persistentDraw = true;
         MainMenuState.rememberedSelectedIndex = 0;
@@ -138,11 +144,21 @@ class ModMenuState extends ScriptedMusicBeatState
             object.shader = new AdjustColorShader();
         }
 
-        for(mod in PolymodHandler.getAllMods())
+        var modList = PolymodHandler.getAllMods();
+        for (i in modList) {
+            if (i.title == "Funkin' Mod Menu") {
+                modList.remove(i);
+                modList.insert(0, i);
+            }
+        }
+        var index = 0;
+        for(mod in modList)
         {
             var modCase = new ModCase(0, 0, mod);
             modCasesGroup.add(modCase);
             modCase.y += 150 * modCasesGroup.members.indexOf(modCase);
+            index == 0 ? modCase.onSelect() : modCase.onDeSelect();
+            index++;
         }
         modCasesGroup.y = (FlxG.height - modCasesGroup.members[0].height)/2;
 
@@ -308,10 +324,13 @@ class ModMenuState extends ScriptedMusicBeatState
             FunkinSound.playOnce(Paths.sound('scrollMenu'));
             FlxTween.cancelTweensOf(modCasesGroup);
             FlxTween.tween(modCasesGroup, { y: 300 - 150*curSelected }, 0.5, { ease: FlxEase.expoOut });
+            var index = 0;
             for(modCase in modCasesGroup.members)
             {
+                index == curSelected ? modCase.onSelect() : modCase.onDeSelect();
                 FlxTween.cancelTweensOf(modCase);
                 FlxTween.tween(modCase, { x: -60 * Math.sin(modCasesGroup.members.indexOf(modCase) - curSelected - 2) - 55 }, 0.5, { ease: FlxEase.expoOut });
+                index++;
             }
         }
         HapticUtil.vibrate(0, 0.01, 0.5);

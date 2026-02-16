@@ -7,6 +7,10 @@
       "role": "Programmer"
     },
     {
+      "name": "Nebula S. Nova",
+      "role": "Programmer"
+    },
+    {
       "name": "ChazbillYT",
       "role": "Artist"
     },
@@ -23,7 +27,7 @@
       "role": "Mobile Testing/Assistance"
     }
   ],
-  "api_version": "0.7.3",
-  "mod_version": "2.0.1",
+  "api_version": "0.8.0",
+  "mod_version": "2.0.4",
   "license": "Apache-2.0"
 }
