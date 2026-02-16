@@ -11,6 +11,10 @@
       "role": "Programmer"
     },
     {
+      "name": "ADA_Funni",
+      "role": "Programmer"
+    },
+    {
       "name": "ChazbillYT",
       "role": "Artist"
     },
@@ -23,7 +27,11 @@
       "role": "Made Base Game Font TTFs"
     },
     {
-      "name": "Doggo, gardenGnostic",
+      "name": "Doggo",
+      "role": "Mobile Testing/Assistance"
+    },
+    {
+      "name": "gardenGnostic",
       "role": "Mobile Testing/Assistance"
     }
   ],
