@@ -164,7 +164,8 @@ class ModMenuState extends ScriptedMusicBeatState
         modList.sort((a, b) -> ModMenuUtils.getModOrder(a) - ModMenuUtils.getModOrder(b));
 
         for (i in modList) {
-            if (i.title == "Funkin' Mod Menu") {
+            // What idiot made this a magic number? WE HAVE A VARIBLE FOR THIS, PEOPLE!
+            if (i.title == ModMenuUtils.modMenuID) {
                 modList.remove(i);
                 modList.insert(0, i);
                 break;
@@ -257,7 +258,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
     function scrollModDesc(change:Int, daValue:Int = 3) {
         if (fullModCase.modAuthors.height < fullModCase.clipHeight) return;
-        
+
         fullModCase.modAuthors.offset.y += (daValue * change);
 
         if (fullModCase.modAuthors.offset.y < 0)
