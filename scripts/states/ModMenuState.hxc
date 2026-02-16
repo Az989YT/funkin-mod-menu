@@ -412,6 +412,8 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(controls.RESET)
         {
+            // This just causes a null object reference, also it's pretty easy to just go thru all your mods.
+            /*
             if(FlxG.keys.pressed.SHIFT && !isReordering)
             {
                 var save = Save.instance.modOptions.get("Funkin' Mod Menu");
@@ -420,6 +422,7 @@ class ModMenuState extends ScriptedMusicBeatState
                 FlxG.switchState(new ModMenuState());
                 return;
             }
+            */
             poofSprite.animation.play("poof");
             HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
         }
