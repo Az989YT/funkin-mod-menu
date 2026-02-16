@@ -164,8 +164,7 @@ class ModMenuState extends ScriptedMusicBeatState
         modList.sort((a, b) -> ModMenuUtils.getModOrder(a) - ModMenuUtils.getModOrder(b));
 
         for (i in modList) {
-            // What idiot made this a magic number? WE HAVE A VARIBLE FOR THIS, PEOPLE!
-            if (i.id == ModMenuUtils.modMenuID) {
+            if (i.title == "Funkin' Mod Menu") {
                 modList.remove(i);
                 modList.insert(0, i);
                 break;
@@ -410,7 +409,7 @@ class ModMenuState extends ScriptedMusicBeatState
         {
             if(FlxG.keys.pressed.SHIFT && !isReordering)
             {
-                var save = Save.instance.modOptions.get(ModMenuUtils.SAVE_KEY);
+                var save = Save.instance.modOptions.get("Funkin' Mod Menu");
                 save.clear();
                 trace(save);
                 FlxG.switchState(new ModMenuState());
