@@ -235,7 +235,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(inFullModView || transitioning) return;
 
-        if( (controls.ACCEPT && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
+        if( (controls.ACCEPT_P && !FlxG.keys.pressed.SHIFT) || (FlxG.onMobile && TouchUtil.pressAction(modCasesGroup.members[curSelected])) )
         {
             if(ModMenuUtils.isModMissingDependencies(modCasesGroup.members[curSelected].metadata))
             {
@@ -262,7 +262,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if(FlxG.onMobile && TouchUtil.justPressed) canFavorite = true;
 
-        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
+        if( (controls.FREEPLAY_FAVORITE || (controls.ACCEPT_P && FlxG.keys.pressed.SHIFT)) || (FlxG.onMobile && TouchUtil.overlapsComplex(modCasesGroup.members[curSelected]) && TouchUtil.pressed && FlxG.game.ticks - TouchUtil.touch.justPressedTimeInTicks >= 250))
         {
             if(canFavorite || !FlxG.onMobile)
             {
