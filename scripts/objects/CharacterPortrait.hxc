@@ -1,4 +1,5 @@
 import funkin.graphics.FunkinSprite;
+import funkin.FunkinMemory;
 import funkin.graphics.ScriptedFunkinSprite;
 import funkin.graphics.shaders.AdjustColorShader;
 import funkin.util.assets.DataAssets;
@@ -29,7 +30,7 @@ class CharacterPortrait extends ScriptedFunkinSprite
         super(0, 0);
 
         for(character in characterList)
-            FunkinSprite.cacheSparrow("modmenu/portraits/" + character);
+            FunkinMemory.cacheTexture(Paths.image("modmenu/portraits/" + character));
 
         initRandomCharacter();
         shader = new AdjustColorShader();
