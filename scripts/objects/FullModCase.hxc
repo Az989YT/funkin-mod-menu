@@ -3,9 +3,15 @@ import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.ModuleHandler;
 import funkin.util.tools.ArrayTools;
 
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.text.FlxTextBorderStyle;
+
+import flixel.math.FlxRect;
 
 import StringTools;
 
@@ -13,10 +19,17 @@ class FullModCase extends ScriptedFlxSpriteGroup
 {
     var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
 
+    var caseSprite:FlxSprite;
+
     var modIcon:FlxSprite;
     var modTitle:FlxText;
-    var modAuthors:FlxText;
+    public var modAuthors:FlxText;
     var modDescription:FlxText;
+
+    var modTitleTween:FlxTween;
+
+    var clipWidth:Int = 700;
+    var clipHeight:Int = 480;
 
     function new(_x, _y)
     {
@@ -25,7 +38,7 @@ class FullModCase extends ScriptedFlxSpriteGroup
 
         var defaultMod = PolymodHandler.getAllMods()[0];
 
-        var caseSprite:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image("modmenu/modCaseFull"));
+        caseSprite = new FlxSprite(0, 0).loadGraphic(Paths.image("modmenu/modCaseFull"));
         this.add(caseSprite);
 
         modIcon = new FlxSprite(0, 121).loadGraphic(ModMenuUtils.getModIcon(defaultMod));
@@ -33,14 +46,16 @@ class FullModCase extends ScriptedFlxSpriteGroup
         modIcon.updateHitbox();
         this.add(modIcon);
 
-        modTitle = new FlxText(0, 0, 0, defaultMod.title, 46);
+        modTitle = new FlxText(5, 62, FlxG.width + 25, defaultMod.title, 46);
+        modTitle.wordWrap = false;
         modTitle.font = "Letterstuff Regular";
         modTitle.color = 0xffFFFFFF;
         modTitle.borderColor = 0xff5F91C1;
+        modTitle.alignment = "center";
         modTitle.borderSize = 3;
         modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
         modTitle.bold = true;
-        modTitle.setPosition((729 - modTitle.width)/2, 40 + (86 - modTitle.height)/2);
+        //modTitle.setPosition((729 - modTitle.width)/2, 40 + (86 - modTitle.height)/2);
         this.add(modTitle);
 
         modAuthors = new FlxText(271 - 12.5, 220 - 12.5, 469 - 12.5, "", 32);
@@ -66,7 +81,17 @@ class FullModCase extends ScriptedFlxSpriteGroup
         modDescription.borderSize = 2;
         modDescription.borderStyle = FlxTextBorderStyle.OUTLINE;
         this.add(modDescription);
+    }
 
+    function update(elapsed:Float) {
+        modTitle.clipRect = FlxRect.weak(15 + modTitle.offset.x, 0, clipWidth - 15, modTitle.height);
+        modAuthors.clipRect = FlxRect.weak(0, modAuthors.offset.y, modAuthors.width, clipHeight);
+
+        super.update(elapsed);
+    }
+
+    function resetOffset() {
+        modTitle.offset.x = (modTitle.width - clipWidth) / 2;
     }
 
     function updateModInfo(metadata:ModMetadata)
@@ -75,8 +100,9 @@ class FullModCase extends ScriptedFlxSpriteGroup
         modIcon.setGraphicSize(241, 241);
         modIcon.updateHitbox();
 
+        var oldTitle = modTitle.text;
         modTitle.text = metadata.title;
-        modTitle.setPosition((729 - modTitle.width)/2, this.y + 40 + (86 - modTitle.height)/2);
+        //modTitle.setPosition((729 - modTitle.width)/2, this.y + 40 + (86 - modTitle.height)/2);
 
         var contributors = [];
         if(metadata._author != null && metadata._author != "") ArrayTools.pushUnique(contributors, [metadata._author, "Author"].join(":\n"));
@@ -88,7 +114,20 @@ class FullModCase extends ScriptedFlxSpriteGroup
             }
         }
         modAuthors.text = contributors.join("\n\n");
+        modAuthors.offset.y = 0;
 
         modDescription.text = metadata.description;
+
+        if (modTitleTween != null) modTitleTween.active = false;
+        resetOffset();
+
+        if (metadata.title.length > 21) {
+            modTitleTween = FlxTween.num(0, modTitle.width - clipWidth, 2, {loopDelay: 0.6, ease: FlxEase.linear, type: 4}, function(num) {
+                modTitle.offset.x = num;
+            });
+            modTitleTween.percent = 0.5;
+        }
+
+        oldTitle = null;
     }
 }
