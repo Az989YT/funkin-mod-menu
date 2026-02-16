@@ -257,7 +257,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
     function scrollModDesc(change:Int, daValue:Int = 3) {
         if (fullModCase.modAuthors.height < fullModCase.clipHeight) return;
-
+        
         fullModCase.modAuthors.offset.y += (daValue * change);
 
         if (fullModCase.modAuthors.offset.y < 0)
