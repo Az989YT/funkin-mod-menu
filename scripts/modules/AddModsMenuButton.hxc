@@ -2,6 +2,7 @@ import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 
 import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
 import funkin.ui.mainmenu.MainMenuState;
 import funkin.ui.AtlasMenuItem;
 
@@ -31,7 +32,7 @@ class AddModsMenuButton extends Module
 			event.targetState.menuItems.members.remove(item);
 			event.targetState.menuItems.members.insert(item.ID, item);
 			repositionMenuItems(event.targetState.menuItems);
-		
+
 			var setIndex = rememberedSelectedIndex ?? MainMenuState.rememberedSelectedIndex;
 			if (event.targetState?.menuItems?.members[setIndex] != null) event.targetState?.menuItems?.selectItem(setIndex);
 			event.targetState.resetCamStuff();
@@ -71,7 +72,7 @@ class AddModsMenuButton extends Module
 					rememberedSelectedIndex = FlxG.state.menuItems.selectedIndex;
 					oldConfirm();
 					MainMenuState.rememberedSelectedIndex = 0;
-			  	}	
+			  	}
 		  	}
 		}
 	}
