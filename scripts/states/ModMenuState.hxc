@@ -165,7 +165,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
         for (i in modList) {
             // What idiot made this a magic number? WE HAVE A VARIBLE FOR THIS, PEOPLE!
-            if (i.title == ModMenuUtils.modMenuID) {
+            if (i.id == ModMenuUtils.modMenuID) {
                 modList.remove(i);
                 modList.insert(0, i);
                 break;
