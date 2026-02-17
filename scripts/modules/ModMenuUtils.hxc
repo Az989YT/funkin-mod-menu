@@ -23,6 +23,7 @@ import funkin.data.song.SongRegistry;
 import funkin.data.freeplay.player.PlayerRegistry;
 import funkin.data.stage.StageRegistry;
 import funkin.data.stickers.StickerRegistry;
+import funkin.data.freeplay.style.FreeplayStyleRegistry;
 import funkin.play.character.CharacterDataParser;
 import funkin.data.freeplay.album.AlbumRegistry;
 import funkin.modding.module.ModuleHandler;
@@ -226,9 +227,10 @@ class ModMenuUtils extends Module
         AlbumRegistry.instance.loadEntries();
         StageRegistry.instance.loadEntries();
         StickerRegistry.instance.loadEntries();
-
+        FreeplayStyleRegistry.instance.loadEntries();
+    
         CharacterDataParser.loadCharacterCache();
-        // NoteKindManager.loadScripts(); // Removed for 0.7.6;
+        NoteKindManager.initialize();
         ModuleHandler.loadModuleCache();
         ModuleHandler.callOnCreate();
 
