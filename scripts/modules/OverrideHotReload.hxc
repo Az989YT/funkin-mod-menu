@@ -42,7 +42,7 @@ class OverrideHotReload extends Module
                 scriptedStateName = ReflectUtil.getAnonymousField(ReflectUtil.getAnonymousField(FlxG.state._asc, "_c"), "name");
                 trace(scriptedStateName);
             }
-            PolymodHandler.loadEnabledMods();
+            ModMenuUtils.loadEnabledMods();
             if(isScriptedState)
             {
                 var targetState:NextState = ScriptedMusicBeatState.init(scriptedStateName);
