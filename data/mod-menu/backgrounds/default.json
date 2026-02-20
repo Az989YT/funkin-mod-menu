@@ -66,7 +66,8 @@
       }
     ],
     "modIcon": {
-      "zIndex": 0
+      "zIndex": 0,
+      "defaultIcon": "modmenu/skins/default/no_icon",
       "scale": [108, 105],
       "position": [663, 7]
     },
@@ -86,7 +87,7 @@
       "fontSize": 32,
       "color": "#FFFFFF",
       "borderColor": "#3D7DFF",
-      "borderSize" 2,
+      "borderSize": 2,
       "position": [110, 11],
       "maxLength": 26
     }
