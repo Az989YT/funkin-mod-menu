@@ -19,5 +19,76 @@
       "assetPath": "modmenu/skins/default/swirlMini",
       "position": [545.5, 94.5]
     }
-  ]
+  ],
+  "modCase": {
+    "scriptClass": "DefaultModMenuCase",
+    "props": [
+      {
+        "zIndex": 10,
+        "name": "modCase",
+        "assetPath": "modmenu/skins/default/modCase",
+        "animations": [
+          {
+            "name": "idle",
+            "prefix": "caseIdle",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": true
+          },
+          {
+            "name": "press",
+            "prefix": "casePress",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": false
+          },
+          {
+            "name": "dim",
+            "prefix": "caseDimmed",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": true
+          },
+        ],
+        "position": [0, 0]
+      },
+      {
+        "zIndex": 20,
+        "name": "toggleSprite",
+        "assetPath": "modmenu/skins/default/modCase",
+        "position": [0, 0]
+      },
+      {
+        "zIndex": 30,
+        "name": "favoriteSprite",
+        "assetPath": "modmenu/skins/default/modCase",
+        "position": [0, 0]
+      }
+    ],
+    "modIcon": {
+      "zIndex": 0
+      "scale": [108, 105],
+      "position": [663, 7]
+    },
+    "titleText": {
+      "zIndex": 40,
+      "font": "Letterstuff Regular",
+      "fontSize": 42,
+      "color": "#FFFFFF",
+      "borderColor": "#5F91C1",
+      "borderSize" 3,
+      "position": [120, 63],
+      "clipWidth": 500
+    },
+    "authorsText": {
+      "zIndex": 50,
+      "font": "Tardling Solid Regular",
+      "fontSize": 32,
+      "color": "#FFFFFF",
+      "borderColor": "#3D7DFF",
+      "borderSize" 2,
+      "position": [110, 11],
+      "maxLength": 26
+    }
+  }
 }
