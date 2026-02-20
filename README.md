@@ -7,4 +7,4 @@ You can contribute to this repository by making pull requests to the `develop` b
 
 ## For Contributors:
 You must make your own branch based on `develop` when making pull requests!
-DO NOT PULL REQUEST TO THE ACTUAL `develop` BRANCH, IT WILL BREAK YOUR FORK!
+DO NOT PULL REQUEST FROM THE ACTUAL `develop` BRANCH, IT WILL BREAK YOUR FORK!
