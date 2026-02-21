@@ -48,7 +48,7 @@
             "offsets": [0, 0],
             "frameRate": 24,
             "looped": true
-          },
+          }
         ],
         "position": [0, 0]
       },
@@ -77,7 +77,7 @@
       "fontSize": 42,
       "color": "#FFFFFF",
       "borderColor": "#5F91C1",
-      "borderSize" 3,
+      "borderSize": 3,
       "position": [120, 63],
       "clipWidth": 500
     },

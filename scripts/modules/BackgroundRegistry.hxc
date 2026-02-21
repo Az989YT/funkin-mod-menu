@@ -1,4 +1,3 @@
-
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.Module;
 import funkin.play.stage.Bopper;
