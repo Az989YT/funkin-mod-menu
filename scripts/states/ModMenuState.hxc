@@ -343,7 +343,7 @@ class ModMenuState extends ScriptedMusicBeatState
                 FunkinSound.playOnce(Paths.sound('modFavoriteDisable'), 0.8);
                 characterPortrait.playAnimation("locked", true, true);
                 HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
-                FlxTween.cancelTweensOf(modCasesGroup.members[curSelected]);
+                FlxTween.cancelTweensOf(modCasesGroup.members[curSelected], ["x"]);
                 modCasesGroup.members[curSelected].x = modCasesGroup.members[curSelected].getIntendedX(curSelected) - 10;
                 FlxTween.tween(modCasesGroup.members[curSelected], { x: modCasesGroup.members[curSelected].getIntendedX(curSelected) }, 0.75, { ease: FlxEase.elasticOut });
             }
@@ -442,7 +442,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
             HapticUtil.vibrate(Constants.DEFAULT_VIBRATION_PERIOD, Constants.DEFAULT_VIBRATION_DURATION, Constants.DEFAULT_VIBRATION_AMPLITUDE, 4);
 
-            FlxTween.cancelTweensOf(modCasesGroup.members[curSelected]);
+            FlxTween.cancelTweensOf(modCasesGroup.members[curSelected], ["x"]);
 
             modCase.x = modCase.getIntendedX(curSelected) - 10;
             FlxTween.tween(modCasesGroup.members[curSelected], {x: modCase.getIntendedX(curSelected)}, 0.75, {ease: FlxEase.elasticOut});
