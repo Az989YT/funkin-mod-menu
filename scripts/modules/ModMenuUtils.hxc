@@ -196,10 +196,13 @@ class ModMenuUtils extends Module
         SpeakerRegistry.instance.loadEntries();
         AlbumRegistry.instance.loadEntries();
         StageRegistry.instance.loadEntries();
-
+        StickerRegistry.instance.loadEntries();
+        FreeplayStyleRegistry.instance.loadEntries();
+    
         CharacterDataParser.loadCharacterCache();
-        // NoteKindManager.loadScripts(); // Removed for 0.7.6;
+        NoteKindManager.initialize();
         ModuleHandler.loadModuleCache();
+        ModuleHandler.callOnCreate();
 
         trace("Mod Loading Completed.");
     }
