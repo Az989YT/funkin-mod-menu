@@ -4,24 +4,36 @@ import funkin.ui.title.TitleState;
 
 class LoadEnabledModsBeforeTitle extends Module
 {
-    var hasMoved:Bool = true; // Set to true on init so that we don't move to the state after hot-reloading.
+    var hasMoved:Bool = true;
 
     public function new()
     {
-        super('LoadEnabledModsBeforeTitle', 0);
+        super("LoadEnabledModsBeforeTitle", 0);
 
-        this.active = false;
         FlxG.signals.postGameStart.addOnce(() -> {
             hasMoved = false;
-            FlxG.signals.preStateSwitch.add(start);
         });
     }
 
-    function start()
+    public function onCreate(event:ScriptEvent)
     {
-        if (FlxG.game._nextState._asc != null || hasMoved) return;
-        hasMoved = true;
+        super.onCreate(event);
 
+        // If the title menu was already initialized, don't do anything and disable the module activity.
+        if (TitleState.initialized) this.active = false;
+    }
+
+    public function onStateChangeEnd(event:StateChangeScriptEvent)
+    {
+        super.onStateChangeEnd(event);
+
+        if (!Std.isOfType(event.targetState, TitleState) || event.eventCanceled || hasMoved) return;
+
+        // Prevent further updates of this module and hald updating any similar modules.
+        event.cancel();
+        this.active = false;
+        hasMoved = true;
+        
         FlxG.switchState(new ModLoadingSubState(new TitleState()));
     }
 }
