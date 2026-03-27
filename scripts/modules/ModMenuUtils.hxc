@@ -193,7 +193,7 @@ class ModMenuUtils extends Module
             modData.lastVersion = mod.modVersion;
 
             if(isModEnabled(mod))
-                modsToLoad.insert(modData.order, mod.id);
+                modsToLoad.insert(modData.order, mod.dirName);
         }
 
         if(modsToLoad.length > 0)
@@ -202,7 +202,7 @@ class ModMenuUtils extends Module
                 modsToLoad.insert(0, modMenuID);
 
             trace("Loading Mods: " + modsToLoad.join(", "));
-            PolymodHandler.loadModsById(modsToLoad);
+            PolymodHandler.loadModsByDir(modsToLoad);
         }
         else
         {
