@@ -1,4 +1,5 @@
 {
+  "id": "funkin-mod-menu",
   "title": "Funkin' Mod Menu",
   "description": "Organize your mods yo!",
   "contributors": [
@@ -35,9 +36,6 @@
       "role": "Mobile Testing/Assistance"
     }
   ],
-  "metadata": {
-    "funkinModMenuInternalId": "funkinModMenu"
-  },
   "api_version": "0.8.0",
   "mod_version": "2.0.3",
   "license": "Apache-2.0"
