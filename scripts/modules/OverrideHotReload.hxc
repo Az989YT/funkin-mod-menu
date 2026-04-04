@@ -10,58 +10,118 @@ import funkin.ui.transition.LoadingState;
 import funkin.util.ReflectUtil;
 import funkin.util.plugins.ReloadAssetsDebugPlugin;
 
+import funkin.ui.MusicBeatState;
+import funkin.ui.MusicBeatSubState;
+#if FEATURE_CHART_EDITOR
+import funkin.ui.debug.charting.ChartEditorState;
+#end
+
+import funkin.modding.PolymodHandler;
+
 class OverrideHotReload extends Module
 {
-    var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
+	var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
 
-    var isScriptedState = false;
-    var scriptedStateName = "";
+	var isScriptedState = false;
+	var scriptedStateName = "";
 
 	public function new()
 	{
 		super('OverrideHotReload');
 	}
 
-    public function onCreate(event:ScriptEvent)
-    {
-        for(plugin in FlxG.plugins.list)
-        {
-            if(Std.isOfType(plugin, ReloadAssetsDebugPlugin))
-                FlxG.plugins.remove(plugin);
-        }
-    }
+		FlxG.signals.postGameStart.addOnce(() -> {
+			for (plugin in FlxG.plugins.list)
+			{
+				if(Std.isOfType(plugin, ReloadAssetsDebugPlugin))
+					FlxG.plugins.remove(plugin);
+			}
+		});
+	}
 
-    public function onUpdate(event:UpdateScriptEvent)
-    {
-        if (FlxG.keys.justPressed.F5)
-        {
-            if(Std.isOfType(FlxG.state, ScriptedMusicBeatState))
-            {
-                isScriptedState = true;
+	function reloadPlayState(state:MusicBeatSubState)
+	{
+		state.performCleanup();
 
-                var cls:ClassDecl = ReflectUtil.getField(FlxG.state._asc, "_c");
-                scriptedStateName = (cls.pkg ?? []).concat([cls.name]).join(".");
-                trace(scriptedStateName);
-            }
-            ModMenuUtils.loadEnabledMods();
-            if(isScriptedState)
-            {
-                var targetState:NextState = ScriptedMusicBeatState.init(scriptedStateName);
-                FlxG.switchState(targetState);
-                FlxTransitionableState.skipNextTransIn = true;
-                FlxTransitionableState.skipNextTransOut = true;
-            }
-            else if(Std.isOfType(FlxG.state, PlayState))
-            {
-                PlayState.lastParams.targetSong = SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id);
-                PlayState.instance.remove(PlayState.instance.currentStage);
-                LoadingState.loadPlayState(PlayState.lastParams);
-            }
-            else
-            {
-                FlxG.resetState();
-            }
-        }
-    }
+		// `performCleanup()` clears the static reference to this state
+		// scripts might still need it, so we set it back to `this`
+		PlayState.instance = state;
+	
+		ModMenuUtils.loadEnabledMods();
+		if (PlayState.lastParams == null)
+		{
+			throw "No lastParams to refer to";
+		}
+		PlayState.lastParams.targetSong = SongRegistry.instance.fetchEntry(PlayState.instance.currentSong.id,
+		  {variation: PlayState.instance.currentVariation}) ?? throw "Could not load current song from ID. This shouldn't happen!";
+		LoadingState.loadPlayState(PlayState.lastParams);
+	}
+	
+	function reloadChartEditorState(state:MusicBeatState)
+	{
+		// If PlayState isn't open, do a regular reload.
+		if (!state.isPlaytesting)
+		{
+			state.reloadAssets();
+			return;
+		}
+	
+		ModMenuUtils.loadEnabledMods();
+	
+		// Create a new instance of the current substate, so old data is cleared.
+		state.resetSubState();
+	
+		state.testSongInPlayState(PlayState.lastParams.minimalMode);
+	}
+
+	public function onUpdate(event:UpdateScriptEvent)
+	{
+		if (FlxG.keys.justPressed.F5)
+		{
+			var state:Dynamic = FlxG.state;
+			var isScripted:Bool = state is ScriptedMusicBeatState;
+			if (isScripted)
+			{
+				var cls:ClassDecl = ReflectUtil.getField(FlxG.state._asc, "_c");
+				scriptedStateName = (cls.pkg ?? []).concat([cls.name]).join(".");
+				trace(scriptedStateName);
+			}
+			if ((state is MusicBeatState || state is MusicBeatSubState) && !isScripted)
+			{
+				// We have to override these specific states because they have PolymodHandler's forceReloadAssets built in
+				if (state is PlayState)
+				{
+					reloadPlayState(state);
+				}
+				#if FEATURE_CHART_EDITOR
+				else if (state is ChartEditorState)
+				{
+					reloadChartEditorState(state);
+				}
+				#end
+				else
+				{
+					state.reloadAssets();
+				}
+			}
+			else
+			{
+				ModMenuUtils.loadEnabledMods();
+		
+				trace("Reloaded assets, checking for scripted state. Scripted: " + isScripted + ", Path: " + scriptedStateName);
+				if (isScripted)
+				{
+					trace("Reloading scripted state: " + scriptedStateName);
+					var targetState:Dynamic = ScriptedMusicBeatState.scriptInit(scriptedStateName);
+					FlxG.switchState(targetState);
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+				}
+		
+				// Create a new instance of the current state, so old data is cleared.
+				if (!isScripted) FlxG.resetState();
+			}
+		}
+	}
 }
 

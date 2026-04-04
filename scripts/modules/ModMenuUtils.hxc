@@ -28,7 +28,8 @@ import funkin.modding.module.ModuleHandler;
 
 class ModMenuUtils extends Module
 {
-    var modMenuID = "Funkin' Mod Menu";
+	var modMenuID = 'funkin-mod-menu';
+    var modsOrdered = [];
 
     final defaultModSave = {
         enabled: true,
@@ -78,15 +79,6 @@ class ModMenuUtils extends Module
         super('ModMenuUtils');
 
         trace("Mod Menu Utils Initialized.");
-
-        for(mod in PolymodHandler.getAllMods())
-        {
-            if(mod.title == modMenuID)
-            {
-                modMenuID = mod.id;
-                break;
-            }
-        }
 
         trace("Funkin' Mod Menu Save Data Found: " + getSaveData());
     }
