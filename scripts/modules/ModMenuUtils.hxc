@@ -30,7 +30,9 @@ import funkin.modding.module.ModuleHandler;
 
 class ModMenuUtils extends Module
 {
-	var modMenuID = 'funkin-mod-menu';
+	var modMenuID:String = 'funkin-mod-menu';
+    var modMenuDir:String;
+
     var modsOrdered = [];
 
     final defaultModSave = {
@@ -100,6 +102,16 @@ class ModMenuUtils extends Module
 
         trace("Funkin' Mod Menu Save Data Found: " + getSaveData());
 
+        for(mod in PolymodHandler.getAllMods())
+        {
+            if(mod.id == modMenuID)
+            {
+                // This sets `modMenuDir` to the mod's folder name.
+                modMenuDir = mod.dirName;
+                break;
+            }
+        }
+    
         this.active = false;
     }
 
@@ -185,8 +197,8 @@ class ModMenuUtils extends Module
 
         if(modsToLoad.length > 0)
         {
-            if (!modsToLoad.contains(modMenuID)) // Ensures Mod Menu loads itself in case of a save bug
-                modsToLoad.insert(0, modMenuID);
+            if (!modsToLoad.contains(modMenuDir)) // Ensures Mod Menu loads itself in case of a save bug
+                modsToLoad.insert(0, modMenuDir);
 
             trace("Loading Mods: " + modsToLoad.join(", "));
             PolymodHandler.loadModsByDir(modsToLoad);
