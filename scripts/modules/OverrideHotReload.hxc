@@ -100,7 +100,10 @@ class OverrideHotReload extends Module
 				#end
 				else
 				{
-					state.reloadAssets();
+					ModMenuUtils.loadEnabledMods();
+
+					// Create a new instance of the current state, so old data is cleared.
+					FlxG.resetState();				
 				}
 			}
 			else
