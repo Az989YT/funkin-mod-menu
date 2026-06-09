@@ -111,7 +111,7 @@ class ModMenuUtils extends Module
                 break;
             }
         }
-    
+
         this.active = false;
     }
 
@@ -227,7 +227,7 @@ class ModMenuUtils extends Module
         StageRegistry.instance.loadEntries();
         StickerRegistry.instance.loadEntries();
         FreeplayStyleRegistry.instance.loadEntries();
-    
+
         CharacterDataParser.loadCharacterCache();
         NoteKindManager.initialize();
         ModuleHandler.loadModuleCache();

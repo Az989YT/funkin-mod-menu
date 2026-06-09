@@ -165,5 +165,100 @@
       "position": [0, 0]
     }
   ],
-  "caseScriptClass": "LabModCase"
+  "modCase": {
+    "scriptClass": "LabModCase",
+    "props": [
+      {
+        "zIndex": 10,
+        "name": "modCase",
+        "assetPath": "modmenu/skins/lab/capsule",
+        "position": [0, 0]
+      },
+      {
+        "zIndex": 20,
+        "name": "toggleSprite",
+        "assetPath": "checkboxThingie",
+        "animations": [
+          {
+            "name": "enabled",
+            "prefix": "Check Box selecting animation",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": false
+          },
+          {
+            "name": "enabled-loop",
+            "prefix": "Check Box Selected Static",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": true
+          },
+          {
+            "name": "disabled",
+            "prefix": "Check Box unselected",
+            "offsets": [-24, -100],
+            "frameRate": 24,
+            "looped": false
+          }
+        ],
+        "startingAnimation": "enabled-loop",
+        "position": [-20, -70],
+        "scale": 0.6
+      },
+      {
+        "zIndex": 30,
+        "name": "favoriteSprite",
+        "assetPath": "freeplay/favHeart",
+        "animations": [
+          {
+            "name": "favorite",
+            "prefix": "favorite heart",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": false
+          },
+          {
+            "name": "unfavorite",
+            "prefix": "favorite heart",
+            "frameIndices": [1, 2, 3, 4, 5],
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": false
+          }
+        ],
+        "startingAnimation": "favorite",
+        "position": [665, 32],
+        "scale": 1.75
+      }
+    ],
+    "modIcon": {
+      "zIndex": 0,
+      "defaultIcon": "modmenu/skins/default/no_icon",
+      "scale": [158, 155],
+      "position": [8, 8]
+    },
+    "titleText": {
+      "zIndex": 40,
+      "font": "5by7",
+      "fontSize": 42,
+      "color": "#FFFFFF",
+      "borderColor": "#3B3B40",
+      "borderSize": 3,
+      "position": [185, 50],
+      "clipWidth": 500
+    },
+    "authorsText": {
+      "zIndex": 50,
+      "font": "Tardling Solid Regular",
+      "fontSize": 32,
+      "color": "#FFFFFF",
+      "borderColor": "#3D7DFF",
+      "borderSize": 2,
+      "position": [110, 11],
+      "maxLength": 26
+    },
+    "spacing": 200,
+    "indent": 25,
+    "curveAmount": 100
+  }
 }

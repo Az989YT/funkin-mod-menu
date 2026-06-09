@@ -68,11 +68,11 @@ class DefaultModMenuBg extends FlxTypedSpriteGroup
   {
     super.update(elapsed);
 
-    swirlBig.angle += 0.25;
-    swirlMini.angle -= 0.5;
+    swirlBig.angle += 0.25 * (elapsed * 60);
+    swirlMini.angle -= 0.5 * (elapsed * 60);
 
-    swirlBig.shader.hue += 1;
-    swirlMini.shader.hue -= 1;
+    swirlBig.shader.hue += 1 * (elapsed * 60);
+    swirlMini.shader.hue -= 1 * (elapsed * 60);
 
     scrollingElementsTop.scrollX -= elapsed * 150;
     scrollingElementsMiddle.scrollX += elapsed * 150;

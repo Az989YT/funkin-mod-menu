@@ -1,6 +1,15 @@
 import funkin.audio.FunkinSound;
+import funkin.data.stage.StageData;
+import funkin.graphics.FunkinSprite;
+import funkin.group.FunkinGroup;
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 import funkin.modding.module.ModuleHandler;
+import funkin.play.character.BaseCharacter;
+import funkin.play.stage.Bopper;
+import funkin.play.stage.StageProp;
+import funkin.util.SortUtil;
+import funkin.util.assets.DataAssets;
+import funkin.util.assets.FlxAnimationUtil;
 import funkin.util.tools.ArrayTools;
 
 import flixel.tweens.FlxTween;
@@ -12,247 +21,293 @@ import flixel.addons.effects.FlxSkewedSprite;
 import flixel.group.FlxTypedSpriteGroup;
 import flixel.text.FlxText;
 import flixel.text.FlxTextBorderStyle;
+import flixel.util.FlxColor;
+import flixel.util.FlxSort;
 
 import flixel.math.FlxRect;
 
-import StringTools;
+import haxe.ds.StringMap;
+import haxe.Json;
+
+using StringTools;
 
 class ModCase extends ScriptedFlxSpriteGroup
 {
-  public var doScrolling:Bool = false;
+    var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils");
+    var BackgroundRegistry = ModuleHandler.getModule("BackgroundRegistry");
 
-  var ModMenuUtils = ModuleHandler.getModule("ModMenuUtils")._asc;
+    var metadata:ModMetadata;
+    var doScrolling:Bool = false;
 
-  var modTitle:FlxText;
+    var modIcon:FunkinSprite;
 
-  var caseSprite:FlxSprite;
-  var buttonSprite:FlxSprite;
-  var favSprite:FlxSprite;
-  var caseLeftCornerSprite:FlxSprite;
-  var caseRightCornerSprite:FlxSprite;
+    var props:StringMap;
+    var spacing:Float = 150;
+    var indent:Float = 55;
+    var curveAmount:Float = 60;
 
-  var caseLeftCornerSpriteB:FlxSprite;
-  var caseRightCornerSpriteB:FlxSprite;
+    var titleText:FlxText;
+    var creditsText:FlxText;
+    var clipWidth:Int = 500;
+    var moveTimer:FlxTimer = new FlxTimer();
+    var moveTween:Null<FlxTween>;
 
-  var pressOffsetGroup:FlxTypedSpriteGroup;
-
-  var metadata:ModMetadata;
-
-  var clipWidth:Int = 500;
-
-  function new(_x, _y, ?_meta:ModMetadata)
-  {
-    super(_x, _y);
-
-    this.setPosition(_x, _y);
-    metadata = _meta;
-
-    ModMenuUtils.isModNew(metadata); // Called up here to initiliaze shit if new
-
-    var colorBg:FlxSkewedSprite = new FlxSkewedSprite(633, 7);
-    colorBg.makeGraphic(108, 105, 0xffFFDFD3);
-    colorBg.skew.set(22,0);
-    this.add(colorBg);
-
-    var modIcon:FlxSkewedSprite = new FlxSkewedSprite(633,7).loadGraphic(ModMenuUtils.getModIcon(metadata));
-    modIcon.setGraphicSize(108, 105);
-    modIcon.updateHitbox();
-    modIcon.skew.set(22,0);
-    this.add(modIcon);
-
-    caseSprite = new FlxSprite(0, 0);
-    caseSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
-    caseSprite.animation.addByPrefix("press", "casePress", 24, false);
-    caseSprite.animation.addByPrefix("idle", "caseIdle", 24, true);
-    caseSprite.animation.addByPrefix("dim", "caseDimmed", 24, true);
-    caseSprite.animation.onFinish.add((name)-> {
-      if(name == "press") caseSprite.animation.play("idle");
-    });
-    caseSprite.animation.play("dim");
-    this.add(caseSprite);
-
-    buttonSprite = new FlxSprite(0, 0);
-    buttonSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
-    buttonSprite.animation.addByPrefix("enabled", "lightEnable0", 24, false);
-    buttonSprite.animation.addByPrefix("loopEnabled", "lightEnableLoop", 24, true);
-    buttonSprite.animation.addByPrefix("disabled", "lightDisable0", 24, false);
-    buttonSprite.animation.addByPrefix("loopDisabled", "lightDisableLoop", 24, true);
-    buttonSprite.animation.addByPrefix("missingDependencies", "lightMissingDependancies0", 24, true);
-    buttonSprite.animation.onFinish.add((name)-> {
-      switch(name)
-      {
-        case "enabled":
-            buttonSprite.animation.play("loopEnabled");
-            pressOffsetGroup.y = 0;
-        case "disabled":
-            buttonSprite.animation.play("loopDisabled");
-            pressOffsetGroup.y = 0;
-      }
-    });
-    buttonSprite.animation.play((ModMenuUtils.isModEnabled(metadata)) ? "loopEnabled":"loopDisabled");
-    if(ModMenuUtils.isModMissingDependencies(metadata)) buttonSprite.animation.play("missingDependencies");
-    this.add(buttonSprite);
-
-    favSprite = new FlxSprite(0, 0);
-    favSprite.frames = Paths.getSparrowAtlas("modmenu/modCase");
-    favSprite.animation.addByPrefix("favorite", "favourite0", 24, false);
-    favSprite.animation.addByPrefix("unfavorite", "unFavourite0", 24, false);
-    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
-    this.add(favSprite);
-
-    modTitle = new FlxText(120, 63, null, "  " + metadata.title + "  ", 42);
-    modTitle.font = "Letterstuff Regular";
-    modTitle.color = 0xffFFFFFF;
-    modTitle.borderColor = 0xff5F91C1;
-    modTitle.borderSize = 3;
-    modTitle.borderStyle = FlxTextBorderStyle.OUTLINE;
-    modTitle.bold = true;
-    modTitle.clipRect = new FlxRect(0, 0, clipWidth, modTitle.height);
-    /* if (modTitle.text.length > 17)
-      modTitle.text = modTitle.text.substring(0, 17); */
-    add(modTitle);
-
-    caseLeftCornerSprite = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
-    add(caseLeftCornerSprite);
-
-    caseRightCornerSprite = new FlxSprite(589, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
-    add(caseRightCornerSprite);
-
-    caseLeftCornerSpriteB = new FlxSprite(110, 52).loadGraphic(Paths.image("modmenu/modCaseCorners/left"));
-    caseLeftCornerSpriteB.color = 0xFF000000;
-    add(caseLeftCornerSpriteB);
-
-    caseRightCornerSpriteB = new FlxSprite(589, 53).loadGraphic(Paths.image("modmenu/modCaseCorners/right"));
-    caseRightCornerSpriteB.color = 0xFF000000;
-    add(caseRightCornerSpriteB);
-
-
-    var modAuthors:FlxText = new FlxText(110, 11, 590, "", 32);
-    var contributors = [];
-    if(metadata._author != null && metadata._author != "") ArrayTools.pushUnique(contributors, metadata._author);
-    if(metadata.contributors != null)
+    function new(x:Float = 0, y:Float = 0, ?_meta:ModMetadata, ?skin:String = 'default')
     {
-      for(contributor in metadata.contributors)
-      {
-        ArrayTools.pushUnique(contributors, contributor.name);
-      }
-    }
-    modAuthors.text = contributors.join(", ");
-    modAuthors.font = "Tardling Solid Regular";
-    modAuthors.borderColor = 0xff3D7DFF;
-    modAuthors.borderSize = 2;
-    modAuthors.borderStyle = FlxTextBorderStyle.OUTLINE;
-    modAuthors.blend = 0;
-    if (modAuthors.text.length > 26) modAuthors.text = modAuthors.text.substring(0, 26) + "...";
-    add(modAuthors);
+        super(x, y);
 
-    if(ModMenuUtils.isModNew(metadata))
+        this.setPosition(x, y);
+        metadata = _meta;
+
+        props = new StringMap();
+
+        var data = BackgroundRegistry.entryDatas.get(skin).modCase ?? BackgroundRegistry.entryDatas.get('default').modCase;
+        for (dataProp in data.props)
+        {
+            var isSolidColor = dataProp.assetPath.startsWith('#');
+            var isAnimated = (dataProp.animations?.length ?? 0) > 0;
+
+            var propSprite:StageProp;
+            if ((dataProp.danceEvery ?? 0) != 0 || isAnimated)
+            {
+                propSprite = new Bopper(dataProp.danceEvery);
+            }
+            else
+            {
+                propSprite = new StageProp();
+            }
+
+            if (isAnimated)
+            {
+                // Initalize sprite frames.
+                switch (dataProp.animType)
+                {
+                case 'packer':
+                    propSprite.loadPacker(dataProp.assetPath);
+                case 'animateatlas':
+                    propSprite.loadTextureAtlas(dataProp.assetPath, data.directory, dataProp.atlasSettings);
+                default: // 'sparrow'
+                    propSprite.loadSparrow(dataProp.assetPath);
+                }
+            }
+            else if (isSolidColor)
+            {
+                var color:String = dataProp.assetPath.replace("#", "");
+                propSprite.makeSolidColor(1, 1, Std.parseInt("0xFF" + color));
+            }
+            else
+            {
+                // Initalize static sprite.
+                propSprite.loadTexture(dataProp.assetPath);
+
+                // Disables calls to update() for a performance boost.
+                propSprite.active = false;
+            }
+
+            if (propSprite.frames == null || propSprite.frames.numFrames == 0)
+            {
+                // @:privateAccess
+                // log(' ERROR '.error() + ' Could not build texture for prop. Check the asset path (${Paths.currentLevel ?? 'default'}, ${dataProp.assetPath}).');
+                continue;
+            }
+
+            var scale:Dynamic = dataProp.scale ?? 1;
+            if (Std.string(scale).contains(","))
+            {
+                propSprite.scale.set(scale[0], scale[1]);
+            }
+            else
+            {
+                propSprite.scale.set(scale, scale);
+            }
+
+            propSprite.updateHitbox();
+
+            var position:Array<Float> = dataProp.position ?? [0, 0];
+            propSprite.x = position[0];
+            propSprite.y = position[1];
+
+            propSprite.alpha = dataProp.alpha ?? 1;
+
+            // If pixel, disable antialiasing.
+            propSprite.antialiasing = !(dataProp.isPixel ?? false);
+
+            var scrolls:Array<Float> = dataProp.scroll ?? [1, 1];
+            propSprite.scrollFactor.x = scrolls[0];
+            propSprite.scrollFactor.y = scrolls[1];
+
+            propSprite.angle = dataProp.angle ?? 0;
+            if (!isSolidColor) propSprite.color = FlxColor.fromString(dataProp.color) ?? 0xFFFFFFFF;
+            // propSprite.blend = BlendMode.fromString(dataProp.blend);
+
+            propSprite.zIndex = dataProp.zIndex ?? 100;
+
+            propSprite.flipX = dataProp.flipX ?? false;
+            propSprite.flipY = dataProp.flipY ?? false;
+
+            if (Std.isOfType(propSprite, Bopper))
+            {
+                switch (dataProp.animType ?? "sparrow")
+                {
+                case 'packer':
+                    for (propAnim in dataProp.animations)
+                    {
+                    propSprite.animation.add(propAnim.name, propAnim.frameIndices);
+                    }
+
+                case 'animateatlas':
+                    FlxAnimationUtil.addTextureAtlasAnimations(propSprite, dataProp.animations);
+
+                default: // 'sparrow'
+                    FlxAnimationUtil.addAtlasAnimations(propSprite, dataProp.animations);
+                }
+
+                for (propAnim in dataProp.animations)
+                {
+                propSprite.setAnimationOffsets(propAnim.name, propAnim.offsets[0], propAnim.offsets[1]);
+                }
+
+                if (!Std.isOfType(propSprite, BaseCharacter))
+                {
+                propSprite.originalPosition.x = position[0];
+                propSprite.originalPosition.y = position[1];
+                }
+
+                if (dataProp.startingAnimation != null)
+                {
+                propSprite.playAnimation(dataProp.startingAnimation);
+                }
+            }
+
+            if(dataProp.name != null)
+            {
+                propSprite.name = dataProp.name;
+                props.set(propSprite.name, propSprite);
+            }
+            add(propSprite);
+        }
+
+        modIcon = new FunkinSprite(data.modIcon.position[0], data.modIcon.position[1]);
+        modIcon.loadGraphic(ModMenuUtils.getModIcon(metadata));
+        if (Std.string(data.modIcon.scale).contains(","))
+        {
+            modIcon.setGraphicSize(data.modIcon.scale[0], data.modIcon.scale[1]);
+        }
+        else
+        {
+            modIcon.setGraphicSize(data.modIcon.scale, data.modIcon.scale);
+        }
+        modIcon.updateHitbox();
+        modIcon.zIndex = data.modIcon.zIndex;
+        add(modIcon);
+
+        titleText = new FlxText(data.titleText.position[0], data.titleText.position[1], null, metadata.title, data.titleText.fontSize);
+        titleText.font = data.titleText.font;
+        titleText.color = FlxColor.fromString(data.titleText.color) ?? 0xFFFFFFFF;
+        titleText.borderColor = FlxColor.fromString(data.titleText.borderColor) ?? 0xFFFFFFFF;
+        titleText.borderSize = data.titleText.borderSize;
+        titleText.borderStyle = FlxTextBorderStyle.OUTLINE;
+        titleText.bold = true;
+        titleText.clipRect = new FlxRect(0, 0, data.titleText.clipWidth, titleText.height);
+        titleText.zIndex = data.titleText.zIndex;
+        add(titleText);
+
+        sort(SortUtil.byZIndex, FlxSort.ASCENDING);
+
+        spacing = data.spacing ?? spacing;
+        indent = data.indent ?? indent;
+        curveAmount = data.curveAmount ?? curveAmount;
+        clipWidth = data.titleText.clipWidth;
+
+        trace(props);
+    }
+
+    public function getIntendedX(curSelected:Int = 0):Float
     {
-      newNotifSprite = new FlxSprite(caseSprite.width - 176, -20);
-      newNotifSprite.frames = Paths.getSparrowAtlas("freeplay/freeplayCapsule/new");
-      newNotifSprite.animation.addByPrefix("idle", "NEW notif", 24, true);
-      newNotifSprite.animation.play("idle");
-      this.add(newNotifSprite);
+        return -curveAmount * Math.sin(this.ID - (curSelected ?? 0) - 2) - indent;
     }
 
-    pressOffsetGroup = new FlxTypedSpriteGroup(0,0,0);
-    for(object in [colorBg, modIcon, favSprite, modTitle, modAuthors, caseLeftCornerSprite, caseLeftCornerSpriteB, caseRightCornerSprite, caseRightCornerSpriteB])
+    public function getIntendedY(curSelected:Int = 0):Float
     {
-        pressOffsetGroup.add(object);
+        return 300 - spacing * ((curSelected ?? 0) - this.ID);
     }
 
-  }
-
-  override function update(elapsed:Float):Void
-  {
-    super.update(elapsed);
-  }
-
-  public function getIntendedX(curSelected:Int = 0):Float
-  {
-    return -60 * Math.sin(this.ID - (curSelected ?? 0) - 2) - 55;
-  }
-
-  public function getIntendedY(curSelected:Int = 0):Float
-  {
-    return 300 - 150 * ((curSelected ?? 0) - this.ID);
-  }
-
-  public function onSelect() {
-    doScrolling = true;
-    if (modTitle.width > clipWidth ) {
-      moveTextRight();
+    function toggleMod()
+    {
+        ModMenuUtils.toggleMod(metadata);
+        FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModEnabled(metadata)) ? "modEnable":"modDisabled")));
     }
-    caseLeftCornerSpriteB.alpha = 0;
-    caseRightCornerSpriteB.alpha = 0;
-  }
 
-  public function onDeSelect() {
-    doScrolling = false;
-    if (moveTween != null)
-      moveTween.cancel();
-    moveTextLeft(true);
-    caseLeftCornerSpriteB.alpha = 0.2;
-    caseRightCornerSpriteB.alpha = 0.2;
-  }
-
-  function toggleMod()
-  {
-    ModMenuUtils.toggleMod(metadata);
-    caseSprite.animation.play("press");
-    buttonSprite.animation.play((ModMenuUtils.isModEnabled(metadata)) ? "enabled":"disabled");
-    pressOffsetGroup.y = 4;
-    FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModEnabled(metadata)) ? "modEnable":"modDisabled")));
-  }
-
-  function toggleFavorite()
-  {
-    ModMenuUtils.toggleFavorite(metadata);
-    favSprite.animation.play((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
-    FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModFavorited(metadata)) ? "fav":"unfav")));
-  }
-
-  var moveTimer:FlxTimer = new FlxTimer();
-  var moveTween:Null<FlxTween>;
-
-  function moveTextRight():Void
-  {
-    if (!doScrolling) return;
-    var distToMove:Float = modTitle.width - clipWidth;
-    moveTween = FlxTween.tween(modTitle.offset, {x: distToMove}, 1 / (clipWidth / modTitle.width),
-      {
-        onUpdate: function(_) {
-          modTitle.clipRect = new FlxRect(modTitle.offset.x, 0, clipWidth, modTitle.height);
-        },
-        onComplete: function(_) {
-          moveTimer.start(0.3, (timer) -> {
-            moveTextLeft(false);
-          });
-        },
-        ease: FlxEase.quadInOut
-      });
-  }
-
-  function moveTextLeft(snap):Void
-  {
-    if (!doScrolling && !snap) return;
-    var updateCallback = function(_) {
-      modTitle.clipRect = new FlxRect(modTitle.offset.x, 0, clipWidth, modTitle.height);
+    function toggleFavorite()
+    {
+        ModMenuUtils.toggleFavorite(metadata);
+        FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModFavorited(metadata)) ? "fav":"unfav")));
     }
-    if (snap) {
-      modTitle.offset.x = 0;
-      updateCallback(null);
-      return;
-    }
-    moveTween = FlxTween.tween(modTitle.offset, {x: 0}, !snap ? (1 / (clipWidth / modTitle.width)) : 0.01,
-      {
-        onUpdate: updateCallback,
-        onComplete: function(_) {
-          moveTimer.start(0.3, (timer) -> {
+
+    public function onSelect()
+    {
+        doScrolling = true;
+        if (titleText.width > clipWidth )
+        {
             moveTextRight();
-          });
-        },
-        ease: FlxEase.quadInOut
-      });
-  }
+        }
+    }
+
+    public function onDeSelect()
+    {
+        doScrolling = false;
+        if (moveTween != null)
+        {
+            moveTween.cancel();
+        }
+        moveTextLeft(true);
+    }
+
+    function moveTextRight():Void
+    {
+        if (!doScrolling) return;
+        var distToMove:Float = titleText.width - clipWidth;
+        moveTween = FlxTween.tween(titleText.offset, {x: distToMove}, 1 / (clipWidth / titleText.width),
+        {
+            onUpdate: function(_)
+            {
+                titleText.clipRect = new FlxRect(titleText.offset.x, 0, clipWidth, titleText.height);
+            },
+            onComplete: function(_)
+            {
+                moveTimer.start(0.3, (timer) ->
+                {
+                    moveTextLeft(false);
+                });
+            },
+            ease: FlxEase.quadInOut
+        });
+    }
+
+    function moveTextLeft(snap):Void
+    {
+        if (!doScrolling && !snap) return;
+        var updateCallback = function(_)
+        {
+            titleText.clipRect = new FlxRect(titleText.offset.x, 0, clipWidth, titleText.height);
+        }
+        if (snap)
+        {
+            titleText.offset.x = 0;
+            updateCallback(null);
+            return;
+        }
+        moveTween = FlxTween.tween(titleText.offset, {x: 0}, !snap ? (1 / (clipWidth / titleText.width)) : 0.01,
+        {
+            onUpdate: updateCallback,
+            onComplete: function(_)
+            {
+                moveTimer.start(0.3, (timer) ->
+                {
+                    moveTextRight();
+                });
+            },
+            ease: FlxEase.quadInOut
+        });
+    }
 }

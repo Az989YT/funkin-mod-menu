@@ -172,9 +172,19 @@ class ModMenuState extends ScriptedMusicBeatState
             }
         }
 
+        var modCaseScriptClass = BackgroundRegistry.entryDatas.get(currentSkin).modCase.scriptClass;
+
         for (i in 0...modList.length)
         {
-            var modCase = ScriptedFlxSpriteGroup.init((currentSkin.charAt(0).toUpperCase() + currentSkin.substr(1)) + 'ModCase', 0, 0, modList[i]);
+            var modCase:ModCase;
+            if(modCaseScriptClass != null)
+            {
+                modCase = ModCase.scriptInit(modCaseScriptClass, 0, 0, modList[i], currentSkin);
+            }
+            else
+            {
+                modCase = new ModCase(0, 0, modList[i], currentSkin);
+            }
             modCase.y = (FlxG.height - modCase.height) / 2 + 150 * i;
             modCase.ID = i;
             (i == 0 ? modCase.onSelect : modCase.onDeSelect)();
@@ -479,7 +489,7 @@ class ModMenuState extends ScriptedMusicBeatState
         modCasesGroup.members.sort((a,b) -> a.ID - b.ID);
         modCasesGroup.forEach(function(modCase)
         {
-            modCase.caseSprite.animation.play(modCase.ID == curSelected ? "idle" : "dim", true);
+            // modCase.caseSprite.animation.play(modCase.ID == curSelected ? "idle" : "dim", true);
         });
 
         for (modCase in modCasesGroup.members)
@@ -495,8 +505,8 @@ class ModMenuState extends ScriptedMusicBeatState
 
         if (!isReordering)
         {
-            modCasesGroup.members[prevSelected].caseSprite.animation.play("dim");
-            modCasesGroup.members[curSelected].caseSprite.animation.play("idle");
+            // modCasesGroup.members[prevSelected].caseSprite.animation.play("dim");
+            // modCasesGroup.members[curSelected].caseSprite.animation.play("idle");
         }
 
         if(scroll != 0)

@@ -21,7 +21,7 @@
     }
   ],
   "modCase": {
-    "scriptClass": "DefaultModMenuCase",
+    "scriptClass": "DefaultModCase",
     "props": [
       {
         "zIndex": 10,
@@ -50,18 +50,74 @@
             "looped": true
           }
         ],
+        "startingAnimation": "idle",
         "position": [0, 0]
       },
       {
         "zIndex": 20,
         "name": "toggleSprite",
         "assetPath": "modmenu/skins/default/modCase",
+        "animations": [
+          {
+            "name": "enabled",
+            "prefix": "lightEnable0",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": false
+          },
+          {
+            "name": "enabled-loop",
+            "prefix": "lightEnableLoop",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": true
+          },
+          {
+            "name": "disabled",
+            "prefix": "lightDisable0",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": false
+          },
+          {
+            "name": "disabled-loop",
+            "prefix": "lightDisableLoop",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": true
+          },
+          {
+            "name": "missingDependencies",
+            "prefix": "lightMissingDependancies0",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": true
+          }
+        ],
+        "startingAnimation": "enabled-loop",
         "position": [0, 0]
       },
       {
         "zIndex": 30,
         "name": "favoriteSprite",
         "assetPath": "modmenu/skins/default/modCase",
+        "animations": [
+          {
+            "name": "favorite",
+            "prefix": "favourite0",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": false
+          },
+          {
+            "name": "unfavorite",
+            "prefix": "unFavourite0",
+            "offsets": [0, 0],
+            "frameRate": 24,
+            "looped": false
+          }
+        ],
+        "startingAnimation": "favorite",
         "position": [0, 0]
       }
     ],
@@ -69,7 +125,7 @@
       "zIndex": 0,
       "defaultIcon": "modmenu/skins/default/no_icon",
       "scale": [108, 105],
-      "position": [663, 7]
+      "position": [633, 7]
     },
     "titleText": {
       "zIndex": 40,

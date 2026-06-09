@@ -1,22 +1,21 @@
 import funkin.graphics.FunkinSprite;
 import funkin.modding.module.ModuleHandler;
 
-class LabModCase extends ModCase
+class DefaultModCase extends ModCase
 {
   var toggleSprite:FunkinSprite;
   var favoriteSprite:FunkinSprite;
 
   function new(x:Float = 0, y:Float = 0, ?_meta:ModMetadata)
   {
-    super(x, y, _meta, 'lab');
+    super(x, y, _meta, 'default');
+
+    modIcon.skew.x = 22;
 
     toggleSprite = props.get("toggleSprite");
     toggleSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModEnabled(metadata)) ? "enabled":"disabled");
 
     favoriteSprite = props.get("favoriteSprite");
-    favoriteSprite.animation.onFinish.add((name)->{
-      if(name == "unfavorite") favoriteSprite?.visible = false;
-    });
     favoriteSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModFavorited(metadata)) ? "favorite":"unfavorite");
   }
 
