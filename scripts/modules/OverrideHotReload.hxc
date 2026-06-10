@@ -84,7 +84,7 @@ class OverrideHotReload extends Module
 			if (isScripted)
 			{
 				// I can't get these fields at runtime, but some people can,
-				// so I am forced to put this into a try/catch statement.
+				// so I am forced to put this into a sort of "try/catch" statement.
 				//
 				// Bottom line: I hate Polymod. ~ ADA_Funni
 				var cls:ClassDecl = ReflectUtil.getField(FlxG.state._asc, "_c");
