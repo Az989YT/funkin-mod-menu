@@ -10,6 +10,8 @@ import funkin.ui.transition.LoadingState;
 import funkin.util.ReflectUtil;
 import funkin.util.plugins.ReloadAssetsDebugPlugin;
 
+import funkin.ui.mainmenu.MainMenuState;
+
 import funkin.ui.MusicBeatState;
 import funkin.ui.MusicBeatSubState;
 #if FEATURE_CHART_EDITOR
@@ -45,7 +47,7 @@ class OverrideHotReload extends Module
 		// `performCleanup()` clears the static reference to this state
 		// scripts might still need it, so we set it back to `this`
 		PlayState.instance = state;
-	
+
 		ModMenuUtils.loadEnabledMods();
 		if (PlayState.lastParams == null)
 		{
@@ -55,7 +57,7 @@ class OverrideHotReload extends Module
 		  {variation: PlayState.instance.currentVariation}) ?? throw "Could not load current song from ID. This shouldn't happen!";
 		LoadingState.loadPlayState(PlayState.lastParams);
 	}
-	
+
 	function reloadChartEditorState(state:MusicBeatState)
 	{
 		// If PlayState isn't open, do a regular reload.
@@ -64,12 +66,12 @@ class OverrideHotReload extends Module
 			state.reloadAssets();
 			return;
 		}
-	
+
 		ModMenuUtils.loadEnabledMods();
-	
+
 		// Create a new instance of the current substate, so old data is cleared.
 		state.resetSubState();
-	
+
 		state.testSongInPlayState(PlayState.lastParams.minimalMode);
 	}
 
@@ -81,9 +83,22 @@ class OverrideHotReload extends Module
 			var isScripted:Bool = state is ScriptedMusicBeatState;
 			if (isScripted)
 			{
+				// I can't get these fields at runtime, but some people can,
+				// so I am forced to put this into a try/catch statement.
+				//
+				// Bottom line: I hate Polymod. ~ ADA_Funni
 				var cls:ClassDecl = ReflectUtil.getField(FlxG.state._asc, "_c");
-				scriptedStateName = (cls.pkg ?? []).concat([cls.name]).join(".");
-				trace(scriptedStateName);
+				if (cls != null) {
+					scriptedStateName = (cls.pkg ?? []).concat([cls.name]).join(".");
+					trace(scriptedStateName);
+				} else {
+					ModMenuUtils.loadEnabledMods();
+
+					// Create a new instance of the main menu state, so something at least happens.
+					FlxG.switchState(() -> new MainMenuState());
+
+					return;
+				}
 			}
 			if ((state is MusicBeatState || state is MusicBeatSubState) && !isScripted)
 			{
@@ -103,13 +118,13 @@ class OverrideHotReload extends Module
 					ModMenuUtils.loadEnabledMods();
 
 					// Create a new instance of the current state, so old data is cleared.
-					FlxG.resetState();				
+					FlxG.resetState();
 				}
 			}
 			else
 			{
 				ModMenuUtils.loadEnabledMods();
-		
+
 				trace("Reloaded assets, checking for scripted state. Scripted: " + isScripted + ", Path: " + scriptedStateName);
 				if (isScripted)
 				{
@@ -119,7 +134,7 @@ class OverrideHotReload extends Module
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
 				}
-		
+
 				// Create a new instance of the current state, so old data is cleared.
 				if (!isScripted) FlxG.resetState();
 			}
