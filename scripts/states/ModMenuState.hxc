@@ -59,7 +59,7 @@ class ModMenuState extends ScriptedMusicBeatState
 
     var textScrollProgress:Float = 0;
 
-    var currentSkin:String = "default";
+    var currentSkin:String = "lab";
 
 	public function new()
     {

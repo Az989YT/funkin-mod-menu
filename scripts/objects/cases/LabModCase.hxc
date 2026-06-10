@@ -18,9 +18,6 @@ class LabModCase extends ModCase
           statusIcon.visible = false;
       };
     });
-
-    var animToPlay = (ModuleHandler.getModule("ModMenuUtils").isModFavorited(metadata)) ? "favorite" : ((ModuleHandler.getModule("ModMenuUtils").isModEnabled(metadata)) ? "enabled":"disabled");
-    playAnim(animToPlay);
   }
 
   override function playAnim(animName:String)
