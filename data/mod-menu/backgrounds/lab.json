@@ -175,58 +175,42 @@
         "position": [0, 0]
       },
       {
-        "zIndex": 20,
-        "name": "toggleSprite",
-        "assetPath": "checkboxThingie",
+        "zIndex": 30,
+        "name": "statusIcon",
+        "assetPath": "modmenu/skins/lab/statusIconsMods",
         "animations": [
           {
             "name": "enabled",
-            "prefix": "Check Box selecting animation",
-            "offsets": [0, 0],
+            "prefix": "enabled_anim",
+            "offsets": [-4, -2],
             "frameRate": 24,
             "looped": false
-          },
-          {
-            "name": "enabled-loop",
-            "prefix": "Check Box Selected Static",
-            "offsets": [0, 0],
-            "frameRate": 24,
-            "looped": true
           },
           {
             "name": "disabled",
-            "prefix": "Check Box unselected",
-            "offsets": [-24, -100],
+            "prefix": "enabled_anim",
+            "frameIndices": [1, 2, 3, 4, 5],
+            "offsets": [-4, -2],
             "frameRate": 24,
             "looped": false
-          }
-        ],
-        "startingAnimation": "enabled-loop",
-        "position": [-20, -70],
-        "scale": 0.6
-      },
-      {
-        "zIndex": 30,
-        "name": "favoriteSprite",
-        "assetPath": "freeplay/favHeart",
-        "animations": [
+          },
           {
             "name": "favorite",
-            "prefix": "favorite heart",
+            "prefix": "favorite_anim",
             "offsets": [0, 0],
             "frameRate": 24,
             "looped": false
           },
           {
             "name": "unfavorite",
-            "prefix": "favorite heart",
+            "prefix": "favorite_anim",
             "frameIndices": [1, 2, 3, 4, 5],
             "offsets": [0, 0],
             "frameRate": 24,
             "looped": false
           }
         ],
-        "startingAnimation": "favorite",
+        "startingAnimation": "enabled",
         "position": [665, 32],
         "scale": 1.75
       }

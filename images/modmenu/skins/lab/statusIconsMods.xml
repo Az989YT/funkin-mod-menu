@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="statusIconsMods.png">
+	<!-- Created with Adobe Animate version 22.0.5.191 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="enabled_anim0000" x="94" y="4" width="20" height="19" frameX="-9" frameY="-7" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0001" x="53" y="4" width="37" height="33"/>
+	<SubTexture name="enabled_anim0002" x="53" y="4" width="37" height="33"/>
+	<SubTexture name="enabled_anim0003" x="4" y="78" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0004" x="94" y="4" width="20" height="19" frameX="-9" frameY="-7" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0005" x="94" y="4" width="20" height="19" frameX="-9" frameY="-7" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0006" x="4" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0007" x="4" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0008" x="4" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0009" x="4" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0010" x="4" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0011" x="4" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="enabled_anim0012" x="4" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="favorite_anim0000" x="94" y="50" width="20" height="15" frameX="-13" frameY="-11" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0001" x="4" y="4" width="45" height="37"/>
+	<SubTexture name="favorite_anim0002" x="4" y="4" width="45" height="37"/>
+	<SubTexture name="favorite_anim0003" x="4" y="45" width="37" height="29" frameX="-4" frameY="-4" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0004" x="94" y="50" width="20" height="15" frameX="-13" frameY="-11" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0005" x="94" y="50" width="20" height="15" frameX="-13" frameY="-11" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0006" x="70" y="78" width="29" height="22" frameX="-8" frameY="-8" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0007" x="70" y="78" width="29" height="22" frameX="-8" frameY="-8" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0008" x="70" y="78" width="29" height="22" frameX="-8" frameY="-8" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0009" x="70" y="78" width="29" height="22" frameX="-8" frameY="-8" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0010" x="70" y="78" width="29" height="22" frameX="-8" frameY="-8" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0011" x="70" y="78" width="29" height="22" frameX="-8" frameY="-8" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="favorite_anim0012" x="70" y="78" width="29" height="22" frameX="-8" frameY="-8" frameWidth="45" frameHeight="37"/>
+	<SubTexture name="warning_anim0000" x="94" y="27" width="20" height="19" frameX="-9" frameY="-7" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0001" x="53" y="41" width="37" height="33"/>
+	<SubTexture name="warning_anim0002" x="53" y="41" width="37" height="33"/>
+	<SubTexture name="warning_anim0003" x="37" y="78" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0004" x="94" y="27" width="20" height="19" frameX="-9" frameY="-7" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0005" x="94" y="27" width="20" height="19" frameX="-9" frameY="-7" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0006" x="37" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0007" x="37" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0008" x="37" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0009" x="37" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0010" x="37" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0011" x="37" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+	<SubTexture name="warning_anim0012" x="37" y="107" width="29" height="25" frameX="-4" frameY="-4" frameWidth="37" frameHeight="33"/>
+</TextureAtlas>

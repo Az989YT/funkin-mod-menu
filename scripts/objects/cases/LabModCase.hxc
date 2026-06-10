@@ -3,35 +3,29 @@ import funkin.modding.module.ModuleHandler;
 
 class LabModCase extends ModCase
 {
-  var toggleSprite:FunkinSprite;
-  var favoriteSprite:FunkinSprite;
+  var statusIcon:FunkinSprite;
 
   function new(x:Float = 0, y:Float = 0, ?_meta:ModMetadata)
   {
     super(x, y, _meta, 'lab');
 
-    toggleSprite = props.get("toggleSprite");
-    toggleSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModEnabled(metadata)) ? "enabled":"disabled");
-
-    favoriteSprite = props.get("favoriteSprite");
-    favoriteSprite.animation.onFinish.add((name)->{
-      if(name == "unfavorite") favoriteSprite?.visible = false;
+    statusIcon = props.get("statusIcon");
+    statusIcon.animation.onFinish.add((name)->{
+      switch(name) {
+        case "unfavorite":
+          statusIcon.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModEnabled(metadata)) ? "enabled":"disabled");
+        case "disabled":
+          statusIcon.visible = false;
+      };
     });
-    favoriteSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModFavorited(metadata)) ? "favorite":"unfavorite");
+
+    var animToPlay = (ModuleHandler.getModule("ModMenuUtils").isModFavorited(metadata)) ? "favorite" : ((ModuleHandler.getModule("ModMenuUtils").isModEnabled(metadata)) ? "enabled":"disabled");
+    playAnim(animToPlay);
   }
 
-  override function toggleMod()
+  override function playAnim(animName:String)
   {
-    super.toggleMod();
-
-    toggleSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModEnabled(metadata)) ? "enabled":"disabled");
-  }
-
-  override function toggleFavorite()
-  {
-    super.toggleFavorite();
-
-    favoriteSprite?.visible = true;
-    favoriteSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModFavorited(metadata)) ? "favorite":"unfavorite");
+    statusIcon?.visible = true;
+    statusIcon.playAnimation(animName);
   }
 }

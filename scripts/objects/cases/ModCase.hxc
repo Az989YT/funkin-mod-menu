@@ -220,6 +220,8 @@ class ModCase extends ScriptedFlxSpriteGroup
         clipWidth = data.titleText.clipWidth;
 
         trace(props);
+        playAnim((ModMenuUtils.isModEnabled(metadata)) ? "enabled":"disabled");
+        playAnim((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
     }
 
     public function getIntendedX(curSelected:Int = 0):Float
@@ -236,12 +238,28 @@ class ModCase extends ScriptedFlxSpriteGroup
     {
         ModMenuUtils.toggleMod(metadata);
         FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModEnabled(metadata)) ? "modEnable":"modDisabled")));
+        playAnim((ModMenuUtils.isModEnabled(metadata)) ? "enabled":"disabled");
     }
 
     function toggleFavorite()
     {
         ModMenuUtils.toggleFavorite(metadata);
         FunkinSound.playOnce(Paths.sound(((ModMenuUtils.isModFavorited(metadata)) ? "fav":"unfav")));
+        playAnim((ModMenuUtils.isModFavorited(metadata)) ? "favorite":"unfavorite");
+    }
+
+    function playAnim(animName:String)
+    {
+        for(prop in props)
+        {
+            if(prop.hasAnimation(animName))
+            {
+                prop.animation.onFinish.addOnce(()->{
+                    if(prop.hasAnimation(animName + "-loop")) prop.playAnimation(animName + "-loop");
+                });
+                prop.playAnimation(animName);
+            }
+        }
     }
 
     public function onSelect()

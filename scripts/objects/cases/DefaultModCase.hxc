@@ -11,26 +11,5 @@ class DefaultModCase extends ModCase
     super(x, y, _meta, 'default');
 
     modIcon.skew.x = 22;
-
-    toggleSprite = props.get("toggleSprite");
-    toggleSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModEnabled(metadata)) ? "enabled":"disabled");
-
-    favoriteSprite = props.get("favoriteSprite");
-    favoriteSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModFavorited(metadata)) ? "favorite":"unfavorite");
-  }
-
-  override function toggleMod()
-  {
-    super.toggleMod();
-
-    toggleSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModEnabled(metadata)) ? "enabled":"disabled");
-  }
-
-  override function toggleFavorite()
-  {
-    super.toggleFavorite();
-
-    favoriteSprite?.visible = true;
-    favoriteSprite.playAnimation((ModuleHandler.getModule("ModMenuUtils").isModFavorited(metadata)) ? "favorite":"unfavorite");
   }
 }
