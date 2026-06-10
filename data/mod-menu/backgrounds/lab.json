@@ -229,7 +229,7 @@
       "borderColor": "#3B3B40",
       "borderSize": 3,
       "position": [185, 50],
-      "clipWidth": 500
+      "clipWidth": 450
     },
     "authorsText": {
       "zIndex": 50,
