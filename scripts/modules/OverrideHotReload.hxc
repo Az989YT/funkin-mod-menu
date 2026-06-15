@@ -28,7 +28,6 @@ class OverrideHotReload extends Module
 	public function new()
 	{
 		super('OverrideHotReload');
-	}
 
 		FlxG.signals.postGameStart.addOnce(() -> {
 			for (plugin in FlxG.plugins.list)
